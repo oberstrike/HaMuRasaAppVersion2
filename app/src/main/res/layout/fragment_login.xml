@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".login.LoginActivityFragment"
+    tools:showIn="@layout/activity_login">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/login_menu"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/name_textView"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="@string/prompt_username"
+            android:textSize="26sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/password_textView"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="@string/prompt_password"
+            android:textSize="26sp"
+            app:layout_constraintLeft_toRightOf="@id/name_textView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:autofillHints="@string/prompt_username"
+            android:hint="@string/prompt_username"
+            android:id="@+id/username_editText"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintRight_toRightOf="@id/name_textView"
+            app:layout_constraintTop_toBottomOf="@id/name_textView"
+            android:labelFor="@id/name_textView"
+            tools:layout_editor_absoluteX="2dp" />
+
+        <EditText
+            android:autofillHints="@string/prompt_password"
+            android:hint="@string/prompt_password"
+            android:id="@+id/password_editText"
+            android:inputType="textPassword"
+            android:labelFor="@id/password_textView"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintRight_toRightOf="@id/password_textView"
+            app:layout_constraintTop_toBottomOf="@id/password_textView"
+
+            tools:layout_editor_absoluteX="2dp" />
+
+        <Button
+            android:id="@+id/login_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/login"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintRight_toRightOf="@id/password_editText"
+            app:layout_constraintTop_toBottomOf="@id/password_editText"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
