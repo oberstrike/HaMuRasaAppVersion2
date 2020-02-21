@@ -1,78 +1,89 @@
 package de.hamurasa.main
 
-import android.content.AbstractThreadedSyncAdapter
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
-import android.widget.LinearLayout
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.hamurasa.R
 import de.hamurasa.login.LoginActivity
-import de.hamurasa.main.fragments.LessonRecylerViewAdapter
-import io.reactivex.Observable
-import kotlinx.android.synthetic.main.content_main.*
+import de.hamurasa.main.fragments.DictionaryFragment
+import de.hamurasa.main.fragments.HomeFragment
+import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),
+    BottomNavigationView.OnNavigationItemSelectedListener {
 
     private val myViewModel: MainViewModel by viewModel()
-
-    private lateinit var lessonRecyclerViewAdapter: LessonRecylerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
-        myViewModel.launch {
-            myViewModel.isLoggedIn
-                .takeLast(1)
-                .subscribeOn(myViewModel.provider.computation())
-                .observeOn(myViewModel.provider.ui())
-                .subscribe {
-                    if (!it) {
-                        doAnimation()
-                    }else{
-                        init()
-                    }
-                }
-        }
-
+        setSupportActionBar(toolbar)
+        bottom_navigator.setOnNavigationItemSelectedListener(this)
         myViewModel.init()
+
+        bottom_navigator.isEnabled = false
+        bottom_navigator.isClickable = false
+
+        loadFragment(HomeFragment())
+
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
 
-    private fun doAnimation() {
-        val appear = hello_textView.animate()
-        appear.alpha(0.8f)
-        appear.withEndAction {
-            val disappear = hello_textView.animate()
-            disappear.alpha(0f)
-            disappear.duration = 2000
-            disappear.withEndAction {
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item == null)
+            return super.onOptionsItemSelected(item)
+
+        when (item.itemId) {
+            R.id.logout -> {
+                myViewModel.logout()
+
                 val intent = Intent(this, LoginActivity::class.java)
                 startActivity(intent)
+                finish()
             }
-            disappear.start()
-        }.setDuration(2000).start()
+        }
+
+
+        return super.onOptionsItemSelected(item)
     }
 
-    private fun init(){
-        lessonRecyclerViewAdapter = LessonRecylerViewAdapter(this)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = lessonRecyclerViewAdapter
 
-        myViewModel.launch {
-            myViewModel.lessons
-                .subscribeOn(myViewModel.provider.computation())
-                .observeOn(myViewModel.provider.ui())
-                .subscribe {
-                    lessonRecyclerViewAdapter.setLessons(it)
-                    lessonRecyclerViewAdapter.notifyDataSetChanged()
+    override fun onNavigationItemSelected(p0: MenuItem): Boolean {
+
+        when (p0.itemId) {
+            R.id.nav_search -> {
+                if (MainContext.activeFragment !is DictionaryFragment) {
+                    loadFragment(DictionaryFragment())
+                    return true
                 }
-        }
-        myViewModel.update()
+            }
+            R.id.nav_home -> {
+                if (MainContext.activeFragment !is HomeFragment) {
+                    loadFragment(HomeFragment())
+                    return true
+                }
+            }
 
+        }
+        return false
+    }
+
+    private fun loadFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.main_container, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+        MainContext.activeFragment = fragment
     }
 }

@@ -1,4 +1,4 @@
-package de.hamurasa.vocable.model
+package de.hamurasa.lesson.model
 
 import de.hamurasa.data.ObjectBox
 import io.objectbox.Box

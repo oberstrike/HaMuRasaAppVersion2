@@ -7,36 +7,74 @@ import android.text.TextWatcher
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.fatboyindustrial.gsonjodatime.Converters
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import com.google.gson.*
+import com.google.gson.reflect.TypeToken
+import de.hamurasa.lesson.model.Lesson
+import de.hamurasa.lesson.model.Vocable
 import org.joda.time.DateTime
+import java.lang.reflect.Type
+
 
 @SuppressWarnings
-fun convertDateTimeToHeadline (dateTime: DateTime, language: Language = Language.DE) : String{
+fun convertDateTimeToHeadline(dateTime: DateTime, language: Language = Language.DE): String {
     val day = dateTime.dayOfMonth().get()
     val month = dateTime.monthOfYear().get()
-    val dayMonth = "${if(day < 9) "0$day" else day}.${if(month < 9) "0$month" else month}."
+    val dayMonth = "${if (day < 9) "0$day" else day}.${if (month < 9) "0$month" else month}."
 
-    return when(language == Language.DE){
-        true ->   "Training vom $dayMonth"
-        false ->   "Training from $dayMonth"
+    return when (language == Language.DE) {
+        true -> "Training vom $dayMonth"
+        false -> "Training from $dayMonth"
     }
 }
 
 
-fun verifyAvailableNetwork(activity:AppCompatActivity):Boolean{
-    val connectivityManager=activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val networkInfo=connectivityManager.activeNetworkInfo
-    return  networkInfo!=null && networkInfo.isConnected
+fun verifyAvailableNetwork(activity: AppCompatActivity): Boolean {
+    val connectivityManager =
+        activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val networkInfo = connectivityManager.activeNetworkInfo
+    return networkInfo != null && networkInfo.isConnected
 }
 
 object GsonObject {
     var gson: Gson
         private set
+
     init {
-        gson = Converters.registerDateTime(GsonBuilder()).create()
+        gson = Converters.registerDateTime(
+            GsonBuilder()
+        ).registerTypeAdapter(Lesson::class.java, LessonDeserializier())
+
+            .create()
     }
 }
+
+
+class LessonDeserializier : JsonDeserializer<Lesson> {
+
+    override fun deserialize(
+        json: JsonElement?,
+        typeOfT: Type?,
+        context: JsonDeserializationContext?
+    ): Lesson {
+        if (json != null) {
+            if (context != null) {
+                val jsonObject = json.asJsonObject
+                val lesson = Lesson()
+
+                val wordsJson = jsonObject.getAsJsonArray("words")
+                val wordsJsonType =
+                    object : TypeToken<ArrayList<Vocable?>?>() {}.type
+                val list: ArrayList<Vocable> = context.deserialize(wordsJson, wordsJsonType)
+
+                lesson.words.addAll(list.map { it.id = 0; it })
+                return lesson
+            }
+
+        }
+        return Lesson()
+    }
+}
+
 
 enum class Language {
     DE, EN

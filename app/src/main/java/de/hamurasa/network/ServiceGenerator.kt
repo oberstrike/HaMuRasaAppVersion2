@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 
-fun createOkHttpClient() : OkHttpClient {
+fun createOkHttpClient(): OkHttpClient {
     val logging = HttpLoggingInterceptor()
     logging.level = HttpLoggingInterceptor.Level.BASIC
 
@@ -23,11 +23,11 @@ fun createOkHttpClient() : OkHttpClient {
 
 object ServiceGenerator {
 
-    private const val API_BASE_URL = "http://192.168.116.134:8080"
+    //   private const val API_BASE_URL = "http://192.168.116.135:8080"
 
- //   private const val API_BASE_URL = "http://192.168.116.133:8080"
+    //   private const val API_BASE_URL = "http://192.168.116.133:8080"
 
-    //private const val API_BASE_URL = "http://127.0.0.1:8080/"
+    private const val API_BASE_URL = "http://10.0.2.2:8080/"
 
     private val httpClient = OkHttpClient.Builder()
 

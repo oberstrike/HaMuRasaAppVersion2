@@ -1,26 +1,29 @@
 package de.hamurasa.main.fragments
 
 import android.content.Context
+import android.provider.UserDictionary
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
-import de.hamurasa.lesson.model.Lesson
+import de.hamurasa.lesson.model.Vocable
 
-class LessonRecylerViewAdapter(
+class ResultRecyclerViewAdapter(
     val context: Context,
     val onClickListener: OnClickListener
-) : RecyclerView.Adapter<LessonRecylerViewAdapter.ViewHolder>() {
+) :
+    RecyclerView.Adapter<ResultRecyclerViewAdapter.ViewHolder>() {
 
-    private val items = ArrayList<Lesson>()
+    val items: ArrayList<Vocable> = ArrayList()
 
-    class ViewHolder(itemView: View,
-                     private val onClickListener: OnClickListener) :
-        RecyclerView.ViewHolder(itemView), View.OnClickListener
-    {
-        val lessonId: TextView = itemView.findViewById(R.id.lesson_id)
+    class ViewHolder(
+        private val item: View,
+        private val onClickListener: OnClickListener
+    ) : RecyclerView.ViewHolder(item), View.OnClickListener {
+
+        val wordId: TextView = itemView.findViewById(R.id.lesson_id)
 
         init {
             itemView.setOnClickListener(this)
@@ -29,15 +32,6 @@ class LessonRecylerViewAdapter(
         override fun onClick(v: View?) {
             onClickListener.onItemClick(adapterPosition)
         }
-
-    }
-    fun getLesson(position: Int): Lesson {
-        return items[position]
-    }
-
-    fun setLessons(lessons: List<Lesson>){
-        items.clear()
-        items.addAll(lessons)
     }
 
     override fun getItemCount(): Int {
@@ -45,16 +39,22 @@ class LessonRecylerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.lessonId.text =  context.resources.getString(R.string.lesson, position + 1)
+        val word = items[position]
+        holder.wordId.text = word.value
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.lesson_fragment, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.lesson_fragment, parent, false)
         return ViewHolder(view, onClickListener)
+    }
+
+    fun setWords(words: List<Vocable>){
+        items.clear()
+        items.addAll(words)
     }
 
     interface OnClickListener {
         fun onItemClick(position: Int)
     }
 }
-

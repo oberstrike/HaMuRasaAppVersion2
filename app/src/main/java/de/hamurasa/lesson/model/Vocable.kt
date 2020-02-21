@@ -1,4 +1,4 @@
-package de.hamurasa.vocable.model
+package de.hamurasa.lesson.model
 
 import com.google.gson.reflect.TypeToken
 import de.hamurasa.util.GsonObject
@@ -9,10 +9,10 @@ import io.objectbox.converter.PropertyConverter
 
 @Entity
 data class Vocable(@Id var id: Long = 0,
-                   var text: String,
+                   var value: String,
                    var type: String,
                    @Convert(converter = ListOfStringConverter::class, dbType = String::class)
-                   var value: List<String>)
+                   var translation: List<String>)
 
 class ListOfStringConverter : PropertyConverter<List<String>, String> {
     override fun convertToDatabaseValue(entityProperty: List<String>?): String {

@@ -52,6 +52,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             MainContext.isLoggedIn = Observable.just(loggedIn)
             startActivity(intent)
+            finish()
 
         } else {
             Toast.makeText(this, "Falsche Eingabe", Toast.LENGTH_LONG).show()

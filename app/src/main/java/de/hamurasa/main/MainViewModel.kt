@@ -2,43 +2,53 @@ package de.hamurasa.main
 
 import android.accounts.AccountManager
 import android.content.Context
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import de.hamurasa.data.CommandLineRunner
 import de.hamurasa.network.RetrofitServices
 import de.hamurasa.util.AbstractViewModel
+import de.hamurasa.util.GsonObject
 import de.hamurasa.util.SchedulerProvider
-import de.hamurasa.vocable.model.LessonRepository
-import de.hamurasa.vocable.model.VocableRepository
+import de.hamurasa.lesson.model.Lesson
+import de.hamurasa.lesson.model.LessonRepository
+import de.hamurasa.lesson.model.Vocable
+import de.hamurasa.lesson.model.VocableRepository
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.CompletableFuture
-import kotlin.math.log
 
 class MainViewModel(
     val context: Context,
     val provider: SchedulerProvider,
-    val lessonRepository: LessonRepository,
-    val commandLineRunner: CommandLineRunner
+    private val lessonRepository: LessonRepository,
+    private val vocableRepository: VocableRepository,
+    private val commandLineRunner: CommandLineRunner
 ) : AbstractViewModel() {
 
     private val accountManager: AccountManager = AccountManager.get(context)
 
-    val isLoggedIn: Observable<Boolean> = MainContext.isLoggedIn
+    lateinit var isLoggedIn: Observable<Boolean>
+
+    lateinit var words: BehaviorSubject<List<Vocable>>
 
     val lessons = lessonRepository.findAll()
 
-
     fun init() {
         commandLineRunner.init()
-     //   logout()
-
-        val isLoggedIn = accountManager.accounts.isNotEmpty()
-        MainContext.isLoggedIn = Observable.just(isLoggedIn)
+        val loggedIn = accountManager.accounts.isNotEmpty()
+        MainContext.isLoggedIn = Observable.just(loggedIn)
+        isLoggedIn = MainContext.isLoggedIn
+        words = BehaviorSubject.create()
+        words.onNext(listOf())
     }
 
 
-    private fun logout() {
-        if (accountManager.accounts.isNotEmpty())
+    fun logout() {
+        if (accountManager.accounts.isNotEmpty()) {
             accountManager.removeAccountExplicitly(accountManager.accounts.first())
+            MainContext.isLoggedIn = Observable.just(false)
+            isLoggedIn = MainContext.isLoggedIn
+        }
     }
 
     fun update() {
@@ -53,13 +63,34 @@ class MainViewModel(
             RetrofitServices.lessonRetrofitService.getLessons().execute()
         }
 
-        val lessons = response.get().body()
+        val body = response.get().body()?.string()
 
 
+        if (body != null) {
+            val lessons: List<Lesson> = GsonObject.gson.fromJson(body)
+            lessonRepository.deleteAll()
 
-        RetrofitServices.initLessonRetrofitService(username, accountManager.getPassword(account))
-
+            for (lesson in lessons) {
+                lesson.id = 0
+                lessonRepository.save(lesson)
+            }
+        }
     }
 
 
+    fun getWord(value: String) {
+
+        if(value.isNotEmpty()){
+            val response = CompletableFuture.supplyAsync {
+                RetrofitServices.vocableRetrofitService.getWordsByText(value).blockingFirst()
+            }.get()
+            words.onNext(response)
+
+        }else{
+            words.onNext(listOf())
+        }
+    }
 }
+
+inline fun <reified T> Gson.fromJson(json: String) =
+    fromJson<T>(json, object : TypeToken<T>() {}.type)

@@ -1,16 +1,18 @@
 package de.hamurasa.network
 
 
-import de.hamurasa.vocable.model.Lesson
-import de.hamurasa.vocable.model.Vocable
+import de.hamurasa.lesson.model.Vocable
 import io.reactivex.Observable
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface VocableRetrofitService {
     @GET("/api/words")
-    fun getWord(@Query("id") id: Long): Observable<Vocable>
+    fun getWordsByText(@Query("text") text: String): Observable<List<Vocable>>
 }
 
 interface UserRetrofitService {

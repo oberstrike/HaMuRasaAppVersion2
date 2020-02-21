@@ -2,10 +2,11 @@ package de.hamurasa.data
 
 import de.hamurasa.login.LoginViewModel
 import de.hamurasa.main.MainViewModel
-import de.hamurasa.network.createUserService
+import de.hamurasa.util.GsonObject
 import de.hamurasa.util.SchedulerProvider
 import de.hamurasa.util.SchedulerProviderImpl
-import de.hamurasa.vocable.model.*
+import de.hamurasa.lesson.LessonViewModel
+import de.hamurasa.lesson.model.*
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -21,9 +22,11 @@ val appModules = module {
 
     single { CommandLineRunner.init(get(), get()) }
 
-    viewModel { MainViewModel(get(), get(),get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
 
     viewModel { LoginViewModel(get()) }
+
+    viewModel { LessonViewModel(get(), get()) }
 }
 
 
@@ -41,14 +44,21 @@ class CommandLineRunner(
         }
     }
 
-    fun init(){
+    var isInit = false
+
+    fun init() {
+        if(isInit)
+            return
+
         val lesson = Lesson()
         lessonRepository.deleteAll()
-        lesson.words.add(Vocable(0,"abuelo", "Nomen", listOf("Großvater")))
+        lesson.words.add(Vocable(0, "abuelo", "Nomen", listOf("Großvater")))
         lessonRepository.save(lesson)
         val observable = lessonRepository.findAll()
         val lessons = observable.blockingFirst()
-        println(lessons)
+
+        val body = GsonObject.gson.toJson(lessons)
+        isInit = true
     }
 
 
