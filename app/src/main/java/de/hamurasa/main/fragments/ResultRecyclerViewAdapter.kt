@@ -19,7 +19,7 @@ class ResultRecyclerViewAdapter(
     val items: ArrayList<Vocable> = ArrayList()
 
     class ViewHolder(
-        private val item: View,
+        val item: View,
         private val onClickListener: OnClickListener
     ) : RecyclerView.ViewHolder(item), View.OnClickListener {
 
