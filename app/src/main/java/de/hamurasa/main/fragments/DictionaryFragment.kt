@@ -35,15 +35,9 @@ class DictionaryFragment : Fragment(), ResultRecyclerViewAdapter.OnClickListener
 
     override fun onItemClick(position: Int) {
         val word = resultRecyclerViewAdapter.items[position]
-        val builder = AlertDialog.Builder(activity)
+        val fragment = ResultAlertDialog(word)
 
-        with(builder){
-            setTitle(word.value)
-            setMessage(word.translation.toString())
-        }
-
-        builder.create().show()
-
+        fragment.show(activity!!.supportFragmentManager, "Result")
     }
 
     override fun onStart() {

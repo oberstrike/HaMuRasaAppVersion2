@@ -42,14 +42,46 @@ object GsonObject {
     init {
         gson = Converters.registerDateTime(
             GsonBuilder()
-        ).registerTypeAdapter(Lesson::class.java, LessonDeserializier())
-
+        )
+            .registerTypeAdapter(Lesson::class.java, LessonDeserializer())
+            .registerTypeAdapter(Vocable::class.java, VocableDeserializer())
             .create()
+
     }
 }
 
+class VocableDeserializer : JsonDeserializer<Vocable> {
+    override fun deserialize(
+        json: JsonElement?,
+        typeOfT: Type?,
+        context: JsonDeserializationContext?
+    ): Vocable {
+        if(json != null){
+            if(context != null){
+                val jsonObject = json.asJsonObject
 
-class LessonDeserializier : JsonDeserializer<Lesson> {
+                val listStringType =
+                    object : TypeToken<List<String?>?>() {}.type
+                val listOfVocableJsonArray = jsonObject.getAsJsonArray("translation")
+                val translation: List<String> = context.deserialize(listOfVocableJsonArray, listStringType)
+
+                val id = 0
+
+                val serverId = jsonObject.getAsJsonPrimitive("id").asLong
+                val type = jsonObject.getAsJsonPrimitive("type").asString
+                val value = jsonObject.getAsJsonPrimitive("value").asString
+
+                return Vocable(0, serverId, value, type, translation)
+            }
+
+        }
+        return Vocable()
+    }
+
+}
+
+@Suppress
+class LessonDeserializer : JsonDeserializer<Lesson> {
 
     override fun deserialize(
         json: JsonElement?,
@@ -66,10 +98,13 @@ class LessonDeserializier : JsonDeserializer<Lesson> {
                     object : TypeToken<ArrayList<Vocable?>?>() {}.type
                 val list: ArrayList<Vocable> = context.deserialize(wordsJson, wordsJsonType)
 
+                val wordIdJson = jsonObject.getAsJsonPrimitive("id")
+                val id = wordIdJson.asLong
+
+                lesson.serverId = id
                 lesson.words.addAll(list.map { it.id = 0; it })
                 return lesson
             }
-
         }
         return Lesson()
     }

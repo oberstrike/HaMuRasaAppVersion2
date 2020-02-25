@@ -9,10 +9,15 @@ import io.objectbox.converter.PropertyConverter
 
 @Entity
 data class Vocable(@Id var id: Long = 0,
+                   var serverId: Long = 0,
                    var value: String,
                    var type: String,
                    @Convert(converter = ListOfStringConverter::class, dbType = String::class)
-                   var translation: List<String>)
+                   var translation: List<String>){
+
+    constructor() : this(0, 0, "", "", arrayListOf())
+
+}
 
 class ListOfStringConverter : PropertyConverter<List<String>, String> {
     override fun convertToDatabaseValue(entityProperty: List<String>?): String {

@@ -52,7 +52,7 @@ class CommandLineRunner(
 
         val lesson = Lesson()
         lessonRepository.deleteAll()
-        lesson.words.add(Vocable(0, "abuelo", "Nomen", listOf("Großvater")))
+        lesson.words.add(Vocable(0,0, "abuelo", "Nomen", listOf("Großvater")))
         lessonRepository.save(lesson)
         val observable = lessonRepository.findAll()
         val lessons = observable.blockingFirst()
