@@ -22,4 +22,7 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="empty"> </string>
+    <string name="search">Search</string>
+    <string name="searchEditTextValue">In this field you can search a Word</string>
+    <string name="settings">Settings</string>
 </resources>
