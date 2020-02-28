@@ -11,7 +11,7 @@ import de.hamurasa.main.MainActivity
 import de.hamurasa.main.MainContext
 import io.reactivex.Observable
 import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.android.synthetic.main.login_fragment.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class LoginActivity : AppCompatActivity(), View.OnClickListener {

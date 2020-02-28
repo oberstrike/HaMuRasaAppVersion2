@@ -12,6 +12,7 @@ import de.hamurasa.R
 import de.hamurasa.login.LoginActivity
 import de.hamurasa.main.fragments.DictionaryFragment
 import de.hamurasa.main.fragments.HomeFragment
+import de.hamurasa.settings.SettingsActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -25,11 +26,11 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        bottom_navigator.setOnNavigationItemSelectedListener(this)
+    //    bottom_navigator.setOnNavigationItemSelectedListener(this)
         myViewModel.init()
 
-        bottom_navigator.isEnabled = false
-        bottom_navigator.isClickable = false
+      //  bottom_navigator.isEnabled = false
+      //  bottom_navigator.isClickable = false
 
         loadFragment(HomeFragment())
 
@@ -52,6 +53,13 @@ class MainActivity : AppCompatActivity(),
                 startActivity(intent)
                 finish()
             }
+            R.id.action_settings -> {
+
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+
+            }
+
         }
 
 
@@ -62,6 +70,7 @@ class MainActivity : AppCompatActivity(),
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
 
         when (p0.itemId) {
+            /*
             R.id.nav_search -> {
                 if (MainContext.activeFragment !is DictionaryFragment) {
                     loadFragment(DictionaryFragment())
@@ -73,7 +82,7 @@ class MainActivity : AppCompatActivity(),
                     loadFragment(HomeFragment())
                     return true
                 }
-            }
+            }*/
 
         }
         return false

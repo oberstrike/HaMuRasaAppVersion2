@@ -7,6 +7,8 @@ import de.hamurasa.util.SchedulerProvider
 import de.hamurasa.util.SchedulerProviderImpl
 import de.hamurasa.lesson.LessonViewModel
 import de.hamurasa.lesson.model.*
+import de.hamurasa.settings.SettingsViewModel
+import de.hamurasa.util.AbstractViewModel
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -27,6 +29,8 @@ val appModules = module {
     viewModel { LoginViewModel(get()) }
 
     viewModel { LessonViewModel(get(), get()) }
+
+    viewModel {  SettingsViewModel() }
 }
 
 
