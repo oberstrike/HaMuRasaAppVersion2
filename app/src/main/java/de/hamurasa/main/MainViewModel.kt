@@ -74,6 +74,9 @@ class MainViewModel(
                 lesson.id = 0
                 lessonRepository.save(lesson)
             }
+            MainContext.lessons = BehaviorSubject.just(lessons)
+
+
         }
     }
 

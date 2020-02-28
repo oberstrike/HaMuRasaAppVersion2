@@ -5,6 +5,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -26,11 +27,11 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-    //    bottom_navigator.setOnNavigationItemSelectedListener(this)
+        bottom_navigator.setOnNavigationItemSelectedListener(this)
         myViewModel.init()
 
-      //  bottom_navigator.isEnabled = false
-      //  bottom_navigator.isClickable = false
+        bottom_navigator.isEnabled = false
+        bottom_navigator.isClickable = false
 
         loadFragment(HomeFragment())
 
@@ -70,7 +71,7 @@ class MainActivity : AppCompatActivity(),
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
 
         when (p0.itemId) {
-            /*
+
             R.id.nav_search -> {
                 if (MainContext.activeFragment !is DictionaryFragment) {
                     loadFragment(DictionaryFragment())
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity(),
                     loadFragment(HomeFragment())
                     return true
                 }
-            }*/
+            }
 
         }
         return false
@@ -94,5 +95,15 @@ class MainActivity : AppCompatActivity(),
         transaction.addToBackStack(null)
         transaction.commit()
         MainContext.activeFragment = fragment
+
+        if(fragment::class.java == DictionaryFragment::class.java){
+            toolbar.menu.add(Menu.NONE, 1, Menu.NONE, "Language ");
+            modeSpinner.visibility = View.VISIBLE
+        }else
+        {
+            toolbar.menu.removeItem(1)
+            modeSpinner.visibility = View.INVISIBLE
+        }
+
     }
 }

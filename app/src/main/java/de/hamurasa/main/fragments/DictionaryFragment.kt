@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +21,7 @@ class DictionaryFragment : Fragment(), ResultRecyclerViewAdapter.OnClickListener
     private lateinit var searchEditText: EditText
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchButton: Button
+    private lateinit var spinner: Spinner
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +44,7 @@ class DictionaryFragment : Fragment(), ResultRecyclerViewAdapter.OnClickListener
         recyclerView = view!!.findViewById(R.id.wordRecyclerView)
         searchEditText = view!!.findViewById(R.id.searchEditText)
         searchButton = view!!.findViewById(R.id.searchButton)
+        spinner = activity!!.findViewById(R.id.modeSpinner)
         init()
     }
 
@@ -68,6 +68,11 @@ class DictionaryFragment : Fragment(), ResultRecyclerViewAdapter.OnClickListener
             myViewModel.getWord(searchEditText.text.toString())
         }
 
+        val array = arrayOf("ES-GER", "GER-ES")
+        val arrayAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
+
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = arrayAdapter
     }
 
 }
