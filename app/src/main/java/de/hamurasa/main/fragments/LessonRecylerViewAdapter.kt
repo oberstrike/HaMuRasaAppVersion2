@@ -49,7 +49,7 @@ class LessonRecylerViewAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.lesson_fragment, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.holder_lesson_fragment, parent, false)
         return ViewHolder(view, onClickListener)
     }
 
