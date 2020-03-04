@@ -13,6 +13,9 @@ import retrofit2.http.Query
 interface VocableRetrofitService {
     @GET("/api/words")
     fun getWordsByText(@Query("text") text: String): Observable<List<Vocable>>
+
+    @GET("/api/words/translation")
+    fun getWordsByTranslation(@Query("text") ext: String): Observable<List<Vocable>>
 }
 
 interface UserRetrofitService {

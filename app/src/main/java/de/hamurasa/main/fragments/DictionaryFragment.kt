@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
 import de.hamurasa.main.MainViewModel
 import de.hamurasa.util.afterTextChanged
+import okhttp3.internal.lockAndWaitNanos
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 class DictionaryFragment : Fragment(), ResultRecyclerViewAdapter.OnClickListener {
@@ -65,14 +66,25 @@ class DictionaryFragment : Fragment(), ResultRecyclerViewAdapter.OnClickListener
         }
 
         searchButton.setOnClickListener{
-            myViewModel.getWord(searchEditText.text.toString())
+            val name = spinner.selectedItem as String
+            val mode = Mode.valueOf(name)
+            if(mode == Mode.ES_GER){
+                myViewModel.getWord(searchEditText.text.toString())
+            }else{
+                myViewModel.getWordByTranslation(searchEditText.text.toString())
+            }
         }
 
-        val array = arrayOf("ES-GER", "GER-ES")
-        val arrayAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
+        val modes = arrayOf( Mode.values().map { it.name } ).first()
+
+        val arrayAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, modes)
 
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = arrayAdapter
     }
 
+
+    enum class Mode{
+        ES_GER, GER_ES;
+    }
 }

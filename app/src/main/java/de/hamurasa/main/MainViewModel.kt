@@ -68,11 +68,18 @@ class MainViewModel(
 
         if (body != null) {
             val lessons: List<Lesson> = GsonObject.gson.fromJson(body)
-            lessonRepository.deleteAll()
-
             for (lesson in lessons) {
-                lesson.id = 0
-                lessonRepository.save(lesson)
+                val serverId = lesson.serverId
+                val oldLesson = lessonRepository.findByServerId(serverId)
+
+                if (oldLesson != null) {
+                    if (oldLesson.words == lesson.words) {
+                        lessonRepository.save(lesson)
+                    }
+
+                } else {
+                    lessonRepository.save(lesson)
+                }
             }
             MainContext.lessons = BehaviorSubject.just(lessons)
 
@@ -82,17 +89,29 @@ class MainViewModel(
 
 
     fun getWord(value: String) {
-
-        if(value.isNotEmpty()){
+        if (value.isNotEmpty()) {
             val response = CompletableFuture.supplyAsync {
                 RetrofitServices.vocableRetrofitService.getWordsByText(value).blockingFirst()
             }.get()
             words.onNext(response)
 
-        }else{
+        } else {
             words.onNext(listOf())
         }
     }
+
+    fun getWordByTranslation(value: String) {
+        if (value.isNotEmpty()) {
+            val response = CompletableFuture.supplyAsync {
+                RetrofitServices.vocableRetrofitService.getWordsByTranslation(value).blockingFirst()
+            }.get()
+            words.onNext(response)
+        } else {
+            words.onNext(listOf())
+        }
+
+    }
+
 }
 
 inline fun <reified T> Gson.fromJson(json: String) =

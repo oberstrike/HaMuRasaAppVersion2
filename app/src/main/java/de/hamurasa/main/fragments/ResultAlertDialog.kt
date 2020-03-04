@@ -38,11 +38,11 @@ class ResultAlertDialog(val word: Vocable) : AppCompatDialogFragment(), View.OnC
         addToLessonButton.setOnClickListener(this)
 
         translationTextView = view.findViewById( R.id.translation_text_view)
-        translationTextView.text = word.translation.toString()
+        translationTextView.text = word.translation.distinct().toString()
 
         resultLessonSpinner = view.findViewById(R.id.result_lesson_Spinner)
 
-        val array = MainContext.lessons.blockingFirst().map { "Lesson ${it.id - 1}" }
+        val array = MainContext.lessons.blockingFirst().map { "Lesson ${it.id}" }
 
         val arrayAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
 
