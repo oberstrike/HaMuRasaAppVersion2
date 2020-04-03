@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:5489663250782794877",
-      "lastPropertyId": "2:8749619108269247619",
+      "lastPropertyId": "4:4330071765460681761",
       "name": "Lesson",
       "properties": [
         {
@@ -15,6 +15,14 @@
         {
           "id": "2:8749619108269247619",
           "name": "serverId"
+        },
+        {
+          "id": "3:1030419953406718283",
+          "name": "language"
+        },
+        {
+          "id": "4:4330071765460681761",
+          "name": "validationLanguage"
         }
       ],
       "relations": [
@@ -26,7 +34,7 @@
     },
     {
       "id": "2:7757629347621521464",
-      "lastPropertyId": "5:3294276495813231705",
+      "lastPropertyId": "6:8659791068748455406",
       "name": "Vocable",
       "properties": [
         {
@@ -48,6 +56,10 @@
         {
           "id": "5:3294276495813231705",
           "name": "serverId"
+        },
+        {
+          "id": "6:8659791068748455406",
+          "name": "language"
         }
       ],
       "relations": []

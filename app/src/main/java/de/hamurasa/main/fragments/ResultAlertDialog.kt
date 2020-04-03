@@ -2,7 +2,6 @@ package de.hamurasa.main.fragments
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
@@ -11,12 +10,14 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialogFragment
 import de.hamurasa.R
+import de.hamurasa.lesson.model.LessonDTO
 import de.hamurasa.lesson.model.Vocable
+import de.hamurasa.lesson.model.VocableDTO
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.MainViewModel
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class ResultAlertDialog(val word: Vocable) : AppCompatDialogFragment(), View.OnClickListener {
+class ResultAlertDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.OnClickListener {
 
     private lateinit var translationTextView: TextView
 
@@ -37,19 +38,22 @@ class ResultAlertDialog(val word: Vocable) : AppCompatDialogFragment(), View.OnC
         addToLessonButton = view.findViewById(R.id.add_to_lesson_button)
         addToLessonButton.setOnClickListener(this)
 
-        translationTextView = view.findViewById( R.id.translation_text_view)
-        translationTextView.text = word.translation.toString()
+        translationTextView = view.findViewById(R.id.translation_text_view)
+        translationTextView.text = vocable.translation.toString()
 
         resultLessonSpinner = view.findViewById(R.id.result_lesson_Spinner)
 
-        val array = MainContext.lessons.blockingFirst().map { "Lesson ${it.id - 1}" }
+        val lessons = MainContext.lessons.blockingFirst()
 
-        val arrayAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
+        val array = lessons.map { it.id.toString() }
+
+        val arrayAdapter =
+            ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
 
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         resultLessonSpinner.adapter = arrayAdapter
 
-        with(builder){
+        with(builder) {
             setView(view)
         }
 
@@ -57,9 +61,11 @@ class ResultAlertDialog(val word: Vocable) : AppCompatDialogFragment(), View.OnC
     }
 
     override fun onClick(v: View?) {
-        val x = myViewModel != null
+        val lessonId = (resultLessonSpinner.selectedItem as String).toLong()
+        val lesson = MainContext.lessons.blockingFirst().find { it.id == lessonId }!!
 
-        println("HALLO")
+        val vocableDTO = VocableDTO.create(vocable.serverId, vocable.value, vocable.type, vocable.translation, vocable.language)
+        myViewModel.addVocableToLesson(vocableDTO, lesson.serverId)
     }
 
 

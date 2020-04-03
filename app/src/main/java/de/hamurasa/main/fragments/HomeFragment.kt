@@ -95,6 +95,8 @@ class HomeFragment : Fragment(), LessonRecylerViewAdapter.OnClickListener {
         val lesson = myViewModel.lessons.blockingFirst()[position]
         val words = lesson.words
         LessonContext.vocables = words
+        if (lesson.words.size == 0)
+            return
 
         val intent = Intent(activity, LessonActivity::class.java)
         startActivity(intent)

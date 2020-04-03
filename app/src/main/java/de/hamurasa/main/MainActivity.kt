@@ -1,7 +1,6 @@
 package de.hamurasa.main
 
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -10,9 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.hamurasa.R
+import de.hamurasa.lesson.model.Language
+import de.hamurasa.lesson.model.Lesson
 import de.hamurasa.login.LoginActivity
 import de.hamurasa.main.fragments.DictionaryFragment
 import de.hamurasa.main.fragments.HomeFragment
+import de.hamurasa.main.fragments.NewLessonDialog
+import de.hamurasa.main.fragments.NewVocableDialog
 import de.hamurasa.settings.SettingsActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -55,23 +58,20 @@ class MainActivity : AppCompatActivity(),
                 finish()
             }
             R.id.action_settings -> {
-
                 val intent = Intent(this, SettingsActivity::class.java)
                 startActivity(intent)
-
             }
-
+            R.id.action_new_lesson -> {
+                val fragment = NewLessonDialog(Lesson(0, language = Language.ES, validationLanguage = Language.GER))
+                fragment.show(supportFragmentManager, "New Lesson")
+            }
         }
-
-
         return super.onOptionsItemSelected(item)
     }
 
 
-    override fun onNavigationItemSelected(p0: MenuItem): Boolean {
-
-        when (p0.itemId) {
-
+    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
             R.id.nav_search -> {
                 if (MainContext.activeFragment !is DictionaryFragment) {
                     loadFragment(DictionaryFragment())
@@ -84,7 +84,6 @@ class MainActivity : AppCompatActivity(),
                     return true
                 }
             }
-
         }
         return false
     }
@@ -97,7 +96,13 @@ class MainActivity : AppCompatActivity(),
         MainContext.activeFragment = fragment
 
         if(fragment::class.java == DictionaryFragment::class.java){
-            toolbar.menu.add(Menu.NONE, 1, Menu.NONE, "Language ");
+            toolbar.menu.add(Menu.NONE, 1, Menu.NONE, "Add Vocable");
+            val menuItem = toolbar.menu.findItem(1)
+            menuItem.setOnMenuItemClickListener {
+                val dialog = NewVocableDialog()
+                dialog.show(supportFragmentManager, "New Vocable")
+                true
+            }
             modeSpinner.visibility = View.VISIBLE
         }else
         {

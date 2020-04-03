@@ -1,18 +1,21 @@
 package de.hamurasa.network
 
 
+import de.hamurasa.lesson.model.Lesson
+import de.hamurasa.lesson.model.LessonDTO
 import de.hamurasa.lesson.model.Vocable
+import de.hamurasa.lesson.model.VocableDTO
 import io.reactivex.Observable
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface VocableRetrofitService {
-    @GET("/api/words")
-    fun getWordsByText(@Query("text") text: String): Observable<List<Vocable>>
+    @GET("/api/vocable/search")
+    fun getWordsByText(@Query("value") value: String): Observable<List<Vocable>>
+
+    @POST("/api/vocable")
+    suspend fun addVocable(@Body vocableDTO: VocableDTO): ResponseBody
 }
 
 interface UserRetrofitService {
@@ -22,12 +25,17 @@ interface UserRetrofitService {
 
     @GET("/login")
     fun login(): Call<ResponseBody>
-
 }
 
 interface LessonRetrofitService {
-    @GET("/api/student/lessons")
-    fun getLessons(): Call<ResponseBody>
+    @GET("/api/user/lessons")
+    suspend fun getLessons(): List<Lesson>
+
+    @POST("/api/lesson")
+    suspend fun addNewLesson(@Body lesson: LessonDTO): LessonDTO?
+
+    @POST("/api/lesson/{id}")
+    suspend fun addVocableToLesson(@Path("id") id: Long, @Body vocableDTO: VocableDTO): ResponseBody
 }
 
 
@@ -48,9 +56,11 @@ fun createLessonRetrofitService(username: String, password: String): LessonRetro
 }
 
 fun createUserService(username: String, password: String): UserRetrofitService {
-    return ServiceGenerator.createService(UserRetrofitService::class.java,
+    return ServiceGenerator.createService(
+        UserRetrofitService::class.java,
         username,
-        password)
+        password
+    )
 }
 
 open class User(val username: String, val password: String)
@@ -73,10 +83,9 @@ object RetrofitServices {
         vocableRetrofitService = createVocableService(username, password)
     }
 
-    fun initLessonRetrofitService(username: String, password: String){
+    fun initLessonRetrofitService(username: String, password: String) {
         lessonRetrofitService = createLessonRetrofitService(username, password)
     }
-
 
 
 }

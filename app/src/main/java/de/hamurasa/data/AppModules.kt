@@ -54,9 +54,9 @@ class CommandLineRunner(
         if(isInit)
             return
 
-        val lesson = Lesson()
+        val lesson = Lesson(language = Language.ES, validationLanguage = Language.GER)
         lessonRepository.deleteAll()
-        lesson.words.add(Vocable(0,0, "abuelo", "Nomen", listOf("Großvater")))
+        lesson.words.add(Vocable(0,0, "abuelo", "Nomen", listOf("Großvater"), language = Language.ES))
         lessonRepository.save(lesson)
         val observable = lessonRepository.findAll()
         val lessons = observable.blockingFirst()

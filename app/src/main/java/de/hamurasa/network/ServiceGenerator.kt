@@ -1,5 +1,6 @@
 package de.hamurasa.network
 
+import de.hamurasa.util.GsonObject
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -33,7 +34,7 @@ object ServiceGenerator {
 
     private val builder = Retrofit.Builder()
         .client(createOkHttpClient())
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(GsonObject.gson))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .baseUrl(API_BASE_URL)
 
@@ -49,7 +50,7 @@ object ServiceGenerator {
         password: String?
     ): S {
         if (username != null && password != null) {
-            val authToken = Credentials.basic(username!!, password!!)
+            val authToken = Credentials.basic(username, password!!)
             return createService(serviceClass, authToken)
         }
 

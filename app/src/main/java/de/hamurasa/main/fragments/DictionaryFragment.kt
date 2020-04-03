@@ -1,6 +1,5 @@
 package de.hamurasa.main.fragments
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,9 +8,9 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import de.hamurasa.R
 import de.hamurasa.main.MainViewModel
-import de.hamurasa.util.afterTextChanged
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 class DictionaryFragment : Fragment(), ResultRecyclerViewAdapter.OnClickListener {
@@ -64,15 +63,19 @@ class DictionaryFragment : Fragment(), ResultRecyclerViewAdapter.OnClickListener
                 }
         }
 
-        searchButton.setOnClickListener{
+        searchButton.setOnClickListener {
             myViewModel.getWord(searchEditText.text.toString())
         }
 
+
+
         val array = arrayOf("ES-GER", "GER-ES")
-        val arrayAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
+        val arrayAdapter =
+            ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
 
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = arrayAdapter
+
     }
 
 }

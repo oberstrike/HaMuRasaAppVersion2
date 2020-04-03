@@ -6,22 +6,25 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import com.fatboyindustrial.gsonjodatime.Converters
+//import com.fatboyindustrial.gsonjodatime.Converters
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
+import de.hamurasa.lesson.model.Language
 import de.hamurasa.lesson.model.Lesson
 import de.hamurasa.lesson.model.Vocable
 import org.joda.time.DateTime
 import java.lang.reflect.Type
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 @SuppressWarnings
-fun convertDateTimeToHeadline(dateTime: DateTime, language: Language = Language.DE): String {
+fun convertDateTimeToHeadline(dateTime: DateTime, language: Language = Language.GER): String {
     val day = dateTime.dayOfMonth().get()
     val month = dateTime.monthOfYear().get()
     val dayMonth = "${if (day < 9) "0$day" else day}.${if (month < 9) "0$month" else month}."
 
-    return when (language == Language.DE) {
+    return when (language == Language.GER) {
         true -> "Training vom $dayMonth"
         false -> "Training from $dayMonth"
     }
@@ -40,9 +43,9 @@ object GsonObject {
         private set
 
     init {
-        gson = Converters.registerDateTime(
-            GsonBuilder()
-        )
+        gson = GsonBuilder() //Converters.registerDateTime(
+      //      GsonBuilder()
+     //   )
             .registerTypeAdapter(Lesson::class.java, LessonDeserializer())
             .registerTypeAdapter(Vocable::class.java, VocableDeserializer())
             .create()
@@ -62,7 +65,7 @@ class VocableDeserializer : JsonDeserializer<Vocable> {
 
                 val listStringType =
                     object : TypeToken<List<String?>?>() {}.type
-                val listOfVocableJsonArray = jsonObject.getAsJsonArray("translation")
+                val listOfVocableJsonArray = jsonObject.getAsJsonArray("translations")
                 val translation: List<String> = context.deserialize(listOfVocableJsonArray, listStringType)
 
                 val id = 0
@@ -71,7 +74,7 @@ class VocableDeserializer : JsonDeserializer<Vocable> {
                 val type = jsonObject.getAsJsonPrimitive("type").asString
                 val value = jsonObject.getAsJsonPrimitive("value").asString
 
-                return Vocable(0, serverId, value, type, translation)
+                return Vocable(0, serverId, value, type, translation, language = de.hamurasa.lesson.model.Language.ES)
             }
 
         }
@@ -91,9 +94,9 @@ class LessonDeserializer : JsonDeserializer<Lesson> {
         if (json != null) {
             if (context != null) {
                 val jsonObject = json.asJsonObject
-                val lesson = Lesson()
+                val lesson = Lesson(language = de.hamurasa.lesson.model.Language.ES, validationLanguage = de.hamurasa.lesson.model.Language.GER)
 
-                val wordsJson = jsonObject.getAsJsonArray("words")
+                val wordsJson = jsonObject.getAsJsonArray("vocables")
                 val wordsJsonType =
                     object : TypeToken<ArrayList<Vocable?>?>() {}.type
                 val list: ArrayList<Vocable> = context.deserialize(wordsJson, wordsJsonType)
@@ -106,14 +109,11 @@ class LessonDeserializer : JsonDeserializer<Lesson> {
                 return lesson
             }
         }
-        return Lesson()
+        return Lesson(language = de.hamurasa.lesson.model.Language.ES, validationLanguage = de.hamurasa.lesson.model.Language.GER)
     }
 }
 
 
-enum class Language {
-    DE, EN
-}
 
 enum class Weekday(val id: Int) {
     MONTAG(1), DIENSTAG(2), MITTWOCH(3), DONNERSTAG(4), FREITAG(5), SAMSTAG(6), SONNTAG(7);
@@ -123,7 +123,7 @@ enum class Weekday(val id: Int) {
     }
 
     override fun toString(): String {
-        return super.toString().toLowerCase()
+        return super.toString().toLowerCase(Locale.ROOT)
     }
 
 

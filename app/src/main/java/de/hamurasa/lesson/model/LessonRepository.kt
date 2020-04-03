@@ -17,6 +17,8 @@ interface LessonRepository {
     fun size(): Int
 
     fun deleteAll()
+
+    fun findByServerId(serverId: Long): Lesson?
 }
 
 class LessonRepositoryImpl : LessonRepository {
@@ -42,6 +44,10 @@ class LessonRepositoryImpl : LessonRepository {
             .blockingFirst().first()
     }
 
+    override fun findByServerId(serverId: Long): Lesson? {
+        return activenessBox.query().equal(Lesson_.serverId, serverId).build().findFirst()
+    }
+
     override fun save(lesson: Lesson) {
         activenessBox.put(lesson)
     }
@@ -49,6 +55,7 @@ class LessonRepositoryImpl : LessonRepository {
     override fun deleteAll() {
         activenessBox.removeAll()
     }
+
 
 
 }
