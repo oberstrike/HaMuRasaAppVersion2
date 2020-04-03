@@ -36,6 +36,22 @@ data class Vocable(
         return serverId.hashCode()
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Vocable
+
+        if (serverId != other.serverId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return serverId.hashCode()
+    }
+
+
 }
 
 class ListOfStringConverter : PropertyConverter<List<String>, String> {

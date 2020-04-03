@@ -8,6 +8,8 @@ import io.reactivex.Observable
 interface LessonRepository {
     fun findById(id: Long): Lesson
 
+    fun findByServerId(id: Long): Lesson?
+
     fun findAll(): Observable<List<Lesson>>
 
     fun save(lesson: Lesson)
@@ -44,9 +46,9 @@ class LessonRepositoryImpl : LessonRepository {
             .blockingFirst().first()
     }
 
-    override fun findByServerId(serverId: Long): Lesson? {
-        return activenessBox.query().equal(Lesson_.serverId, serverId).build().findFirst()
-    }
+    override fun findByServerId(serverId: Long): Lesson? =
+        activenessBox.query().equal(Lesson_.serverId, serverId).build().findFirst()
+
 
     override fun save(lesson: Lesson) {
         activenessBox.put(lesson)
@@ -55,7 +57,6 @@ class LessonRepositoryImpl : LessonRepository {
     override fun deleteAll() {
         activenessBox.removeAll()
     }
-
 
 
 }

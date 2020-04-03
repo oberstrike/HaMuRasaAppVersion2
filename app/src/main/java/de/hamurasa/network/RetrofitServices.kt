@@ -11,11 +11,16 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface VocableRetrofitService {
+
     @GET("/api/vocable/search")
     fun getWordsByText(@Query("value") value: String): Observable<List<Vocable>>
 
     @POST("/api/vocable")
     suspend fun addVocable(@Body vocableDTO: VocableDTO): ResponseBody
+
+    @GET("/api/words/translation")
+    fun getWordsByTranslation(@Query("text") ext: String): Observable<List<Vocable>>
+
 }
 
 interface UserRetrofitService {

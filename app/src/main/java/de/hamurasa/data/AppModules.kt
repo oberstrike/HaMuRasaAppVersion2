@@ -54,14 +54,6 @@ class CommandLineRunner(
         if(isInit)
             return
 
-        val lesson = Lesson(language = Language.ES, validationLanguage = Language.GER)
-        lessonRepository.deleteAll()
-        lesson.words.add(Vocable(0,0, "abuelo", "Nomen", listOf("Großvater"), language = Language.ES))
-        lessonRepository.save(lesson)
-        val observable = lessonRepository.findAll()
-        val lessons = observable.blockingFirst()
-
-        val body = GsonObject.gson.toJson(lessons)
         isInit = true
     }
 

@@ -113,8 +113,6 @@ class LessonDeserializer : JsonDeserializer<Lesson> {
     }
 }
 
-
-
 enum class Weekday(val id: Int) {
     MONTAG(1), DIENSTAG(2), MITTWOCH(3), DONNERSTAG(4), FREITAG(5), SAMSTAG(6), SONNTAG(7);
 

@@ -64,8 +64,8 @@ class MainViewModel(
             val lessons: List<Lesson> = RetrofitServices.lessonRetrofitService.getLessons()
             val oldLessons = lessonRepository.findAll().blockingFirst()
 
-            for(oldLesson in oldLessons){
-                if(oldLesson !in lessons){
+            for (oldLesson in oldLessons) {
+                if (oldLesson !in lessons) {
                     lessonRepository.delete(oldLesson)
                 }
             }
@@ -78,8 +78,8 @@ class MainViewModel(
 
                 if (oldLesson != null) {
                     val oldWords = oldLesson.words
-                    for (word in words){
-                        if(word !in oldWords){
+                    for (word in words) {
+                        if (word !in oldWords) {
                             oldLesson.words.add(word)
                         }
                     }
@@ -88,8 +88,6 @@ class MainViewModel(
                     lessonRepository.save(newLesson)
                 }
             }
-
-
             MainContext.lessons = BehaviorSubject.just(lessons)
         }
 
@@ -111,6 +109,7 @@ class MainViewModel(
 
     fun addLesson(lesson: LessonDTO) {
 
+        <<<<<<< HEAD
         GlobalScope.launch(Dispatchers.IO) {
             val result = RetrofitServices.lessonRetrofitService.addNewLesson(lesson)
             //    val body = result.string()
@@ -129,11 +128,24 @@ class MainViewModel(
 
     }
 
+
     fun addVocableToLesson(vocableDTO: VocableDTO, lessonId: Long) {
         GlobalScope.launch(Dispatchers.IO) {
             val result =
                 RetrofitServices.lessonRetrofitService.addVocableToLesson(lessonId, vocableDTO)
         }
+    }
+
+    fun getWordByTranslation(value: String) {
+        if (value.isNotEmpty()) {
+            val response = CompletableFuture.supplyAsync {
+                RetrofitServices.vocableRetrofitService.getWordsByTranslation(value).blockingFirst()
+            }.get()
+            words.onNext(response)
+        } else {
+            words.onNext(listOf())
+        }
+
     }
 
 }

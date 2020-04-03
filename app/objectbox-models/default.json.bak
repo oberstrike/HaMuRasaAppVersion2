@@ -1,0 +1,67 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:5489663250782794877",
+      "lastPropertyId": "2:8749619108269247619",
+      "name": "Lesson",
+      "properties": [
+        {
+          "id": "1:2826322604057123900",
+          "name": "id"
+        },
+        {
+          "id": "2:8749619108269247619",
+          "name": "serverId"
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:6204580206949688283",
+          "name": "words"
+        }
+      ]
+    },
+    {
+      "id": "2:7757629347621521464",
+      "lastPropertyId": "5:3294276495813231705",
+      "name": "Vocable",
+      "properties": [
+        {
+          "id": "1:4047069483659205260",
+          "name": "id"
+        },
+        {
+          "id": "2:8496678067223322053",
+          "name": "value"
+        },
+        {
+          "id": "3:5337020572798411533",
+          "name": "type"
+        },
+        {
+          "id": "4:4216756173047299712",
+          "name": "translation"
+        },
+        {
+          "id": "5:3294276495813231705",
+          "name": "serverId"
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "2:7757629347621521464",
+  "lastIndexId": "0:0",
+  "lastRelationId": "1:6204580206949688283",
+  "lastSequenceId": "0:0",
+  "modelVersion": 4,
+  "modelVersionParserMinimum": 4,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

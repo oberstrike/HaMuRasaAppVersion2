@@ -19,6 +19,4 @@ abstract class AbstractViewModel: ViewModel() {
     }
 
 
-
-
 }
