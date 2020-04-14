@@ -1,30 +1,28 @@
 package de.hamurasa.main.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
-import de.hamurasa.lesson.LessonActivity
-import de.hamurasa.lesson.LessonContext
-import de.hamurasa.lesson.LessonViewModel
-import de.hamurasa.login.LoginActivity
+import de.hamurasa.main.MainContext
 import de.hamurasa.main.MainViewModel
+import de.hamurasa.main.fragments.adapters.LessonRecyclerViewAdapter
+import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.home_fragment.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class HomeFragment : Fragment(), LessonRecylerViewAdapter.OnClickListener {
+class HomeFragment : Fragment(), LessonRecyclerViewAdapter.OnClickListener {
 
     private val myViewModel: MainViewModel by sharedViewModel()
+
     private lateinit var recyclerView: RecyclerView
 
-
-    private lateinit var lessonRecyclerViewAdapter: LessonRecylerViewAdapter
+    private lateinit var lessonRecyclerViewAdapter: LessonRecyclerViewAdapter
 
 
     override fun onCreateView(
@@ -36,30 +34,18 @@ class HomeFragment : Fragment(), LessonRecylerViewAdapter.OnClickListener {
     }
 
     override fun onStart() {
-        recyclerView = view!!.findViewById(R.id.recyclerView)
-        checkLoggedIn()
         super.onStart()
+        recyclerView = view!!.findViewById(R.id.lessonsRecyclerView)
+        init()
     }
 
-
-    private fun doAnimation() {
-        val appear = hello_textView.animate()
-        appear.alpha(0.8f)
-        appear.withEndAction {
-            val disappear = hello_textView.animate()
-            disappear.alpha(0f)
-            disappear.duration = 2000
-            disappear.withEndAction {
-                val intent = Intent(activity, LoginActivity::class.java)
-                startActivity(intent)
-                activity!!.finish()
-            }
-            disappear.start()
-        }.setDuration(2000).start()
-    }
 
     private fun init() {
-        lessonRecyclerViewAdapter = LessonRecylerViewAdapter(context!!, this)
+        lessonRecyclerViewAdapter =
+            LessonRecyclerViewAdapter(
+                context!!,
+                this
+            )
         recyclerView.layoutManager = LinearLayoutManager(context!!)
         recyclerView.adapter = lessonRecyclerViewAdapter
 
@@ -75,31 +61,50 @@ class HomeFragment : Fragment(), LessonRecylerViewAdapter.OnClickListener {
         myViewModel.update()
     }
 
-    private fun checkLoggedIn() {
-        myViewModel.launch {
-            myViewModel.isLoggedIn
-                .takeLast(1)
-                .subscribeOn(myViewModel.provider.computation())
-                .observeOn(myViewModel.provider.ui())
-                .subscribe {
-                    if (!it) {
-                        doAnimation()
-                    } else {
-                        init()
-                    }
-                }
-        }
-    }
 
+    /*
     override fun onItemClick(position: Int) {
         val lesson = myViewModel.lessons.blockingFirst()[position]
         val words = lesson.words
-        LessonContext.vocables = words
+        SessionContext.vocables = words
         if (lesson.words.size == 0)
             return
 
-        val intent = Intent(activity, LessonActivity::class.java)
+        val intent = Intent(activity, SessionActivity::class.java)
         startActivity(intent)
+    }*/
+
+
+    override fun onItemClick(position: Int) {
+        val lesson = myViewModel.lessons.blockingFirst()[position]
+        val vocables = lesson.words
+        MainContext.EditContext.lesson = BehaviorSubject.create()
+        MainContext.EditContext.lesson.onNext(lesson)
+    }
+
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            //Wenn "Löschen" ausgewählt ist
+            R.id.action_delete -> {
+                onActionDeleteExercise()
+            }
+            R.id.action_rename -> {
+                onActionRenameExercise()
+            }
+        }
+        return super.onContextItemSelected(item)
+    }
+
+    private fun onActionDeleteExercise() {
+        val position = lessonRecyclerViewAdapter.position
+        val lesson = lessonRecyclerViewAdapter.getLesson(position)
+        myViewModel.deleteLesson(lesson)
+        println(lesson)
+    }
+
+    private fun onActionRenameExercise() {
+
     }
 
 

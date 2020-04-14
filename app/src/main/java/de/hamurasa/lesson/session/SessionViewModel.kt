@@ -1,13 +1,13 @@
-package de.hamurasa.lesson
+package de.hamurasa.lesson.session
 
 import android.content.Context
 import de.hamurasa.util.AbstractViewModel
 import de.hamurasa.util.SchedulerProvider
-import de.hamurasa.lesson.model.Vocable
+import de.hamurasa.lesson.model.vocable.Vocable
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
-class LessonViewModel(
+class SessionViewModel(
     val provider: SchedulerProvider,
     val context: Context
 ) : AbstractViewModel() {
@@ -21,8 +21,8 @@ class LessonViewModel(
 
 
     fun init() {
-        if (LessonContext.vocables != null) {
-            activeVocable = Observable.just(LessonContext.vocables!![position])
+        if (SessionContext.vocables != null) {
+            activeVocable = Observable.just(SessionContext.vocables!![position])
         }
 
         isRunning = BehaviorSubject.create()
@@ -45,7 +45,7 @@ class LessonViewModel(
             println(it)
         }
 
-        if (LessonContext.vocables!!.size != stats.size) {
+        if (SessionContext.vocables!!.size != stats.size) {
             changeVocable()
         } else {
             if (stats.filter { it.value < 3 }.isEmpty()) {
@@ -63,7 +63,7 @@ class LessonViewModel(
         var vocable: Vocable? = null
 
         while (vocable == null) {
-            val random = LessonContext.vocables!!.random()
+            val random = SessionContext.vocables!!.random()
             if (random.id != active.id) {
                 val count = stats[random.id]
                 if (count != null) {
@@ -78,7 +78,7 @@ class LessonViewModel(
     }
 
     fun stop() {
-        LessonContext.vocables = null
+        SessionContext.vocables = null
         stats.clear()
     }
 }

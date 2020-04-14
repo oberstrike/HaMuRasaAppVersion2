@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
-        android:inputType="textPersonName"
+        android:inputType="textNoSuggestions"
         android:text="@string/empty"
         android:textSize="20sp"
         android:hint="@string/searchEditTextValue"

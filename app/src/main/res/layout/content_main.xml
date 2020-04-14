@@ -10,7 +10,8 @@
         android:id="@+id/main_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

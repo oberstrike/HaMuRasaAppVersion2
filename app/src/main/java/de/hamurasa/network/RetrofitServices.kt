@@ -1,10 +1,10 @@
 package de.hamurasa.network
 
 
-import de.hamurasa.lesson.model.Lesson
-import de.hamurasa.lesson.model.LessonDTO
-import de.hamurasa.lesson.model.Vocable
-import de.hamurasa.lesson.model.VocableDTO
+import de.hamurasa.lesson.model.lesson.Lesson
+import de.hamurasa.lesson.model.lesson.LessonDTO
+import de.hamurasa.lesson.model.vocable.Vocable
+import de.hamurasa.lesson.model.vocable.VocableDTO
 import io.reactivex.Observable
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -16,7 +16,7 @@ interface VocableRetrofitService {
     fun getWordsByText(@Query("value") value: String): Observable<List<Vocable>>
 
     @POST("/api/vocable")
-    suspend fun addVocable(@Body vocableDTO: VocableDTO): ResponseBody
+    suspend fun addVocable(@Body vocableDTO: VocableDTO): VocableDTO
 
     @GET("/api/words/translation")
     fun getWordsByTranslation(@Query("text") ext: String): Observable<List<Vocable>>
@@ -30,6 +30,8 @@ interface UserRetrofitService {
 
     @GET("/login")
     fun login(): Call<ResponseBody>
+
+
 }
 
 interface LessonRetrofitService {
@@ -41,10 +43,21 @@ interface LessonRetrofitService {
 
     @POST("/api/lesson/{id}")
     suspend fun addVocableToLesson(@Path("id") id: Long, @Body vocableDTO: VocableDTO): ResponseBody
+
+    @DELETE("/api/lesson/{id}")
+    suspend fun deleteLesson(@Path("id") id: Long): ResponseBody
+
+    @DELETE("/api/lesson/{id}/{vocableId}")
+    suspend fun removeVocableFromLesson(@Path("id") id: Long, @Path("vocableId") vocableId: Long)
+}
+
+interface UpdateRetrofitService {
+    @GET("/version")
+    fun status(): Call<ResponseBody>
 }
 
 
-fun createVocableService(username: String, password: String): VocableRetrofitService {
+fun createVocableRetrofitService(username: String, password: String): VocableRetrofitService {
     return ServiceGenerator.createService(
         VocableRetrofitService::class.java,
         username,
@@ -60,12 +73,16 @@ fun createLessonRetrofitService(username: String, password: String): LessonRetro
     )
 }
 
-fun createUserService(username: String, password: String): UserRetrofitService {
+fun createUserRetrofitService(username: String, password: String): UserRetrofitService {
     return ServiceGenerator.createService(
         UserRetrofitService::class.java,
         username,
         password
     )
+}
+
+fun createUpdateRetrofitService(): UpdateRetrofitService {
+    return ServiceGenerator.createService(UpdateRetrofitService::class.java)
 }
 
 open class User(val username: String, val password: String)
@@ -80,16 +97,22 @@ object RetrofitServices {
 
     lateinit var lessonRetrofitService: LessonRetrofitService
 
+    lateinit var updateRetrofitService: UpdateRetrofitService
+
     fun init(username: String, password: String) {
-        userRetrofitService = createUserService(username, password)
+        userRetrofitService = createUserRetrofitService(username, password)
     }
 
     fun initVocableRetrofitService(username: String, password: String) {
-        vocableRetrofitService = createVocableService(username, password)
+        vocableRetrofitService = createVocableRetrofitService(username, password)
     }
 
     fun initLessonRetrofitService(username: String, password: String) {
         lessonRetrofitService = createLessonRetrofitService(username, password)
+    }
+
+    fun initUpdateRetrofitService() {
+        updateRetrofitService = createUpdateRetrofitService()
     }
 
 

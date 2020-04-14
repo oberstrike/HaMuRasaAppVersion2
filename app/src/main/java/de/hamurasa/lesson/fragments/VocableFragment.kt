@@ -7,22 +7,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import de.hamurasa.R
-import de.hamurasa.lesson.LessonContext
-import de.hamurasa.lesson.LessonViewModel
-import kotlinx.android.synthetic.main.vocable_fragment.*
-import kotlinx.android.synthetic.main.vocable_fragment.view.*
+import de.hamurasa.lesson.session.SessionContext
+import de.hamurasa.lesson.session.SessionViewModel
+import kotlinx.android.synthetic.main.vocable_session_fragment.*
+import kotlinx.android.synthetic.main.vocable_session_fragment.view.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 class VocableFragment : Fragment(), View.OnClickListener {
 
-    private val myViewModel: LessonViewModel by sharedViewModel()
+    private val myViewModel: SessionViewModel by sharedViewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.vocable_fragment, container, false)
+        val view = inflater.inflate(R.layout.vocable_session_fragment, container, false)
 
         view.vocable_second_value.setOnClickListener(this)
 
@@ -38,7 +38,7 @@ class VocableFragment : Fragment(), View.OnClickListener {
                 .subscribe {
                     if (vocable_first_value != null) {
 
-                        if (LessonContext.vocableType == Type.VALUE_TRANSLATION) {
+                        if (SessionContext.vocableType == Type.VALUE_TRANSLATION) {
                             vocable_first_value.text = it.value
                         } else {
                             var translation = ""
@@ -64,7 +64,7 @@ class VocableFragment : Fragment(), View.OnClickListener {
                 .observeOn(myViewModel.provider.ui())
                 .subscribe {
                     if (vocable_second_value != null) {
-                        if(LessonContext.vocableType  == Type.VALUE_TRANSLATION){
+                        if(SessionContext.vocableType  == Type.VALUE_TRANSLATION){
                             var translation = ""
                             for (trans in it.translation) {
                                 translation += "$trans,"

@@ -2,13 +2,19 @@ package de.hamurasa.data
 
 import de.hamurasa.login.LoginViewModel
 import de.hamurasa.main.MainViewModel
-import de.hamurasa.util.GsonObject
 import de.hamurasa.util.SchedulerProvider
 import de.hamurasa.util.SchedulerProviderImpl
-import de.hamurasa.lesson.LessonViewModel
-import de.hamurasa.lesson.model.*
+import de.hamurasa.lesson.session.SessionViewModel
+import de.hamurasa.lesson.model.lesson.LessonRepository
+import de.hamurasa.lesson.model.lesson.LessonRepositoryImpl
+import de.hamurasa.lesson.model.lesson.LessonService
+import de.hamurasa.lesson.model.lesson.LessonServiceImpl
+import de.hamurasa.lesson.model.vocable.VocableRepository
+import de.hamurasa.lesson.model.vocable.VocableRepositoryImpl
+import de.hamurasa.lesson.model.vocable.VocableService
+import de.hamurasa.lesson.model.vocable.VocableServiceImpl
 import de.hamurasa.settings.SettingsViewModel
-import de.hamurasa.util.AbstractViewModel
+import de.hamurasa.settings.model.Settings
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -22,40 +28,23 @@ val appModules = module {
 
     single { LessonRepositoryImpl() } bind LessonRepository::class
 
-    single { CommandLineRunner.init(get(), get()) }
+    single { LessonServiceImpl(get()) } bind LessonService::class
 
-    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
+    single { VocableServiceImpl(get()) } bind VocableService::class
+
+    single { Settings(get()) }
+
+    viewModel { MainViewModel(get(), get(), get(), get()) }
 
     viewModel { LoginViewModel(get()) }
 
-    viewModel { LessonViewModel(get(), get()) }
-
-    viewModel {  SettingsViewModel() }
-}
-
-
-class CommandLineRunner(
-    val vocableRepository: VocableRepository,
-    val lessonRepository: LessonRepository
-) {
-    companion object {
-        fun init(
-            vocableRepository: VocableRepository,
-            lessonRepository: LessonRepository
-        ): CommandLineRunner {
-            return CommandLineRunner(vocableRepository, lessonRepository)
-
-        }
+    viewModel {
+        SessionViewModel(
+            get(),
+            get()
+        )
     }
 
-    var isInit = false
-
-    fun init() {
-        if(isInit)
-            return
-
-        isInit = true
-    }
-
+    viewModel {  SettingsViewModel(get()) }
 
 }

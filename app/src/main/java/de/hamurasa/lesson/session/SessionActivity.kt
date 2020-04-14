@@ -1,4 +1,4 @@
-package de.hamurasa.lesson
+package de.hamurasa.lesson.session
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,9 +14,9 @@ import de.hamurasa.lesson.fragments.VocableFragment
 import kotlinx.android.synthetic.main.activity_lesson.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class LessonActivity : AppCompatActivity() {
+class SessionActivity : AppCompatActivity() {
 
-    private val myViewModel: LessonViewModel by viewModel()
+    private val myViewModel: SessionViewModel by viewModel()
 
     private lateinit var swipe: Swipe
 

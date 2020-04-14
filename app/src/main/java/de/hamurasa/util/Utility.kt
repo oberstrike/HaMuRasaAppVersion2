@@ -1,28 +1,38 @@
 package de.hamurasa.util
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 //import com.fatboyindustrial.gsonjodatime.Converters
 import com.google.gson.*
-import com.google.gson.reflect.TypeToken
-import de.hamurasa.lesson.model.Language
-import de.hamurasa.lesson.model.Lesson
-import de.hamurasa.lesson.model.Vocable
+import de.hamurasa.R
+import de.hamurasa.lesson.model.vocable.Language
+import de.hamurasa.lesson.model.lesson.Lesson
+import de.hamurasa.lesson.model.vocable.Vocable
 import org.joda.time.DateTime
-import java.lang.reflect.Type
 import java.util.*
-import kotlin.collections.ArrayList
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 
 @SuppressWarnings
 fun convertDateTimeToHeadline(dateTime: DateTime, language: Language = Language.GER): String {
     val day = dateTime.dayOfMonth().get()
     val month = dateTime.monthOfYear().get()
-    val dayMonth = "${if (day < 9) "0$day" else day}.${if (month < 9) "0$month" else month}."
+    val dayMonth =
+        "${if (day < 9) "0$day" else day.toString()}.${if (month < 9) "0$month" else month.toString()}."
+
 
     return when (language == Language.GER) {
         true -> "Training vom $dayMonth"
@@ -44,72 +54,12 @@ object GsonObject {
 
     init {
         gson = GsonBuilder() //Converters.registerDateTime(
-      //      GsonBuilder()
-     //   )
+            //      GsonBuilder()
+            //   )
             .registerTypeAdapter(Lesson::class.java, LessonDeserializer())
             .registerTypeAdapter(Vocable::class.java, VocableDeserializer())
             .create()
 
-    }
-}
-
-class VocableDeserializer : JsonDeserializer<Vocable> {
-    override fun deserialize(
-        json: JsonElement?,
-        typeOfT: Type?,
-        context: JsonDeserializationContext?
-    ): Vocable {
-        if(json != null){
-            if(context != null){
-                val jsonObject = json.asJsonObject
-
-                val listStringType =
-                    object : TypeToken<List<String?>?>() {}.type
-                val listOfVocableJsonArray = jsonObject.getAsJsonArray("translations")
-                val translation: List<String> = context.deserialize(listOfVocableJsonArray, listStringType)
-
-                val id = 0
-
-                val serverId = jsonObject.getAsJsonPrimitive("id").asLong
-                val type = jsonObject.getAsJsonPrimitive("type").asString
-                val value = jsonObject.getAsJsonPrimitive("value").asString
-
-                return Vocable(0, serverId, value, type, translation, language = de.hamurasa.lesson.model.Language.ES)
-            }
-
-        }
-        return Vocable()
-    }
-
-}
-
-@Suppress
-class LessonDeserializer : JsonDeserializer<Lesson> {
-
-    override fun deserialize(
-        json: JsonElement?,
-        typeOfT: Type?,
-        context: JsonDeserializationContext?
-    ): Lesson {
-        if (json != null) {
-            if (context != null) {
-                val jsonObject = json.asJsonObject
-                val lesson = Lesson(language = de.hamurasa.lesson.model.Language.ES, validationLanguage = de.hamurasa.lesson.model.Language.GER)
-
-                val wordsJson = jsonObject.getAsJsonArray("vocables")
-                val wordsJsonType =
-                    object : TypeToken<ArrayList<Vocable?>?>() {}.type
-                val list: ArrayList<Vocable> = context.deserialize(wordsJson, wordsJsonType)
-
-                val wordIdJson = jsonObject.getAsJsonPrimitive("id")
-                val id = wordIdJson.asLong
-
-                lesson.serverId = id
-                lesson.words.addAll(list.map { it.id = 0; it })
-                return lesson
-            }
-        }
-        return Lesson(language = de.hamurasa.lesson.model.Language.ES, validationLanguage = de.hamurasa.lesson.model.Language.GER)
     }
 }
 
@@ -139,4 +89,33 @@ fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
             afterTextChanged.invoke(editable.toString())
         }
     })
+}
+
+class StringPreference(
+    private val sharedPreferences: SharedPreferences,
+    private val key: String,
+    private val defaultValue: Boolean = false
+) : ReadWriteProperty<Any?, Boolean> {
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean =
+        sharedPreferences.getBoolean(key, defaultValue)
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) =
+        sharedPreferences.edit()
+            .putBoolean(key, value)
+            .apply()
+}
+
+fun SharedPreferences.boolean(
+    key: String,
+    defaultValue: Boolean = false
+): ReadWriteProperty<Any?, Boolean> =
+    StringPreference(this, key, defaultValue)
+
+fun Menu.foreach(block: (MenuItem) -> Unit) {
+    val size = this.size()
+    for (i in 0 until size) {
+        val item = this.getItem(i)
+        block.invoke(item)
+    }
 }

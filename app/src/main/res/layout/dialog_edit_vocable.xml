@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/wordTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="45dp"
+        android:layout_marginTop="25dp"
+        android:text="@string/word"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/valueEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:inputType="textNoSuggestions|text|textAutoComplete"
+        android:labelFor="@id/wordTextView"
+        app:layout_constraintStart_toEndOf="@+id/translationTextView"
+        app:layout_constraintTop_toTopOf="@+id/wordTextView"
+        tools:ignore="LabelFor" />
+
+    <TextView
+        android:id="@+id/translationTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="@string/translation"
+        app:layout_constraintStart_toStartOf="@+id/wordTextView"
+        app:layout_constraintTop_toBottomOf="@+id/valueEditText" />
+
+    <EditText
+        android:id="@+id/translationEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:inputType="textNoSuggestions|text|textAutoComplete"
+        android:labelFor="@id/translationTextView"
+        app:layout_constraintStart_toEndOf="@+id/translationTextView"
+        app:layout_constraintTop_toTopOf="@+id/translationTextView"
+        tools:ignore="LabelFor" />
+
+    <CheckBox
+        android:id="@+id/editVocableOfflineCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="@string/offline"
+        app:layout_constraintBottom_toBottomOf="@+id/applyButton"
+        app:layout_constraintStart_toStartOf="@+id/translationTextView"
+        app:layout_constraintTop_toBottomOf="@+id/editVocableTypeSpinner" />
+
+    <Button
+        android:id="@+id/applyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/apply"
+        app:layout_constraintBottom_toBottomOf="@id/editVocableOfflineCheckBox"
+        app:layout_constraintEnd_toEndOf="@+id/translationEditText" />
+
+    <Button
+        android:id="@+id/deleteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/action_delete"
+        app:layout_constraintEnd_toStartOf="@+id/applyButton"
+        app:layout_constraintTop_toTopOf="@+id/applyButton" />
+
+    <Spinner
+        android:id="@+id/editVocableTypeSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        app:layout_constraintBottom_toTopOf="@+id/deleteButton"
+        app:layout_constraintStart_toStartOf="@+id/editVocableOfflineCheckBox"
+        app:layout_constraintTop_toBottomOf="@+id/translationEditText"
+        app:layout_constraintVertical_bias="0.222" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

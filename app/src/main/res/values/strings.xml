@@ -28,4 +28,10 @@
     <string name="new_lesson">New Lesson</string>
     <string name="add">Add</string>
     <string name="ok">Ok</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_rename">Rename</string>
+    <string name="offline">Offline</string>
+    <string name="translation">Translation</string>
+    <string name="apply">Apply</string>
+    <string name="word">Word</string>
 </resources>

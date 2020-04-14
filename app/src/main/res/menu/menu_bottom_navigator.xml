@@ -8,12 +8,11 @@
         android:title="Home" />
 
     <item
-        android:id="@+id/nav_favorites"
+        android:id="@+id/nav_edit_lesson"
         android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="Dashboard" />
+        android:title="Lesson" />
 
     <item
         android:id="@+id/nav_search"
-        android:icon="@drawable/ic_search_bar"
         android:title="Search" />
 </menu>

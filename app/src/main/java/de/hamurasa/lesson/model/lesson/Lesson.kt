@@ -1,5 +1,9 @@
-package de.hamurasa.lesson.model
+package de.hamurasa.lesson.model.lesson
 
+import de.hamurasa.lesson.model.vocable.Language
+import de.hamurasa.lesson.model.vocable.LanguageStringConverter
+import de.hamurasa.lesson.model.vocable.Vocable
+import de.hamurasa.lesson.model.vocable.VocableDTO
 import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
@@ -9,6 +13,7 @@ import io.objectbox.relation.ToMany
 class Lesson(
     @Id var id: Long = 0,
     var serverId: Long = 0,
+    val isOffline: Boolean = false,
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)
     var language: Language,
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)

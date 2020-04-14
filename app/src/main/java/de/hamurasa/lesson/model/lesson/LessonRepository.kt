@@ -1,4 +1,4 @@
-package de.hamurasa.lesson.model
+package de.hamurasa.lesson.model.lesson
 
 import de.hamurasa.data.ObjectBox
 import io.objectbox.Box
@@ -6,9 +6,7 @@ import io.objectbox.rx.RxQuery
 import io.reactivex.Observable
 
 interface LessonRepository {
-    fun findById(id: Long): Lesson
-
-    fun findByServerId(id: Long): Lesson?
+    fun findById(id: Long): Lesson?
 
     fun findAll(): Observable<List<Lesson>>
 
@@ -41,9 +39,9 @@ class LessonRepositoryImpl : LessonRepository {
         return RxQuery.observable(activenessBox.query().build())
     }
 
-    override fun findById(id: Long): Lesson {
+    override fun findById(id: Long): Lesson? {
         return RxQuery.observable(activenessBox.query().equal(Lesson_.id, id).build())
-            .blockingFirst().first()
+            .blockingFirst().firstOrNull()
     }
 
     override fun findByServerId(serverId: Long): Lesson? =

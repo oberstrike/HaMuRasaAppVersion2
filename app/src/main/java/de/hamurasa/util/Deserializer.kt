@@ -4,8 +4,10 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
-import de.hamurasa.lesson.model.Lesson
-import de.hamurasa.lesson.model.Vocable
+import de.hamurasa.lesson.model.vocable.Language
+import de.hamurasa.lesson.model.lesson.Lesson
+import de.hamurasa.lesson.model.vocable.Vocable
+import de.hamurasa.lesson.model.vocable.VocableType
 import java.lang.reflect.Type
 
 class VocableDeserializer : JsonDeserializer<Vocable> {
@@ -13,27 +15,34 @@ class VocableDeserializer : JsonDeserializer<Vocable> {
         json: JsonElement?,
         typeOfT: Type?,
         context: JsonDeserializationContext?
-    ): Vocable {
-        if(json != null){
-            if(context != null){
+    ): Vocable? {
+        if (json != null) {
+            if (context != null) {
                 val jsonObject = json.asJsonObject
 
                 val listStringType =
                     object : TypeToken<List<String?>?>() {}.type
-                val listOfVocableJsonArray = jsonObject.getAsJsonArray("translation")
-                val translation: List<String> = context.deserialize(listOfVocableJsonArray, listStringType)
-
-                val id = 0
+                val listOfVocableJsonArray = jsonObject.getAsJsonArray("translations")
+                val translation: List<String> =
+                    context.deserialize(listOfVocableJsonArray, listStringType)
 
                 val serverId = jsonObject.getAsJsonPrimitive("id").asLong
-                val type = jsonObject.getAsJsonPrimitive("type").asString
+                val type = VocableType.valueOf(jsonObject.getAsJsonPrimitive("type").asString)
                 val value = jsonObject.getAsJsonPrimitive("value").asString
 
-                return Vocable(0, serverId, value, type, translation)
+                return Vocable(
+                    0,
+                    serverId,
+                    false,
+                    value,
+                    type,
+                    translation,
+                    Language.ES
+                )
             }
 
         }
-        return Vocable()
+        return null
     }
 
 }
@@ -45,13 +54,19 @@ class LessonDeserializer : JsonDeserializer<Lesson> {
         json: JsonElement?,
         typeOfT: Type?,
         context: JsonDeserializationContext?
-    ): Lesson {
+    ): Lesson? {
         if (json != null) {
             if (context != null) {
                 val jsonObject = json.asJsonObject
-                val lesson = Lesson()
+                val lesson = Lesson(
+                    0,
+                    0,
+                    false,
+                    Language.ES,
+                    Language.GER
+                )
 
-                val wordsJson = jsonObject.getAsJsonArray("words")
+                val wordsJson = jsonObject.getAsJsonArray("vocables")
                 val wordsJsonType =
                     object : TypeToken<ArrayList<Vocable?>?>() {}.type
                 val list: ArrayList<Vocable> = context.deserialize(wordsJson, wordsJsonType)
@@ -64,6 +79,6 @@ class LessonDeserializer : JsonDeserializer<Lesson> {
                 return lesson
             }
         }
-        return Lesson()
+        return null
     }
 }

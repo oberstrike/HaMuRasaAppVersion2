@@ -1,4 +1,4 @@
-package de.hamurasa.main.fragments
+package de.hamurasa.main.fragments.adapters
 
 import android.content.Context
 import android.util.TypedValue
@@ -8,13 +8,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
-import de.hamurasa.lesson.model.Vocable
+import de.hamurasa.lesson.model.vocable.Vocable
 
-class ResultRecyclerViewAdapter(
+class VocableRecyclerViewAdapter(
     val context: Context,
     private val onClickListener: OnClickListener
 ) :
-    RecyclerView.Adapter<ResultRecyclerViewAdapter.ViewHolder>() {
+    RecyclerView.Adapter<VocableRecyclerViewAdapter.ViewHolder>() {
 
     val items: ArrayList<Vocable> = ArrayList()
 
@@ -66,7 +66,10 @@ class ResultRecyclerViewAdapter(
         val view =
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.holder_vocable_fragment, parent, false)
-        return ViewHolder(view, onClickListener)
+        return ViewHolder(
+            view,
+            onClickListener
+        )
     }
 
     fun setWords(words: List<Vocable>) {

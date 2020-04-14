@@ -1,4 +1,4 @@
-package de.hamurasa.lesson.model
+package de.hamurasa.lesson.model.vocable
 
 import com.google.gson.reflect.TypeToken
 import de.hamurasa.util.GsonObject
@@ -11,15 +11,20 @@ import io.objectbox.converter.PropertyConverter
 data class Vocable(
     @Id var id: Long = 0,
     var serverId: Long = 0,
+    var isOffline: Boolean = false,
     var value: String,
-    var type: String,
+    @Convert(converter = VocableTypeConverter::class, dbType = Long::class)
+    var type: VocableType,
     @Convert(converter = ListOfStringConverter::class, dbType = String::class)
     var translation: List<String>,
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)
     var language: Language
 ) {
 
-    constructor() : this(0, 0, "", "", arrayListOf(), Language.ES)
+    constructor() : this(0, 0, false, "",
+        VocableType.VERB, arrayListOf(),
+        Language.ES
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -35,23 +40,14 @@ data class Vocable(
     override fun hashCode(): Int {
         return serverId.hashCode()
     }
+}
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+enum class VocableType(val id: Long) {
+    VERB(0), SUBSTANTIVE(1), ADJECTIVE(2);
 
-        other as Vocable
-
-        if (serverId != other.serverId) return false
-
-        return true
+    companion object {
+        fun fromId(id: Long) = values().firstOrNull { it.id == id }
     }
-
-    override fun hashCode(): Int {
-        return serverId.hashCode()
-    }
-
-
 }
 
 class ListOfStringConverter : PropertyConverter<List<String>, String> {
@@ -72,7 +68,22 @@ class LanguageStringConverter : PropertyConverter<Language, Long> {
     }
 
     override fun convertToEntityProperty(databaseValue: Long?): Language {
-        return Language.fromId(databaseValue!!)!!
+        return Language.fromId(
+            databaseValue!!
+        )!!
+    }
+
+}
+
+class VocableTypeConverter : PropertyConverter<VocableType, Long> {
+    override fun convertToDatabaseValue(entityProperty: VocableType?): Long {
+        return entityProperty?.id ?: 1
+    }
+
+    override fun convertToEntityProperty(databaseValue: Long?): VocableType {
+        return VocableType.fromId(
+            databaseValue!!
+        )!!
     }
 
 }
@@ -92,7 +103,7 @@ enum class Language(val id: Long, val letterCode: String) {
 data class VocableDTO private constructor(
     val id: Long,
     val value: String,
-    val type: String,
+    val type: VocableType,
     val translations: List<String>,
     val language: Language = Language.ES
 ) {
@@ -108,11 +119,18 @@ data class VocableDTO private constructor(
         fun create(
             id: Long,
             value: String,
-            type: String,
+            type: VocableType,
             translations: List<String>,
             language: Language = Language.ES
-        ) = VocableDTO(id, value, type, translations, language)
+        ) = VocableDTO(
+            id,
+            value,
+            type,
+            translations,
+            language
+        )
 
-        fun copy(vocableDTO: VocableDTO) = VocableDTO(vocableDTO)
+        fun copy(vocableDTO: VocableDTO) =
+            VocableDTO(vocableDTO)
     }
 }

@@ -1,35 +1,47 @@
-package de.hamurasa.main.fragments
+package de.hamurasa.main.fragments.adapters
 
 import android.content.Context
 import android.graphics.Color
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
-import de.hamurasa.lesson.model.Lesson
+import de.hamurasa.lesson.model.lesson.Lesson
 
-class LessonRecylerViewAdapter(
+class LessonRecyclerViewAdapter(
     val context: Context,
-    val onClickListener: OnClickListener
-) : RecyclerView.Adapter<LessonRecylerViewAdapter.ViewHolder>() {
+    private val onClickListener: OnClickListener
+) : RecyclerView.Adapter<LessonRecyclerViewAdapter.ViewHolder>() {
 
     private val items = ArrayList<Lesson>()
+
+    var position: Int = 0
 
     class ViewHolder(
         itemView: View,
         private val onClickListener: OnClickListener
     ) :
-        RecyclerView.ViewHolder(itemView), View.OnClickListener {
+        RecyclerView.ViewHolder(itemView),
+        View.OnClickListener,
+        View.OnCreateContextMenuListener{
         val lessonId: TextView = itemView.findViewById(R.id.lesson_id)
 
         init {
             itemView.setOnClickListener(this)
+            itemView.setOnCreateContextMenuListener(this)
         }
 
         override fun onClick(v: View?) {
             onClickListener.onItemClick(adapterPosition)
+        }
+
+        override fun onCreateContextMenu(
+            menu: ContextMenu?,
+            v: View?,
+            menuInfo: ContextMenu.ContextMenuInfo?
+        ) {
+            menu?.add(Menu.NONE, R.id.action_delete, Menu.NONE, R.string.action_delete)
+            menu?.add(Menu.NONE, R.id.action_rename, Menu.NONE, R.string.action_rename)
         }
 
     }
@@ -54,17 +66,26 @@ class LessonRecylerViewAdapter(
         if (item.words.size == 0) {
             holder.lessonId.setTextColor(Color.parseColor("#a1a1a1"))
         }
+
+        holder.itemView.setOnLongClickListener {
+            this.position = holder.adapterPosition
+            false
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.lesson_fragment, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.holder_lesson_fragment, parent, false)
 
-        return ViewHolder(view, onClickListener)
+        return ViewHolder(
+            view,
+            onClickListener
+        )
     }
 
     interface OnClickListener {
         fun onItemClick(position: Int)
+
     }
 }
 

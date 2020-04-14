@@ -2,28 +2,31 @@ package de.hamurasa.main
 
 import android.accounts.AccountManager
 import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import de.hamurasa.data.CommandLineRunner
-import de.hamurasa.lesson.model.*
+import de.hamurasa.lesson.model.lesson.Lesson
+import de.hamurasa.lesson.model.lesson.LessonDTO
+import de.hamurasa.lesson.model.lesson.LessonRepository
+import de.hamurasa.lesson.model.lesson.LessonService
+import de.hamurasa.lesson.model.vocable.Vocable
+import de.hamurasa.lesson.model.vocable.VocableDTO
+import de.hamurasa.lesson.model.vocable.VocableService
 import de.hamurasa.network.RetrofitServices
+import de.hamurasa.settings.SettingsContext
+import de.hamurasa.settings.request
 import de.hamurasa.util.AbstractViewModel
-import de.hamurasa.util.GsonObject
 import de.hamurasa.util.SchedulerProvider
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CompletableFuture
-import kotlin.coroutines.coroutineContext
 
 class MainViewModel(
     val context: Context,
     val provider: SchedulerProvider,
-    private val lessonRepository: LessonRepository,
-    private val vocableRepository: VocableRepository,
-    private val commandLineRunner: CommandLineRunner
+    private val lessonService: LessonService,
+    private val vocableService: VocableService
 ) : AbstractViewModel() {
 
     private val accountManager: AccountManager = AccountManager.get(context)
@@ -32,19 +35,28 @@ class MainViewModel(
 
     lateinit var words: BehaviorSubject<List<Vocable>>
 
-    val lessons = lessonRepository.findAll()
+    val lessons = lessonService.findAll()
 
     fun init() {
-        commandLineRunner.init()
         val loggedIn = accountManager.accounts.isNotEmpty()
         MainContext.isLoggedIn = Observable.just(loggedIn)
         isLoggedIn = MainContext.isLoggedIn
         words = BehaviorSubject.create()
+
         words.onNext(listOf())
+        checkConnection()
+    }
+
+    fun checkConnection() {
+        if (!SettingsContext.forceOffline) {
+            runBlocking {
+                checkVersion()
+            }
+        }
     }
 
 
-    fun logout() {
+    fun logout() = withOnline {
         if (accountManager.accounts.isNotEmpty()) {
             accountManager.removeAccountExplicitly(accountManager.accounts.first())
             MainContext.isLoggedIn = Observable.just(false)
@@ -52,7 +64,8 @@ class MainViewModel(
         }
     }
 
-    fun update() {
+
+    fun update() = withOnline {
         val account = accountManager.accounts.first()
         val username = account.name
         val password = accountManager.getPassword(account)
@@ -60,13 +73,14 @@ class MainViewModel(
         RetrofitServices.initVocableRetrofitService(username, password)
         RetrofitServices.initLessonRetrofitService(username, password)
 
+        //Receive the current status of the server
         GlobalScope.launch(Dispatchers.IO) {
             val lessons: List<Lesson> = RetrofitServices.lessonRetrofitService.getLessons()
-            val oldLessons = lessonRepository.findAll().blockingFirst()
+            val oldLessons = lessonService.findAll().blockingFirst()
 
             for (oldLesson in oldLessons) {
                 if (oldLesson !in lessons) {
-                    lessonRepository.delete(oldLesson)
+                    lessonService.delete(oldLesson)
                 }
             }
 
@@ -83,12 +97,12 @@ class MainViewModel(
                             oldLesson.words.add(word)
                         }
                     }
-                    lessonRepository.save(oldLesson)
+                    lessonService.save(oldLesson)
                 } else {
-                    lessonRepository.save(newLesson)
+                    lessonService.save(newLesson)
                 }
             }
-            MainContext.lessons = BehaviorSubject.just(lessons)
+            MainContext.HomeContext.lessons = BehaviorSubject.just(lessons)
         }
 
     }
@@ -107,33 +121,39 @@ class MainViewModel(
         }
     }
 
-    fun addLesson(lesson: LessonDTO) {
-
-        <<<<<<< HEAD
+    fun addLesson(lesson: LessonDTO) = withOnline(block = {
         GlobalScope.launch(Dispatchers.IO) {
-            val result = RetrofitServices.lessonRetrofitService.addNewLesson(lesson)
-            //    val body = result.string()
-            //   GsonObject.gson.fromJson<LessonDTO>(body)
+            RetrofitServices.lessonRetrofitService.addNewLesson(lesson)
+            update()
+        }
+    }, alternative = {
+        println("Not Online")
+
+    })
+
+    fun addVocableToServer(vocableDTO: VocableDTO) = withOnline {
+        GlobalScope.launch(Dispatchers.IO) {
+            RetrofitServices.vocableRetrofitService.addVocable(vocableDTO)
             update()
         }
     }
 
-    fun addVocable(vocableDTO: VocableDTO) {
 
-        GlobalScope.launch(Dispatchers.IO) {
-            val result = RetrofitServices.vocableRetrofitService.addVocable(vocableDTO)
-            result.string()
-            update()
+    fun addVocableToLesson(vocableDTO: VocableDTO, lessonServerId: Long) {
+        withOnline {
+            GlobalScope.launch(Dispatchers.IO) {
+                RetrofitServices.lessonRetrofitService.addVocableToLesson(
+                    lessonServerId,
+                    vocableDTO
+                )
+            }
         }
+        val lesson = lessonService.findByServerId(lessonServerId)
+        val vocable = vocableService.save(vocableDTO, true)
+        lesson!!.words.add(vocable)
+        lessonService.save(lesson)
 
-    }
-
-
-    fun addVocableToLesson(vocableDTO: VocableDTO, lessonId: Long) {
-        GlobalScope.launch(Dispatchers.IO) {
-            val result =
-                RetrofitServices.lessonRetrofitService.addVocableToLesson(lessonId, vocableDTO)
-        }
+        MainContext.EditContext.lesson.onNext(lesson)
     }
 
     fun getWordByTranslation(value: String) {
@@ -148,7 +168,75 @@ class MainViewModel(
 
     }
 
-}
+    fun deleteLesson(lesson: Lesson) = withOnline {
+        GlobalScope.launch(Dispatchers.IO) {
+            RetrofitServices.lessonRetrofitService.deleteLesson(lesson.serverId)
+            lessonService.delete(lesson)
+            update()
+        }
+    }
 
-inline fun <reified T> Gson.fromJson(json: String) =
-    fromJson<T>(json, object : TypeToken<T>() {}.type)
+
+    private suspend fun checkVersion() =
+        GlobalScope.launch(Dispatchers.IO) {
+            val status = request(true) {
+                !RetrofitServices.updateRetrofitService.status().execute().isSuccessful
+            }
+
+            SettingsContext.isOffline = Observable.just(status)
+        }.join()
+
+    private inline fun withOnline(
+        crossinline block: () -> Unit,
+        crossinline alternative: () -> Unit
+    ) {
+        val offline = SettingsContext.isOffline.blockingFirst()
+        if (!offline) {
+            block.invoke()
+        } else {
+            alternative.invoke()
+        }
+    }
+
+    private inline fun withOnline(crossinline block: () -> Unit) {
+        withOnline(block) {
+            Unit
+        }
+    }
+
+
+    fun patchVocable(vocableDTO: VocableDTO, offline: Boolean) {
+        if (!offline) {
+            withOnline {
+                //TODO ONLINE DELETE
+            }
+        } else {
+            vocableService.update(vocableDTO)
+            val lessonId = MainContext.EditContext.lesson.blockingFirst().id
+            val lesson = lessonService.findById(lessonId)!!
+            MainContext.EditContext.lesson.onNext(lesson)
+
+        }
+    }
+
+    fun deleteVocable(vocableDTO: VocableDTO, offline: Boolean) {
+        if (!offline) {
+            withOnline {
+                val serverId = MainContext.EditContext.lesson.blockingFirst().serverId
+                GlobalScope.launch(Dispatchers.IO) {
+                    RetrofitServices.lessonRetrofitService.removeVocableFromLesson(
+                        serverId,
+                        vocableDTO.id
+                    )
+                }
+            }
+        } else {
+            val vocable = vocableService.findById(vocableDTO.id)!!
+            val lesson = MainContext.EditContext.lesson.blockingFirst()
+            lessonService.removeVocable(lesson, vocable)
+            MainContext.EditContext.lesson.onNext(lesson)
+        }
+
+
+    }
+}
