@@ -40,7 +40,7 @@ class ResultAlertDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.
 
             val lessons = MainContext.HomeContext.lessons.blockingFirst()
 
-            val array = lessons.map { it.id.toString() }.toTypedArray()
+            val array = lessons.map { it.serverId.toString() }.toTypedArray()
 
             val arrayAdapter =
                 ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
@@ -53,7 +53,7 @@ class ResultAlertDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.
 
     override fun onClick(v: View?) {
         val lessonId = (resultLessonSpinner.selectedItem as String).toLong()
-        val lesson = MainContext.HomeContext.lessons.blockingFirst().find { it.id == lessonId }!!
+        val lesson = MainContext.HomeContext.lessons.blockingFirst().find { it.serverId == lessonId }!!
 
         val vocableDTO = VocableDTO.create(
             vocable.serverId,
@@ -63,6 +63,7 @@ class ResultAlertDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.
             vocable.language
         )
         myViewModel.addVocableToLesson(vocableDTO, lesson.serverId)
+        dismiss()
     }
 
 

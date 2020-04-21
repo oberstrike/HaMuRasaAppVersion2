@@ -6,20 +6,27 @@ import de.hamurasa.lesson.model.lesson.LessonDTO
 import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.lesson.model.vocable.VocableDTO
 import io.reactivex.Observable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.*
 
 interface VocableRetrofitService {
 
     @GET("/api/vocable/search")
-    fun getWordsByText(@Query("value") value: String): Observable<List<Vocable>>
+    suspend fun getWordsByText(@Query("value") value: String): List<Vocable>
 
     @POST("/api/vocable")
     suspend fun addVocable(@Body vocableDTO: VocableDTO): VocableDTO
 
     @GET("/api/words/translation")
-    fun getWordsByTranslation(@Query("text") ext: String): Observable<List<Vocable>>
+    suspend fun getWordsByTranslation(@Query("text") ext: String): List<Vocable>
+
+    @PATCH("/api/vocable/{id}")
+    suspend fun patchWord(@Query("id") id: Long, @Body vocableDTO: VocableDTO)
 
 }
 
@@ -47,47 +54,31 @@ interface LessonRetrofitService {
     @DELETE("/api/lesson/{id}")
     suspend fun deleteLesson(@Path("id") id: Long): ResponseBody
 
-    @DELETE("/api/lesson/{id}/{vocableId}")
-    suspend fun removeVocableFromLesson(@Path("id") id: Long, @Path("vocableId") vocableId: Long)
+    @DELETE("/api/lesson/{id}/vocable/{vocableId}")
+    suspend fun removeVocableFromLesson(
+        @Path("id") id: Long,
+        @Path("vocableId") vocableId: Long
+    )
+
+    @PATCH("/api/lesson/{id}")
+    suspend fun patchLesson(@Path("id") id: Long, @Body lessonDTO: LessonDTO): Lesson
 }
 
 interface UpdateRetrofitService {
     @GET("/version")
-    fun status(): Call<ResponseBody>
+    suspend fun status(): ResponseBody
 }
 
-
-fun createVocableRetrofitService(username: String, password: String): VocableRetrofitService {
-    return ServiceGenerator.createService(
-        VocableRetrofitService::class.java,
-        username,
-        password
-    )
+inline fun <reified T> createRetrofitService(
+    username: String? = null,
+    password: String? = null
+): T {
+    return ServiceGenerator.createService(T::class.java, username, password)
 }
 
-fun createLessonRetrofitService(username: String, password: String): LessonRetrofitService {
-    return ServiceGenerator.createService(
-        LessonRetrofitService::class.java,
-        username,
-        password
-    )
-}
-
-fun createUserRetrofitService(username: String, password: String): UserRetrofitService {
-    return ServiceGenerator.createService(
-        UserRetrofitService::class.java,
-        username,
-        password
-    )
-}
-
-fun createUpdateRetrofitService(): UpdateRetrofitService {
-    return ServiceGenerator.createService(UpdateRetrofitService::class.java)
-}
 
 open class User(val username: String, val password: String)
 
-data class CustomResponse(val body: String)
 
 object RetrofitServices {
 
@@ -100,20 +91,21 @@ object RetrofitServices {
     lateinit var updateRetrofitService: UpdateRetrofitService
 
     fun init(username: String, password: String) {
-        userRetrofitService = createUserRetrofitService(username, password)
+        userRetrofitService = createRetrofitService(username, password)
     }
 
     fun initVocableRetrofitService(username: String, password: String) {
-        vocableRetrofitService = createVocableRetrofitService(username, password)
+        vocableRetrofitService = createRetrofitService(username, password)
     }
 
     fun initLessonRetrofitService(username: String, password: String) {
-        lessonRetrofitService = createLessonRetrofitService(username, password)
+        lessonRetrofitService = createRetrofitService(username, password)
     }
 
     fun initUpdateRetrofitService() {
-        updateRetrofitService = createUpdateRetrofitService()
+        updateRetrofitService = createRetrofitService()
     }
 
-
 }
+
+

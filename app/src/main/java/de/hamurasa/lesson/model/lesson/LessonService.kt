@@ -1,6 +1,7 @@
 package de.hamurasa.lesson.model.lesson
 
 import de.hamurasa.lesson.model.vocable.Vocable
+import de.hamurasa.lesson.model.vocable.VocableDTO
 import io.reactivex.Observable
 
 interface LessonService {
@@ -22,6 +23,8 @@ interface LessonService {
     fun removeVocable(lesson: Lesson, vocable: Vocable): Boolean
 
     fun addVocable(lesson: Lesson, vocable: Vocable): Boolean
+
+     fun convertToDTO(lesson: Lesson, vocableDTOs: List<VocableDTO>): LessonDTO
 }
 
 class LessonServiceImpl(private val lessonRepository: LessonRepository) : LessonService {
@@ -50,6 +53,10 @@ class LessonServiceImpl(private val lessonRepository: LessonRepository) : Lesson
         val success = lesson.words.add(vocable)
         lessonRepository.save(lesson)
         return success
+    }
+
+    override fun convertToDTO(lesson: Lesson, vocableDTOs : List<VocableDTO>): LessonDTO {
+        return LessonDTO(lesson.serverId, vocableDTOs, lesson.language, lesson.validationLanguage)
     }
 
 }

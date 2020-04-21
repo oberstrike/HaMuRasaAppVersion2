@@ -6,6 +6,7 @@ import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.converter.PropertyConverter
+import org.joda.time.DateTime
 
 @Entity
 data class Vocable(
@@ -72,8 +73,19 @@ class LanguageStringConverter : PropertyConverter<Language, Long> {
             databaseValue!!
         )!!
     }
+}
+
+class DateTimeStringConverter: PropertyConverter<DateTime, String> {
+    override fun convertToDatabaseValue(entityProperty: DateTime?): String {
+        return entityProperty.toString()
+    }
+
+    override fun convertToEntityProperty(databaseValue: String?): DateTime {
+        return DateTime.parse(databaseValue)
+    }
 
 }
+
 
 class VocableTypeConverter : PropertyConverter<VocableType, Long> {
     override fun convertToDatabaseValue(entityProperty: VocableType?): Long {

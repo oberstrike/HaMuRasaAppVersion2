@@ -49,6 +49,7 @@ class EditFragment : Fragment(), VocableRecyclerViewAdapter.OnClickListener {
         recyclerView.layoutManager = LinearLayoutManager(context!!)
         recyclerView.adapter = vocableRecyclerViewAdapter
 
+
         myViewModel.launch {
             MainContext.EditContext.lesson
                 .subscribeOn(myViewModel.provider.computation())

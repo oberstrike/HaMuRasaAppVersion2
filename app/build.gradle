@@ -98,7 +98,7 @@ dependencies {
 
     //Joda-Time for DateTime
     implementation('joda-time:joda-time:2.10.3')
-    //implementation('com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.8.0')
+    implementation('com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.8.0')
 
     //Objectbox Android
     implementation "io.objectbox:objectbox-kotlin:$objectboxVersion"

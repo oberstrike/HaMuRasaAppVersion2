@@ -8,6 +8,7 @@ import de.hamurasa.lesson.model.vocable.Language
 import de.hamurasa.lesson.model.lesson.Lesson
 import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.lesson.model.vocable.VocableType
+import org.joda.time.DateTime
 import java.lang.reflect.Type
 
 class VocableDeserializer : JsonDeserializer<Vocable> {
@@ -63,7 +64,8 @@ class LessonDeserializer : JsonDeserializer<Lesson> {
                     0,
                     false,
                     Language.ES,
-                    Language.GER
+                    Language.GER,
+                    DateTime.now()
                 )
 
                 val wordsJson = jsonObject.getAsJsonArray("vocables")
@@ -74,6 +76,10 @@ class LessonDeserializer : JsonDeserializer<Lesson> {
                 val wordIdJson = jsonObject.getAsJsonPrimitive("id")
                 val id = wordIdJson.asLong
 
+                val lastChangedJson = jsonObject.getAsJsonPrimitive("lastChanged").asString
+                val lastChanged = DateTime.parse(lastChangedJson)
+
+                lesson.lastChanged = lastChanged
                 lesson.serverId = id
                 lesson.words.addAll(list.map { it.id = 0; it })
                 return lesson

@@ -1,6 +1,7 @@
 package de.hamurasa.util
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
@@ -12,8 +13,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import com.fatboyindustrial.gsonjodatime.Converters
+import com.fatboyindustrial.gsonjodatime.registerDateTime
 //import com.fatboyindustrial.gsonjodatime.Converters
 import com.google.gson.*
 import de.hamurasa.R
@@ -22,6 +26,7 @@ import de.hamurasa.lesson.model.lesson.Lesson
 import de.hamurasa.lesson.model.vocable.Vocable
 import org.joda.time.DateTime
 import java.util.*
+import java.util.function.Predicate
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -53,9 +58,9 @@ object GsonObject {
         private set
 
     init {
-        gson = GsonBuilder() //Converters.registerDateTime(
-            //      GsonBuilder()
-            //   )
+        gson = Converters.registerDateTime(
+            GsonBuilder()
+        )
             .registerTypeAdapter(Lesson::class.java, LessonDeserializer())
             .registerTypeAdapter(Vocable::class.java, VocableDeserializer())
             .create()
@@ -113,9 +118,22 @@ fun SharedPreferences.boolean(
     StringPreference(this, key, defaultValue)
 
 fun Menu.foreach(block: (MenuItem) -> Unit) {
-    val size = this.size()
-    for (i in 0 until size) {
+    for (i in 0 until size()) {
         val item = this.getItem(i)
         block.invoke(item)
     }
+}
+
+fun Menu.findFirst(predicate: (MenuItem) -> Boolean): MenuItem? {
+    for (i in 0 until size()) {
+        val item = getItem(i)
+        if (predicate.invoke(item)) {
+            return item
+        }
+    }
+    return null
+}
+
+inline fun Activity.toast(text: String) {
+    Toast.makeText(this, text, Toast.LENGTH_LONG).show()
 }

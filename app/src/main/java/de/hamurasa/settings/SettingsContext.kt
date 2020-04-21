@@ -3,7 +3,8 @@ package de.hamurasa.settings
 import de.hamurasa.settings.model.Settings
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
-import okhttp3.internal.format
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.lang.Exception
 
 object SettingsContext {
@@ -23,13 +24,4 @@ object SettingsContext {
             field = value
             settings.appOffline = value
         }
-}
-
-fun <R> request(default: R, block: () -> R): R {
-    try {
-        return block.invoke()
-    } catch (exception: Exception) {
-        println("There was no connection found.")
-    }
-    return default
 }

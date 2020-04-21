@@ -28,7 +28,13 @@ class DictionaryFragment : Fragment(), VocableRecyclerViewAdapter.OnClickListene
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.dictionary_fragment, container, false)
+        val view = inflater.inflate(R.layout.dictionary_fragment, container, false)
+        recyclerView = view!!.findViewById(R.id.wordRecyclerView)
+        searchEditText = view.findViewById(R.id.searchEditText)
+        searchButton = view.findViewById(R.id.searchButton)
+        spinner = activity!!.findViewById(R.id.modeSpinner)
+
+        return view
 
     }
 
@@ -41,12 +47,6 @@ class DictionaryFragment : Fragment(), VocableRecyclerViewAdapter.OnClickListene
 
     override fun onStart() {
         super.onStart()
-        with(view!!){
-            recyclerView = this.findViewById(R.id.wordRecyclerView)
-            searchEditText = this.findViewById(R.id.searchEditText)
-            searchButton = this.findViewById(R.id.searchButton)
-            spinner = this.findViewById(R.id.modeSpinner)
-        }
 
         init()
     }
@@ -74,7 +74,6 @@ class DictionaryFragment : Fragment(), VocableRecyclerViewAdapter.OnClickListene
         searchButton.setOnClickListener {
             myViewModel.getWord(searchEditText.text.toString())
         }
-
 
 
         val array = arrayOf("ES-GER", "GER-ES")

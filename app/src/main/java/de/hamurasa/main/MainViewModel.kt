@@ -4,14 +4,14 @@ import android.accounts.AccountManager
 import android.content.Context
 import de.hamurasa.lesson.model.lesson.Lesson
 import de.hamurasa.lesson.model.lesson.LessonDTO
-import de.hamurasa.lesson.model.lesson.LessonRepository
 import de.hamurasa.lesson.model.lesson.LessonService
 import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.lesson.model.vocable.VocableDTO
 import de.hamurasa.lesson.model.vocable.VocableService
 import de.hamurasa.network.RetrofitServices
+import de.hamurasa.network.request
+import de.hamurasa.network.requestAsync
 import de.hamurasa.settings.SettingsContext
-import de.hamurasa.settings.request
 import de.hamurasa.util.AbstractViewModel
 import de.hamurasa.util.SchedulerProvider
 import io.reactivex.Observable
@@ -20,7 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.util.concurrent.CompletableFuture
+import okhttp3.internal.wait
+import java.lang.Exception
 
 class MainViewModel(
     val context: Context,
@@ -35,8 +36,6 @@ class MainViewModel(
 
     lateinit var words: BehaviorSubject<List<Vocable>>
 
-    val lessons = lessonService.findAll()
-
     fun init() {
         val loggedIn = accountManager.accounts.isNotEmpty()
         MainContext.isLoggedIn = Observable.just(loggedIn)
@@ -44,7 +43,7 @@ class MainViewModel(
         words = BehaviorSubject.create()
 
         words.onNext(listOf())
-        checkConnection()
+        MainContext.HomeContext.lessons = lessonService.findAll()
     }
 
     fun checkConnection() {
@@ -65,7 +64,7 @@ class MainViewModel(
     }
 
 
-    fun update() = withOnline {
+    fun update() = withOnline(block = {
         val account = accountManager.accounts.first()
         val username = account.name
         val password = accountManager.getPassword(account)
@@ -73,99 +72,121 @@ class MainViewModel(
         RetrofitServices.initVocableRetrofitService(username, password)
         RetrofitServices.initLessonRetrofitService(username, password)
 
-        //Receive the current status of the server
-        GlobalScope.launch(Dispatchers.IO) {
-            val lessons: List<Lesson> = RetrofitServices.lessonRetrofitService.getLessons()
-            val oldLessons = lessonService.findAll().blockingFirst()
+        requestAsync(action = {
+            RetrofitServices.lessonRetrofitService.getLessons()
+        }, onSuccess = { newLessons ->
+            val oldLessons = MainContext.HomeContext.lessons.blockingFirst()
+            val combinedLessons = mutableListOf<Lesson>()
 
-            for (oldLesson in oldLessons) {
-                if (oldLesson !in lessons) {
-                    lessonService.delete(oldLesson)
-                }
-            }
-
-            for (newLesson in lessons) {
+            for (newLesson in newLessons) {
                 val serverId = newLesson.serverId
-                val words = newLesson.words
+                val newLastChanged = newLesson.lastChanged
 
                 val oldLesson = oldLessons.find { it.serverId == serverId }
-
                 if (oldLesson != null) {
-                    val oldWords = oldLesson.words
-                    for (word in words) {
-                        if (word !in oldWords) {
-                            oldLesson.words.add(word)
-                        }
+                    val oldLastChanged = oldLesson.lastChanged
+                    if (newLastChanged.isAfter(oldLastChanged) || newLastChanged.isEqual(
+                            oldLastChanged
+                        )
+                    ) {
+                        combinedLessons.add(newLesson)
+                    } else {
+                        patchLesson(oldLesson)
+                        combinedLessons.add(newLesson)
                     }
-                    lessonService.save(oldLesson)
                 } else {
-                    lessonService.save(newLesson)
+                    combinedLessons.add(newLesson)
                 }
             }
-            MainContext.HomeContext.lessons = BehaviorSubject.just(lessons)
-        }
 
-    }
+            MainContext.HomeContext.lessons = BehaviorSubject.just(combinedLessons)
+            lessonService.deleteAll()
+
+            for (lesson in combinedLessons) {
+                lessonService.save(lesson)
+            }
+
+            if (MainContext.EditContext.lesson.hasValue()) {
+                val oldServerId = MainContext.EditContext.lesson.blockingFirst().serverId
+                val newLesson = combinedLessons.first { it.serverId == oldServerId }
+
+                MainContext.EditContext.lesson.onNext(newLesson)
+            }
+
+
+        })
+    }, alternative = {
+        MainContext.HomeContext.lessons = lessonService.findAll()
+    })
 
 
     fun getWord(value: String) {
         if (value.isNotEmpty()) {
-            CompletableFuture.supplyAsync {
-                RetrofitServices.vocableRetrofitService.getWordsByText(value).blockingFirst()
-            }
-                .thenApply {
-                    words.onNext(it)
-                }
+            requestAsync(action = {
+                RetrofitServices.vocableRetrofitService.getWordsByText(value)
+            }, onSuccess = {
+                words.onNext(it)
+            })
         } else {
             words.onNext(listOf())
         }
     }
 
     fun addLesson(lesson: LessonDTO) = withOnline(block = {
-        GlobalScope.launch(Dispatchers.IO) {
+        requestAsync(action = {
             RetrofitServices.lessonRetrofitService.addNewLesson(lesson)
-            update()
-        }
+        }, onSuccess = {
+            runBlocking {
+                update()
+            }
+        })
     }, alternative = {
         println("Not Online")
-
     })
 
     fun addVocableToServer(vocableDTO: VocableDTO) = withOnline {
-        GlobalScope.launch(Dispatchers.IO) {
+        requestAsync(action = {
             RetrofitServices.vocableRetrofitService.addVocable(vocableDTO)
+        }, onSuccess = {
             update()
-        }
+        })
     }
 
-
     fun addVocableToLesson(vocableDTO: VocableDTO, lessonServerId: Long) {
-        withOnline {
-            GlobalScope.launch(Dispatchers.IO) {
+        withOnline(block = {
+            requestAsync(action = {
                 RetrofitServices.lessonRetrofitService.addVocableToLesson(
                     lessonServerId,
                     vocableDTO
                 )
-            }
-        }
-        val lesson = lessonService.findByServerId(lessonServerId)
-        val vocable = vocableService.save(vocableDTO, true)
-        lesson!!.words.add(vocable)
-        lessonService.save(lesson)
+            }, onSuccess = {
+                update()
+            }, onFailure = {
+                println("Error in addVocableToLesson")
+                it.printStackTrace()
+            })
+        }, alternative = {
+            update()
+            val lesson = lessonService.findByServerId(lessonServerId)
+            val vocable = vocableService.save(vocableDTO, true)
+            lesson!!.words.add(vocable)
+            lessonService.save(lesson)
 
-        MainContext.EditContext.lesson.onNext(lesson)
+            MainContext.EditContext.lesson.onNext(lesson)
+        })
     }
 
     fun getWordByTranslation(value: String) {
         if (value.isNotEmpty()) {
-            val response = CompletableFuture.supplyAsync {
-                RetrofitServices.vocableRetrofitService.getWordsByTranslation(value).blockingFirst()
-            }.get()
-            words.onNext(response)
+            requestAsync(action = {
+                RetrofitServices.vocableRetrofitService.getWordsByTranslation(value)
+            }, onSuccess = {
+                words.onNext(it)
+            })
         } else {
             words.onNext(listOf())
-        }
 
+        }
     }
 
     fun deleteLesson(lesson: Lesson) = withOnline {
@@ -176,31 +197,40 @@ class MainViewModel(
         }
     }
 
+    fun patchLesson(lesson: Lesson) = withOnline {
+        requestAsync(action = {
+            val vocableDTOs = lesson.words.map { vocableService.convertToDTO(it) }.toList()
+            val lessonDTO = lessonService.convertToDTO(lesson, vocableDTOs)
+            RetrofitServices.lessonRetrofitService.patchLesson(lesson.id, lessonDTO)
+        }, onSuccess = { newLesson ->
+            lessonService.save(newLesson)
+        })
+    }
 
-    private suspend fun checkVersion() =
-        GlobalScope.launch(Dispatchers.IO) {
-            val status = request(true) {
-                !RetrofitServices.updateRetrofitService.status().execute().isSuccessful
+
+    private fun checkVersion() =
+        request(action = {
+            runBlocking {
+                RetrofitServices.updateRetrofitService.status()
             }
-
-            SettingsContext.isOffline = Observable.just(status)
-        }.join()
+            SettingsContext.isOffline = Observable.just(false)
+        }, onFailure = {
+            SettingsContext.isOffline = Observable.just(true)
+        })
 
     private inline fun withOnline(
-        crossinline block: () -> Unit,
-        crossinline alternative: () -> Unit
+        crossinline alternative: () -> Unit = {},
+        crossinline block: () -> Unit
     ) {
         val offline = SettingsContext.isOffline.blockingFirst()
         if (!offline) {
-            block.invoke()
+            try {
+                block.invoke()
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+            }
         } else {
             alternative.invoke()
-        }
-    }
-
-    private inline fun withOnline(crossinline block: () -> Unit) {
-        withOnline(block) {
-            Unit
         }
     }
 
@@ -208,7 +238,13 @@ class MainViewModel(
     fun patchVocable(vocableDTO: VocableDTO, offline: Boolean) {
         if (!offline) {
             withOnline {
-                //TODO ONLINE DELETE
+                request(action = {
+                    runBlocking {
+                        RetrofitServices.vocableRetrofitService.patchWord(vocableDTO.id, vocableDTO)
+                    }
+                }, onSuccess = {
+                    update()
+                })
             }
         } else {
             vocableService.update(vocableDTO)
@@ -219,24 +255,35 @@ class MainViewModel(
         }
     }
 
-    fun deleteVocable(vocableDTO: VocableDTO, offline: Boolean) {
+    fun deleteVocableFromLesson(vocableDTO: VocableDTO, offline: Boolean) {
         if (!offline) {
-            withOnline {
+            request(action = {
                 val serverId = MainContext.EditContext.lesson.blockingFirst().serverId
-                GlobalScope.launch(Dispatchers.IO) {
+                runBlocking {
                     RetrofitServices.lessonRetrofitService.removeVocableFromLesson(
                         serverId,
                         vocableDTO.id
                     )
                 }
-            }
+
+                true
+            }, onFailure = {
+                it.printStackTrace()
+            }, onSuccess = {
+                update()
+            })
+
         } else {
             val vocable = vocableService.findById(vocableDTO.id)!!
             val lesson = MainContext.EditContext.lesson.blockingFirst()
             lessonService.removeVocable(lesson, vocable)
             MainContext.EditContext.lesson.onNext(lesson)
         }
+    }
 
-
+    fun <T> observe(observable: Observable<T>, action: (value: T) -> Unit) {
+        observe(
+            observable, provider.computation(), provider.ui(), action
+        )
     }
 }

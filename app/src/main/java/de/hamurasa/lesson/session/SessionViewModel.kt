@@ -13,7 +13,7 @@ class SessionViewModel(
 ) : AbstractViewModel() {
     lateinit var activeVocable: Observable<Vocable>
 
-    var stats: HashMap<Long, Int> = HashMap()
+    private var stats: HashMap<Long, Int> = HashMap()
 
     var position: Int = 0
 

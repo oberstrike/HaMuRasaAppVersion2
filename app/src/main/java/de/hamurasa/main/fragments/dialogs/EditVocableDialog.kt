@@ -10,6 +10,7 @@ import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.lesson.model.vocable.VocableDTO
 import de.hamurasa.lesson.model.vocable.VocableType
 import de.hamurasa.main.MainViewModel
+import de.hamurasa.util.createSpinner
 import de.hamurasa.util.withDialog
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
@@ -58,13 +59,11 @@ class EditVocableDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.
 
             translationEditText.setText(translations)
         }
+        createSpinner<VocableType>(activity!!, typeSpinner)
 
-        val array = VocableType.values().map { it.toString() }
-        val adapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_dropdown_item, array)
-        typeSpinner.adapter = adapter
 
         val vocableType = vocable.type.toString()
-        val position = array.indexOf(vocableType)
+        val position = VocableType.values().map { it.name }.indexOf(vocableType)
         typeSpinner.setSelection(position)
 
         isOfflineCheckBox.isChecked = vocable.isOffline
@@ -74,12 +73,13 @@ class EditVocableDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.
     override fun onClick(v: View?) {
         val newValue = valueEditText.text.toString()
         val newTranslations = translationEditText.text.toString().split(",")
-        val newVocableType = VocableType.valueOf( typeSpinner.selectedItem.toString() )
+        val newVocableType = VocableType.valueOf(typeSpinner.selectedItem.toString())
 
         val isOffline = isOfflineCheckBox.isChecked
         val id = if (!isOffline) vocable.serverId else vocable.id
 
-        val vocableDTO = VocableDTO.create(id, newValue, newVocableType, newTranslations, vocable.language)
+        val vocableDTO =
+            VocableDTO.create(id, newValue, newVocableType, newTranslations, vocable.language)
 
         myViewModel.patchVocable(vocableDTO, isOffline)
 
@@ -97,7 +97,7 @@ class EditVocableDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.
             vocable.translation,
             vocable.language
         )
-        myViewModel.deleteVocable(vocableDTO, isOffline)
+        myViewModel.deleteVocableFromLesson(vocableDTO, isOffline)
         dismiss()
     }
 }

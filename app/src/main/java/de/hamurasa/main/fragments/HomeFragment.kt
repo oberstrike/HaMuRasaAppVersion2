@@ -48,17 +48,12 @@ class HomeFragment : Fragment(), LessonRecyclerViewAdapter.OnClickListener {
             )
         recyclerView.layoutManager = LinearLayoutManager(context!!)
         recyclerView.adapter = lessonRecyclerViewAdapter
-
-        myViewModel.launch {
-            myViewModel.lessons
-                .subscribeOn(myViewModel.provider.computation())
-                .observeOn(myViewModel.provider.ui())
-                .subscribe {
-                    lessonRecyclerViewAdapter.setLessons(it)
-                    lessonRecyclerViewAdapter.notifyDataSetChanged()
-                }
-        }
         myViewModel.update()
+
+        myViewModel.observe(MainContext.HomeContext.lessons){
+            lessonRecyclerViewAdapter.setLessons(it)
+            lessonRecyclerViewAdapter.notifyDataSetChanged()
+        }
     }
 
 
@@ -76,8 +71,7 @@ class HomeFragment : Fragment(), LessonRecyclerViewAdapter.OnClickListener {
 
 
     override fun onItemClick(position: Int) {
-        val lesson = myViewModel.lessons.blockingFirst()[position]
-        val vocables = lesson.words
+        val lesson = MainContext.HomeContext.lessons.blockingFirst()[position]
         MainContext.EditContext.lesson = BehaviorSubject.create()
         MainContext.EditContext.lesson.onNext(lesson)
     }
@@ -100,7 +94,6 @@ class HomeFragment : Fragment(), LessonRecyclerViewAdapter.OnClickListener {
         val position = lessonRecyclerViewAdapter.position
         val lesson = lessonRecyclerViewAdapter.getLesson(position)
         myViewModel.deleteLesson(lesson)
-        println(lesson)
     }
 
     private fun onActionRenameExercise() {

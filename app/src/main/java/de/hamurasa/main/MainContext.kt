@@ -11,6 +11,7 @@ object MainContext {
 
     lateinit var activeFragment: Fragment
 
+
     object HomeContext {
         lateinit var lessons: Observable<List<Lesson>>
     }
