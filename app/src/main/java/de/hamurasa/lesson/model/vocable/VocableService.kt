@@ -9,13 +9,15 @@ interface VocableService {
 
     fun save(vocableDTO: VocableDTO, offline: Boolean): Vocable
 
-    fun update(vocableDTO: VocableDTO): Boolean
+    fun save(vocableDTO: VocableDTO): Long
+
+    fun update(vocable: Vocable): Long
 
 }
 
 class VocableServiceImpl(private val vocableRepository: VocableRepository) : VocableService {
 
-    override fun update(vocableDTO: VocableDTO): Boolean {
+    override fun save(vocableDTO: VocableDTO): Long {
         val vocable = vocableRepository.findById(vocableDTO.id)
 
         if (vocable != null) {
@@ -28,9 +30,15 @@ class VocableServiceImpl(private val vocableRepository: VocableRepository) : Voc
                 vocableRepository.save(this)
             }
 
-            return true
+            return vocable.id
         }
-        return false
+        return 0
+    }
+
+
+    override fun update(vocable: Vocable): Long {
+        return vocableRepository.save(vocable)
+
     }
 
 

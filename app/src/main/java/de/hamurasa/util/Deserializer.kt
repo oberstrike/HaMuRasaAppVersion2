@@ -1,8 +1,7 @@
 package de.hamurasa.util
 
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
+import com.fatboyindustrial.gsonjodatime.Converters
+import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import de.hamurasa.lesson.model.vocable.Language
 import de.hamurasa.lesson.model.lesson.Lesson
@@ -10,6 +9,21 @@ import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.lesson.model.vocable.VocableType
 import org.joda.time.DateTime
 import java.lang.reflect.Type
+
+object GsonObject {
+    var gson: Gson
+        private set
+
+    init {
+        gson = Converters.registerDateTime(
+            GsonBuilder()
+        )
+            .registerTypeAdapter(Lesson::class.java, LessonDeserializer())
+            .registerTypeAdapter(Vocable::class.java, VocableDeserializer())
+            .create()
+
+    }
+}
 
 class VocableDeserializer : JsonDeserializer<Vocable> {
     override fun deserialize(

@@ -71,6 +71,14 @@
             app:layout_constraintTop_toBottomOf="@id/password_editText"
             />
 
+        <Button
+            android:id="@+id/offlineButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/login_button" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

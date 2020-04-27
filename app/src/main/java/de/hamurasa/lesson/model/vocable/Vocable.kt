@@ -113,7 +113,7 @@ enum class Language(val id: Long, val letterCode: String) {
 }
 
 data class VocableDTO private constructor(
-    val id: Long,
+    var id: Long,
     val value: String,
     val type: VocableType,
     val translations: List<String>,

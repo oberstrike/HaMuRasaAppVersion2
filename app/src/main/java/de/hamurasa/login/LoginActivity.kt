@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import de.hamurasa.R
 import de.hamurasa.main.MainActivity
 import de.hamurasa.main.MainContext
+import de.hamurasa.settings.SettingsContext
 import io.reactivex.Observable
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.login_fragment.*
@@ -30,6 +31,12 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
 
 
         login_button.setOnClickListener(this)
+        offlineButton.setOnClickListener{
+            SettingsContext.forceOffline = true
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 
     override fun onClick(v: View?) {

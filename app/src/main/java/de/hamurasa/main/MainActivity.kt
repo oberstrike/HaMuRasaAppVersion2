@@ -1,7 +1,6 @@
 package de.hamurasa.main
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -24,14 +23,13 @@ import de.hamurasa.network.requestAsync
 import de.hamurasa.settings.SettingsActivity
 import de.hamurasa.settings.SettingsContext
 import de.hamurasa.settings.model.Settings
-import de.hamurasa.util.findFirst
-import de.hamurasa.util.foreach
-import de.hamurasa.util.toast
-import de.hamurasa.util.withDialog
+import de.util.hamurasa.utility.findFirst
+import de.util.hamurasa.utility.foreach
+import de.util.hamurasa.utility.toast
+import de.util.hamurasa.utility.withDialog
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.joda.time.DateTime
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -54,13 +52,17 @@ class MainActivity : AppCompatActivity(),
         setSupportActionBar(toolbar)
         bottom_navigator.setOnNavigationItemSelectedListener(this)
         SettingsContext.init(settings)
+
         MainContext.EditContext.lesson = BehaviorSubject.create()
+
+
         swipe = Swipe(60, 300)
         checkConnection()
 
-        init()
 
-
+        requestAsync {
+            init()
+        }
     }
 
     override fun onResume() {
@@ -153,13 +155,17 @@ class MainActivity : AppCompatActivity(),
                 toolbar.menu.add(Menu.NONE, 1, Menu.NONE, "Add Vocable")
                 val menuItem = toolbar.menu.findItem(1)
                 menuItem.setOnMenuItemClickListener {
-                    val dialog =
-                        NewVocableDialog()
+                    val dialog: NewVocableDialog by inject()
+
                     dialog.show(supportFragmentManager, "New Vocable")
                     true
                 }
             }
-            modeSpinner.visibility = View.VISIBLE
+            if (fragment::class.java == DictionaryFragment::class.java) {
+                modeSpinner.visibility = View.VISIBLE
+            } else {
+                modeSpinner.visibility = View.INVISIBLE
+            }
         } else {
             toolbar.menu.removeItem(1)
             modeSpinner.visibility = View.INVISIBLE
@@ -174,26 +180,34 @@ class MainActivity : AppCompatActivity(),
                 finish()
             } else {
                 myViewModel.init()
-                myViewModel.update()
+                //       myViewModel.updateHome(false)
+
             }
         }
     }
 
     private fun checkConnection() {
-        loadingDialog = withDialog(this, R.layout.dialog_loading).create()
+        loadingDialog = withDialog(R.layout.dialog_loading).create()
 
         requestAsync(action = {
             myViewModel.checkConnection()
         }, onSuccess = {
-            withContext(Dispatchers.Main) {
-                loadingDialog?.dismiss()
+            with(SettingsContext.activeLessonId) {
+                if (this != 0) {
+                    myViewModel.setActiveLesson(this.toLong())
+                }
+            }
+
+            runBlocking {
+                withContext(Dispatchers.Main) {
+                    loadingDialog?.dismiss()
+                }
             }
 
             myViewModel.observe(SettingsContext.isOffline) {
                 myViewModel.init()
                 if (it) toast("You are in offline mode.")
                 else checkLoggedIn()
-
                 loadFragment(HomeFragment())
             }
         })
@@ -202,12 +216,18 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun init() {
+
         myViewModel.observe(SettingsContext.isOffline) {
             bottom_navigator.menu.foreach { menuItem ->
                 if (menuItem.itemId == R.id.nav_search) {
                     menuItem.isEnabled = !it
                 }
             }
+        }
+
+        myViewModel.observe(MainContext.EditContext.lesson) {
+            println(it)
+
         }
 
         myViewModel.observe(swipe.observe()) {
@@ -250,8 +270,19 @@ class MainActivity : AppCompatActivity(),
         return super.dispatchTouchEvent(event)
     }
 
-    override fun onDestroy() {
-        loadingDialog = null
-        super.onDestroy()
+    override fun onStop() {
+        super.onStop()
+        if (MainContext.EditContext.lesson.hasValue()) {
+            val id = MainContext.EditContext.lesson.value?.serverId?.toInt()
+            if (id != null) {
+                SettingsContext.activeLessonId = id
+            }
+        }
+        val lessons = MainContext.HomeContext.lessons.blockingFirst()
+        for (lesson in lessons) {
+            myViewModel.saveLesson(lesson)
+        }
+
     }
+
 }

@@ -3,6 +3,7 @@ package de.hamurasa
 import android.app.Application
 import de.hamurasa.data.ObjectBox
 import de.hamurasa.data.appModules
+import de.hamurasa.data.modelModules
 import de.hamurasa.network.RetrofitServices
 import de.hamurasa.settings.SettingsContext
 import org.koin.android.ext.koin.androidContext
@@ -22,9 +23,10 @@ class Application : Application() {
             //inject Android context
             androidContext(this@Application)
             // use modules
-            modules(appModules)
+            modules(appModules.plus(modelModules))
         }
 
         RetrofitServices.initUpdateRetrofitService()
+
     }
 }

@@ -24,7 +24,7 @@
             android:label="SettingsActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="de.hamurasa.lesson.session.SessionActivity"
+            android:name="de.hamurasa.session.SessionActivity"
             android:label="@string/title_activity_vocable"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

@@ -3,18 +3,22 @@ package de.hamurasa.main.fragments.dialogs
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
-import android.widget.*
-import androidx.appcompat.app.AppCompatDialogFragment
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.Spinner
 import de.hamurasa.R
 import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.lesson.model.vocable.VocableDTO
 import de.hamurasa.lesson.model.vocable.VocableType
 import de.hamurasa.main.MainViewModel
-import de.hamurasa.util.createSpinner
-import de.hamurasa.util.withDialog
+import de.hamurasa.util.isValid
+import de.util.hamurasa.utility.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class EditVocableDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.OnClickListener {
+
+//Reworked
+class EditVocableDialog(val vocable: Vocable) : AbstractDialog<Vocable>(vocable) {
 
     private lateinit var valueEditText: EditText
 
@@ -30,58 +34,47 @@ class EditVocableDialog(val vocable: Vocable) : AppCompatDialogFragment(), View.
 
     private val myViewModel: MainViewModel by sharedViewModel()
 
+    override fun getLayoutId(): Int = R.layout.dialog_edit_vocable
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        withDialog(activity!!, R.layout.dialog_edit_vocable) { view ->
-            valueEditText = view.findViewById(R.id.valueEditText)
-            translationEditText = view.findViewById(R.id.translationEditText)
-            isOfflineCheckBox = view.findViewById(R.id.editVocableOfflineCheckBox)
-            applyButton = view.findViewById(R.id.applyButton)
-            typeSpinner = view.findViewById(R.id.editVocableTypeSpinner)
-
-            deleteButton = view.findViewById(R.id.deleteButton)
-
-            applyButton.setOnClickListener(this)
-            deleteButton.setOnClickListener {
-                delete()
-            }
-            init()
-        }.create()
-
-
-    private fun init() {
+    override fun createView(view: View) {
+        valueEditText = view.findViewById(R.id.valueEditText)
         valueEditText.setText(vocable.value)
-
-        if (vocable.translation.isNotEmpty()) {
-            val translations = vocable.translation.reduce { acc, s ->
-                "$acc,$s"
-            }
-
-            translationEditText.setText(translations)
+        valueEditText.afterTextChanged {
+            if (it.isNotEmpty()) vocable.value = it
         }
-        createSpinner<VocableType>(activity!!, typeSpinner)
 
+        translationEditText = view.findViewById(R.id.translationEditText)
+        translationEditText.setText(vocable.translation.reduce { acc, s -> "$acc,$s" })
+        translationEditText.afterTextChanged {
+            if (it.isNotBlank()) vocable.translation = it.split(",")
+        }
 
-        val vocableType = vocable.type.toString()
-        val position = VocableType.values().map { it.name }.indexOf(vocableType)
+        isOfflineCheckBox = view.findViewById(R.id.editVocableOfflineCheckBox)
+        isOfflineCheckBox.isChecked = vocable.isOffline
+        isOfflineCheckBox.setOnCheckedChangeListener { _, checked -> vocable.isOffline = checked }
+
+        applyButton = view.findViewById(R.id.applyButton)
+        applyButton.setOnClickListener(this)
+
+        typeSpinner = view.findViewById(R.id.editVocableTypeSpinner)
+        activity!!.createSpinner<VocableType>(typeSpinner)
+        typeSpinner.afterSelectedChanged { vocable.type = VocableType.valueOf(it) }
+        val position = VocableType.values().map { it.name }.indexOf(vocable.type.toString())
         typeSpinner.setSelection(position)
 
-        isOfflineCheckBox.isChecked = vocable.isOffline
-
+        deleteButton = view.findViewById(R.id.deleteButton)
+        deleteButton.setOnClickListener {
+            delete()
+        }
     }
 
     override fun onClick(v: View?) {
-        val newValue = valueEditText.text.toString()
-        val newTranslations = translationEditText.text.toString().split(",")
-        val newVocableType = VocableType.valueOf(typeSpinner.selectedItem.toString())
+        if (!vocable.isValid()) {
+            activity!!.toast("Please fill all required forms")
+            return
+        }
 
-        val isOffline = isOfflineCheckBox.isChecked
-        val id = if (!isOffline) vocable.serverId else vocable.id
-
-        val vocableDTO =
-            VocableDTO.create(id, newValue, newVocableType, newTranslations, vocable.language)
-
-        myViewModel.patchVocable(vocableDTO, isOffline)
+        myViewModel.patchVocable(vocable)
 
         dismiss()
     }

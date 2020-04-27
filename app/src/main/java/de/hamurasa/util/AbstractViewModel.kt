@@ -14,11 +14,11 @@ abstract class AbstractViewModel : ViewModel() {
         disposables.add(job())
     }
 
-    fun <T> observe(
+    inline fun <T> observe(
         observable: Observable<T>,
         subscribeOn: Scheduler,
         observeOn: Scheduler,
-        action: (value: T) -> Unit
+        crossinline action: (value: T) -> Unit
     ) {
         launch {
             observable
@@ -29,6 +29,7 @@ abstract class AbstractViewModel : ViewModel() {
                 }
         }
     }
+
 
     @CallSuper
     public override fun onCleared() {

@@ -1,6 +1,7 @@
 package de.hamurasa.main.fragments.adapters
 
 import android.content.Context
+import android.graphics.Color
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -41,6 +42,12 @@ class VocableRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val word = items[position]
+
+        val offline = word.isOffline
+        if(offline){
+            holder.item.setBackgroundColor(Color.parseColor("#D4D4D4"))
+        }
+
 
         holder.wordValueTextView.text = word.value
         if (word.value.length < 6) {

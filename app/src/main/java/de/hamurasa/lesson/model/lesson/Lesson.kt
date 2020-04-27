@@ -13,11 +13,11 @@ class Lesson(
     var serverId: Long = 0,
     val isOffline: Boolean = false,
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)
-    var language: Language,
+    var language: Language = Language.ES,
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)
-    var validationLanguage: Language,
+    var validationLanguage: Language = Language.GER,
     @Convert(converter = DateTimeStringConverter::class, dbType = String::class)
-    var lastChanged: DateTime
+    var lastChanged: DateTime = DateTime.now()
 ) {
     lateinit var words: ToMany<Vocable>
 

@@ -1,10 +1,6 @@
 package de.hamurasa.settings
 
-import android.content.Context
 import android.os.Bundle
-import android.util.AttributeSet
-import android.view.View
-import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import de.hamurasa.R
 import io.reactivex.subjects.BehaviorSubject
@@ -24,7 +20,6 @@ class SettingsActivity : AppCompatActivity() {
             init()
         }
     }
-
 
     private fun init() {
         initObserver()

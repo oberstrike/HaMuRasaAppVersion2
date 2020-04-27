@@ -1,6 +1,9 @@
 package de.hamurasa
 
+import de.hamurasa.util.RequestCache
 import io.reactivex.subjects.BehaviorSubject
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -18,27 +21,8 @@ class ExampleUnitTest {
         assertEquals(4, 2 + 2)
     }
 
-
     @Test
-    fun behaviour_Test() {
-        var behaviorSubject = BehaviorSubject.create<Int>()
-
-        behaviorSubject.onNext(9)
-        behaviorSubject.onNext(10)
-
-        behaviorSubject.take(1).subscribe {
-            println("First $it")
-        }
-
-        behaviorSubject.subscribe{
-            println(it)
-        }
-
-        behaviorSubject.onNext(11)
-
-
-
-
+    fun requestCachingTest(){
 
     }
 

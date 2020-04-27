@@ -23,7 +23,7 @@ class LessonRecyclerViewAdapter(
     ) :
         RecyclerView.ViewHolder(itemView),
         View.OnClickListener,
-        View.OnCreateContextMenuListener{
+        View.OnCreateContextMenuListener {
         val lessonId: TextView = itemView.findViewById(R.id.lesson_id)
 
         init {
@@ -42,6 +42,7 @@ class LessonRecyclerViewAdapter(
         ) {
             menu?.add(Menu.NONE, R.id.action_delete, Menu.NONE, R.string.action_delete)
             menu?.add(Menu.NONE, R.id.action_rename, Menu.NONE, R.string.action_rename)
+            menu?.add(Menu.NONE, R.id.action_start, Menu.NONE, R.string.start)
         }
 
     }
@@ -75,7 +76,8 @@ class LessonRecyclerViewAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.holder_lesson_fragment, parent, false)
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.holder_lesson_fragment, parent, false)
 
         return ViewHolder(
             view,

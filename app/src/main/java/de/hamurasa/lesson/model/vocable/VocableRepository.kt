@@ -13,7 +13,7 @@ interface VocableRepository {
 
     fun findAll(): Observable<List<Vocable>>
 
-    fun save(vocable: Vocable)
+    fun save(vocable: Vocable): Long
 
     fun delete(vocable: Vocable)
 
@@ -35,9 +35,9 @@ class VocableRepositoryImpl :
         return activenessBox.query().equal(Vocable_.serverId, id).build().findFirst()
     }
 
-    override fun save(vocable: Vocable) {
-        activenessBox.put(vocable)
-    }
+    override fun save(vocable: Vocable): Long {
+        return activenessBox.put(vocable)
+}
 
     override fun delete(vocable: Vocable) {
         activenessBox.remove(vocable)

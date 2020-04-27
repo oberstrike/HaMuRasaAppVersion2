@@ -11,14 +11,19 @@ object MainContext {
 
     lateinit var activeFragment: Fragment
 
-
     object HomeContext {
         lateinit var lessons: Observable<List<Lesson>>
+
+        lateinit var updateLessons: Observable<HashMap<Lesson, Lesson>>
     }
 
     object EditContext {
         lateinit var lesson: BehaviorSubject<Lesson>
 
+    }
+
+    object DictionaryContext {
+        lateinit var words: BehaviorSubject<List<Vocable>>
     }
 
 

@@ -1,59 +1,47 @@
 package de.hamurasa.main.fragments
 
-import android.os.Bundle
-import android.view.LayoutInflater
+import android.content.Intent
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
+import de.hamurasa.session.SessionActivity
+import de.hamurasa.session.SessionContext
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.MainViewModel
 import de.hamurasa.main.fragments.adapters.LessonRecyclerViewAdapter
+import de.hamurasa.session.models.VocableWrapper
+import de.util.hamurasa.utility.AbstractFragment
+import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
-import kotlinx.android.synthetic.main.content_main.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class HomeFragment : Fragment(), LessonRecyclerViewAdapter.OnClickListener {
-
+class HomeFragment : AbstractFragment(), LessonRecyclerViewAdapter.OnClickListener {
     private val myViewModel: MainViewModel by sharedViewModel()
 
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var lessonsRecyclerView: RecyclerView
 
     private lateinit var lessonRecyclerViewAdapter: LessonRecyclerViewAdapter
 
+    override fun getLayoutId(): Int = R.layout.home_fragment
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.home_fragment, main_container, false)
+    override fun init(view: View) {
+        myViewModel.updateHome()
+        lessonsRecyclerView = view.findViewById(R.id.lessonsRecyclerView)
+        initElements()
     }
 
-    override fun onStart() {
-        super.onStart()
-        recyclerView = view!!.findViewById(R.id.lessonsRecyclerView)
-        init()
-    }
+    private fun initElements() {
+        lessonRecyclerViewAdapter = LessonRecyclerViewAdapter(context!!, this)
+        lessonsRecyclerView.layoutManager = LinearLayoutManager(context!!)
+        lessonsRecyclerView.adapter = lessonRecyclerViewAdapter
 
-
-    private fun init() {
-        lessonRecyclerViewAdapter =
-            LessonRecyclerViewAdapter(
-                context!!,
-                this
-            )
-        recyclerView.layoutManager = LinearLayoutManager(context!!)
-        recyclerView.adapter = lessonRecyclerViewAdapter
-        myViewModel.update()
-
-        myViewModel.observe(MainContext.HomeContext.lessons){
+        myViewModel.observe(MainContext.HomeContext.lessons) {
             lessonRecyclerViewAdapter.setLessons(it)
             lessonRecyclerViewAdapter.notifyDataSetChanged()
         }
+
     }
 
 
@@ -65,8 +53,7 @@ class HomeFragment : Fragment(), LessonRecyclerViewAdapter.OnClickListener {
         if (lesson.words.size == 0)
             return
 
-        val intent = Intent(activity, SessionActivity::class.java)
-        startActivity(intent)
+
     }*/
 
 
@@ -86,6 +73,9 @@ class HomeFragment : Fragment(), LessonRecyclerViewAdapter.OnClickListener {
             R.id.action_rename -> {
                 onActionRenameExercise()
             }
+            R.id.action_start -> {
+                onActionStart()
+            }
         }
         return super.onContextItemSelected(item)
     }
@@ -94,10 +84,24 @@ class HomeFragment : Fragment(), LessonRecyclerViewAdapter.OnClickListener {
         val position = lessonRecyclerViewAdapter.position
         val lesson = lessonRecyclerViewAdapter.getLesson(position)
         myViewModel.deleteLesson(lesson)
+
     }
 
     private fun onActionRenameExercise() {
 
+    }
+
+    private fun onActionStart() {
+        val position = lessonRecyclerViewAdapter.position
+        val lesson = lessonRecyclerViewAdapter.getLesson(position)
+
+        if (lesson.words.isEmpty())
+            return
+
+        SessionContext.vocables = lesson.words.map { VocableWrapper(it) }
+
+        val intent = Intent(activity, SessionActivity::class.java)
+        startActivity(intent)
     }
 
 
