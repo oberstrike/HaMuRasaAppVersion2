@@ -12,12 +12,14 @@ import io.reactivex.subjects.PublishSubject
 import kotlin.math.acos
 
 class SessionViewModel(
-    val provider: SchedulerProvider,
+    private val provider: SchedulerProvider,
     val context: Context
 ) : AbstractViewModel() {
 
 
     fun init() {
+        SessionContext.vocables = SessionContext.vocables.take(SettingsContext.SessionSettings.maxVocableCount)
+
         val next = SessionContext.vocables.random()
         SessionContext.activeVocable = Observable.just(next)
         SessionContext.running.onNext(true)
@@ -30,8 +32,7 @@ class SessionViewModel(
         vocable.level += if (correct) 1 else -1
         vocable.attempts += 1
 
-
-        if (vocable.level >= 6) {
+        if (vocable.level >= (SettingsContext.SessionSettings.maxRepetitions + 1)) {
             SessionContext.vocables =
                 SessionContext.vocables.filterNot { it.value == vocable.value }
         }

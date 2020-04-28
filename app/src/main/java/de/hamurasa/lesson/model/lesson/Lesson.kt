@@ -11,7 +11,7 @@ import org.joda.time.DateTime
 class Lesson(
     @Id var id: Long = 0,
     var serverId: Long = 0,
-    val isOffline: Boolean = false,
+    var isOffline: Boolean = false,
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)
     var language: Language = Language.ES,
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)
@@ -38,5 +38,6 @@ data class LessonDTO(
     val id: Long = 0,
     var vocables: List<VocableDTO>,
     var language: Language,
-    var validationLanguage: Language
+    var validationLanguage: Language,
+    var lastChanged: DateTime
 )

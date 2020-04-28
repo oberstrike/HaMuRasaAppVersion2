@@ -1,15 +1,15 @@
 package de.hamurasa.main.fragments.dialogs
 
-import android.app.Dialog
-import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.Spinner
 import android.widget.Toast
 import de.hamurasa.R
 import de.hamurasa.lesson.model.vocable.Language
 import de.hamurasa.lesson.model.lesson.Lesson
 import de.hamurasa.main.MainViewModel
+import de.hamurasa.settings.SettingsContext
 import de.hamurasa.util.isValid
 import de.util.hamurasa.utility.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
@@ -19,12 +19,13 @@ class NewLessonDialog(private val lesson: Lesson) : AbstractDialog<Lesson>(lesso
 
     private lateinit var newLanguageSpinner: Spinner
 
-    private lateinit var newValidationSpinner: Spinner
+    private lateinit var newValidationLanguageSpinner: Spinner
 
     private lateinit var addButton: Button
 
     private lateinit var cancelButton: Button
 
+    private lateinit var istOfflineCheckBox: CheckBox
 
     private val myViewModel: MainViewModel by sharedViewModel()
 
@@ -60,11 +61,25 @@ class NewLessonDialog(private val lesson: Lesson) : AbstractDialog<Lesson>(lesso
         }
 
 
-        newValidationSpinner = view.findViewById(R.id.new_validation_language_spinner)
-        activity!!.createSpinner<Language>(newValidationSpinner)
-        newValidationSpinner.afterSelectedChanged {
+        newValidationLanguageSpinner = view.findViewById(R.id.new_validation_language_spinner)
+        activity!!.createSpinner<Language>(newValidationLanguageSpinner)
+        newValidationLanguageSpinner.afterSelectedChanged {
             val validationLanguage = Language.valueOf(it)
             lesson.validationLanguage = validationLanguage
+        }
+
+        istOfflineCheckBox = view.findViewById(R.id.new_lesson_offline_checkBox)
+        istOfflineCheckBox.setOnCheckedChangeListener { _, checked ->
+            lesson.isOffline = checked
+        }
+
+        myViewModel.observe(SettingsContext.isOffline){
+            if(it){
+                istOfflineCheckBox.isChecked = true
+                istOfflineCheckBox.isEnabled = false
+            }else{
+                istOfflineCheckBox.isEnabled = true
+            }
         }
     }
 

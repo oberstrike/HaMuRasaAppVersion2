@@ -24,7 +24,7 @@ inline fun MainViewModel.withOnline(
         }
     } else {
         //if (remember) RequestCache.add { block.invoke() }
-
+        SettingsContext.isOffline = Observable.just(true)
         alternative.invoke()
     }
 }

@@ -13,10 +13,15 @@ class Settings(private val context: Context) {
 
     var activeLessonId: Int by sharedPreferences.int(ACTIVE_LESSON_ID, 0)
 
+    var maxRepetitions: Int by sharedPreferences.int(MAX_REPETITIONS, 5)
+
+    var maxVocableCount: Int by sharedPreferences.int(MAX_VOCABLE_COUNT, 20)
 
     private companion object Key {
         const val APP_OFFLINE: String = "VERSION_1"
         const val ACTIVE_LESSON_ID = "ACTIVE_LESSON"
+        const val MAX_REPETITIONS = "MAX_REPETITIONS"
+        const val MAX_VOCABLE_COUNT = "MAX_VOCABLE_COUNT"
     }
 
 }

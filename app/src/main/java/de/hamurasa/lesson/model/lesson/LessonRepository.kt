@@ -22,38 +22,38 @@ interface LessonRepository {
 }
 
 class LessonRepositoryImpl : LessonRepository {
-    private var activenessBox: Box<Lesson> = ObjectBox.boxStore.boxFor(
+    private var lessonBox: Box<Lesson> = ObjectBox.boxStore.boxFor(
         Lesson::class.java
     )
 
 
     override fun size(): Int {
-        return activenessBox.query().build().find().size
+        return lessonBox.query().build().find().size
     }
 
     override fun delete(lesson: Lesson) {
-        activenessBox.remove(lesson)
+        lessonBox.remove(lesson)
     }
 
     override fun findAll(): Observable<List<Lesson>> {
-        return RxQuery.observable(activenessBox.query().build())
+        return RxQuery.observable(lessonBox.query().build())
     }
 
     override fun findById(id: Long): Lesson? {
-        return RxQuery.observable(activenessBox.query().equal(Lesson_.id, id).build())
+        return RxQuery.observable(lessonBox.query().equal(Lesson_.id, id).build())
             .blockingFirst().firstOrNull()
     }
 
     override fun findByServerId(serverId: Long): Lesson? =
-        activenessBox.query().equal(Lesson_.serverId, serverId).build().findFirst()
+        lessonBox.query().equal(Lesson_.serverId, serverId).build().findFirst()
 
 
     override fun save(lesson: Lesson) {
-        activenessBox.put(lesson)
+        lessonBox.put(lesson)
     }
 
     override fun deleteAll() {
-        activenessBox.removeAll()
+        lessonBox.removeAll()
     }
 
 

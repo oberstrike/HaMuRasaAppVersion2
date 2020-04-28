@@ -12,7 +12,9 @@ object SettingsContext {
         this.settings = settings
         forceOffline = settings.appOffline
         activeLessonId = settings.activeLessonId
-        isOffline = BehaviorSubject.just(forceOffline)
+        SessionSettings.maxRepetitions = settings.maxRepetitions
+        SessionSettings.maxVocableCount = settings.maxVocableCount
+        isOffline = Observable.just(forceOffline)
 
     }
 
@@ -31,5 +33,21 @@ object SettingsContext {
             settings.appOffline = value
         }
 
+    object SessionSettings {
+
+        var maxRepetitions: Int = 5
+            set(value) {
+                field = value
+                settings.maxRepetitions = value
+            }
+
+        var maxVocableCount: Int = 20
+            set(value) {
+                field = value
+                settings.maxVocableCount = value
+            }
+
+
+    }
 
 }

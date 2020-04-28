@@ -3,6 +3,7 @@ package de.hamurasa.lesson.model.lesson
 import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.lesson.model.vocable.VocableDTO
 import io.reactivex.Observable
+import org.joda.time.DateTime
 
 interface LessonService {
     fun findById(id: Long): Lesson?
@@ -24,7 +25,7 @@ interface LessonService {
 
     fun addVocable(lesson: Lesson, vocable: Vocable): Boolean
 
-     fun convertToDTO(lesson: Lesson, vocableDTOs: List<VocableDTO>): LessonDTO
+    fun convertToDTO(lesson: Lesson, vocableDTOs: List<VocableDTO>): LessonDTO
 }
 
 class LessonServiceImpl(private val lessonRepository: LessonRepository) : LessonService {
@@ -33,7 +34,9 @@ class LessonServiceImpl(private val lessonRepository: LessonRepository) : Lesson
 
     override fun findAll(): Observable<List<Lesson>> = lessonRepository.findAll()
 
-    override fun save(lesson: Lesson) = lessonRepository.save(lesson)
+    override fun save(lesson: Lesson) {
+        lessonRepository.save(lesson)
+    }
 
     override fun delete(lesson: Lesson) = lessonRepository.delete(lesson)
 
@@ -44,19 +47,27 @@ class LessonServiceImpl(private val lessonRepository: LessonRepository) : Lesson
     override fun findByServerId(serverId: Long): Lesson? = lessonRepository.findByServerId(serverId)
 
     override fun removeVocable(lesson: Lesson, vocable: Vocable): Boolean {
-        val success = lesson.words.remove(vocable)
+        val success = lesson.words.removeAll { it.id == vocable.id }
+        lesson.lastChanged = DateTime.now()
         lessonRepository.save(lesson)
         return success
     }
 
     override fun addVocable(lesson: Lesson, vocable: Vocable): Boolean {
         val success = lesson.words.add(vocable)
+        lesson.lastChanged = DateTime.now()
         lessonRepository.save(lesson)
         return success
     }
 
-    override fun convertToDTO(lesson: Lesson, vocableDTOs : List<VocableDTO>): LessonDTO {
-        return LessonDTO(lesson.serverId, vocableDTOs, lesson.language, lesson.validationLanguage)
+    override fun convertToDTO(lesson: Lesson, vocableDTOs: List<VocableDTO>): LessonDTO {
+        return LessonDTO(
+            lesson.serverId,
+            vocableDTOs,
+            lesson.language,
+            lesson.validationLanguage,
+            lesson.lastChanged
+        )
     }
 
 }

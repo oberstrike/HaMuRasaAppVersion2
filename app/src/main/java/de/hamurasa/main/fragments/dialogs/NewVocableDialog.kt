@@ -11,6 +11,7 @@ import de.hamurasa.lesson.model.vocable.VocableType
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.MainViewModel
 import de.hamurasa.main.fragments.DictionaryFragment
+import de.hamurasa.settings.SettingsContext
 import de.hamurasa.util.isValid
 import de.util.hamurasa.utility.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
@@ -61,6 +62,15 @@ class NewVocableDialog(private val vocable: Vocable) : AbstractDialog<Vocable>(v
         newVocableOfflineCheckBox = view.findViewById(R.id.new_vocable_offline_checkbox)
         newVocableOfflineCheckBox.setOnCheckedChangeListener { _, checked ->
             vocable.isOffline = checked
+        }
+
+        myViewModel.observe(SettingsContext.isOffline){
+            if(it){
+                newVocableOfflineCheckBox.isChecked = true
+                newVocableOfflineCheckBox.isEnabled = false
+            }else{
+                newVocableOfflineCheckBox.isEnabled = true
+            }
         }
 
 

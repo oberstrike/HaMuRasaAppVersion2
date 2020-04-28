@@ -9,6 +9,14 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'io.objectbox'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('F:\\ke.jks')
+            keyAlias = 'key0'
+            storePassword 'mewtu123'
+            keyPassword 'mewtu123'
+        }
+    }
     compileSdkVersion 28
     buildToolsVersion "29.0.2"
     defaultConfig {

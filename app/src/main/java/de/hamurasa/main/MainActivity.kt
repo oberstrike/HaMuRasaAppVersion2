@@ -19,6 +19,7 @@ import de.hamurasa.login.LoginActivity
 import de.hamurasa.main.fragments.*
 import de.hamurasa.main.fragments.dialogs.NewLessonDialog
 import de.hamurasa.main.fragments.dialogs.NewVocableDialog
+import de.hamurasa.main.fragments.dialogs.UpdateLessonDialog
 import de.hamurasa.network.requestAsync
 import de.hamurasa.settings.SettingsActivity
 import de.hamurasa.settings.SettingsContext
@@ -54,7 +55,6 @@ class MainActivity : AppCompatActivity(),
         SettingsContext.init(settings)
 
         MainContext.EditContext.lesson = BehaviorSubject.create()
-
 
         swipe = Swipe(60, 300)
         checkConnection()
@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity(),
                     return true
                 }
             }
+
         }
         return false
     }
@@ -156,7 +157,6 @@ class MainActivity : AppCompatActivity(),
                 val menuItem = toolbar.menu.findItem(1)
                 menuItem.setOnMenuItemClickListener {
                     val dialog: NewVocableDialog by inject()
-
                     dialog.show(supportFragmentManager, "New Vocable")
                     true
                 }
@@ -227,7 +227,13 @@ class MainActivity : AppCompatActivity(),
 
         myViewModel.observe(MainContext.EditContext.lesson) {
             println(it)
+        }
 
+        myViewModel.observe(MainContext.HomeContext.updateLessons) {
+            for (pair in it) {
+                val dialog = UpdateLessonDialog(pair.toPair())
+                dialog.show(supportFragmentManager, "Update Lesson Dialog")
+            }
         }
 
         myViewModel.observe(swipe.observe()) {
@@ -270,10 +276,10 @@ class MainActivity : AppCompatActivity(),
         return super.dispatchTouchEvent(event)
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         if (MainContext.EditContext.lesson.hasValue()) {
-            val id = MainContext.EditContext.lesson.value?.serverId?.toInt()
+            val id = MainContext.EditContext.lesson.value?.id?.toInt()
             if (id != null) {
                 SettingsContext.activeLessonId = id
             }

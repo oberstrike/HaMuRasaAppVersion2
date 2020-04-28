@@ -19,6 +19,7 @@ import io.reactivex.Observable
 import io.reactivex.internal.operators.single.SingleDoOnSuccess
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.coroutines.runBlocking
+import org.joda.time.DateTime
 import java.lang.Exception
 
 class MainViewModel(
@@ -43,8 +44,12 @@ class MainViewModel(
         MainContext.HomeContext.lessons = lessonService.findAll()
     }
 
-    fun saveLesson(lesson: Lesson) {
+    fun saveLesson(lesson: Lesson, lastChanged: DateTime? = null) {
         try {
+            if (lastChanged != null) {
+                lesson.lastChanged = lastChanged
+            }
+
             lessonService.save(lesson)
         } catch (exception: Exception) {
             exception.printStackTrace()
@@ -75,11 +80,15 @@ class MainViewModel(
             if (newLesson != null) {
                 MainContext.EditContext.lesson.onNext(newLesson)
             }
+            //TODO WHEN LESSON IS DELETED
         }
     }
 
     //Only Online
     fun updateHome(async: Boolean = true) = withOnline(block = {
+        val result = vocableService.findAll()
+        val all = result.blockingFirst()
+
         val account = accountManager.accounts.first()
         val username = account.name
         val password = accountManager.getPassword(account)
@@ -112,66 +121,60 @@ class MainViewModel(
     //Only Online
     private fun updateLessons(newLessons: List<Lesson>) {
         val oldLessons = MainContext.HomeContext.lessons.blockingFirst()
-        val combinedLessons = mutableListOf<Lesson>()
 
-        for (newLesson in newLessons) {
-            val serverId = newLesson.serverId
-            val newLastChanged = newLesson.lastChanged
+        val newLessonsIds = newLessons.map { it.serverId }
+        val oldLessonsIds = oldLessons.map { it.serverId }
 
-            val oldLesson = oldLessons.find { it.serverId == serverId }
-            if (oldLesson != null) {
-                val oldLastChanged = oldLesson.lastChanged
-                when {
-                    oldLastChanged.isAfter(newLastChanged) -> {
-                        //EXPERIMENTAL
-                        combinedLessons.add(oldLesson)
-                        patchLesson(oldLesson)
+        val newLessonsDates = newLessons.map { it.lastChanged }
+        val oldLessonsDates = oldLessons.map { it.lastChanged }
+
+        if (newLessonsIds == oldLessonsIds && newLessonsDates == oldLessonsDates) {
+            return
+        }
+
+        val updateLessons = mutableMapOf<Lesson, Lesson>()
+        val combined = mutableListOf<Lesson>()
+
+        for (old in oldLessons) {
+            val oldServerId = old.serverId
+            if (newLessonsIds.contains(oldServerId)) {
+                val new = newLessons.first { it.serverId == oldServerId }
+                if (new.lastChanged.isBefore(old.lastChanged)) {
+                    new.words.addAll(old.words.filter { it.isOffline })
+
+                    val oldLessonsLastChanged = old.words.map { it.lastChanged }
+                    val newLessonsLastChanged = new.words.map { it.lastChanged }
+                    if (oldLessonsLastChanged != newLessonsLastChanged) {
+                        updateLessons[old] = new
+                    } else {
+                        combined.add(new)
                     }
-                    oldLastChanged.isEqual(newLastChanged) -> {
-                        for (vocable in newLesson.words) {
-                            if (!oldLesson.words.contains(vocable)) {
-                                oldLesson.words.add(vocable)
-                            }
-                        }
-                        val distinct = oldLesson.words.distinctBy { it.serverId }
-                        oldLesson.words.clear()
-                        oldLesson.words.addAll(distinct)
-
-                        combinedLessons.add(oldLesson)
-                    }
-                    oldLastChanged.isBefore(newLastChanged) -> {
-                        newLesson.id = oldLesson.id
-                        val oldVocables =
-                            oldLesson.words.filter { newLesson.words.contains(it) }.toMutableList()
-                        val newVocables = newLesson.words.filter { !oldLesson.words.contains(it) }
-
-                        oldVocables.addAll(newVocables)
-                        newLesson.words.clear()
-                        newLesson.words.addAll(oldVocables)
-
-                        combinedLessons.add(newLesson)
-                    }
+                } else {
+                    combined.add(new)
                 }
-
             } else {
-                combinedLessons.add(newLesson)
+                if (old.isOffline) {
+                    combined.add(old)
+                }
             }
+        }
+
+        for (new in newLessons) {
+            val newServerId = new.serverId
+            if (!oldLessonsIds.contains(newServerId)) {
+                combined.add(new)
+            }
+
         }
 
         lessonService.deleteAll()
+        vocableService.deleteAll()
 
-        for (lesson in combinedLessons) {
-            val oldLesson = lessonService.findById(lesson.id)
-            if (oldLesson != null) {
-                if (!oldLesson.words.containsAll(lesson.words)) {
-                    saveLesson(lesson)
-                }
-            } else {
-                saveLesson(lesson)
-            }
+        for (lesson in combined) {
+            saveLesson(lesson)
         }
-
-
+        MainContext.HomeContext.updateLessons.onNext(updateLessons)
+        updateEdit()
     }
 
     //Only Online
@@ -188,26 +191,32 @@ class MainViewModel(
     }
 
     //Only Online + Offline
-    fun addLesson(lesson: Lesson) = withOnline(block = {
-        val lessonDTO = lessonService.convertToDTO(lesson, listOf())
-        requestAsync(action = {
-            RetrofitServices.lessonRetrofitService.addNewLesson(lessonDTO)
-        }, onSuccess = {
-            runBlocking {
-                updateHome()
-            }
-        })
-    }, alternative = {
-        lessonService.save(lesson)
-        println("Not Online")
-    })
+    fun addLesson(lesson: Lesson) {
+        if (!lesson.isOffline) {
+            withOnline(block = {
+                val lessonDTO = lessonService.convertToDTO(lesson, listOf())
+                requestAsync(action = {
+                    RetrofitServices.lessonRetrofitService.addNewLesson(lessonDTO)
+                }, onSuccess = {
+                    runBlocking {
+                        updateHome()
+                    }
+                })
+            }, alternative = {
+                lessonService.save(lesson)
+            })
+        } else {
+            lessonService.save(lesson)
+        }
+    }
 
     //Only Online
     fun addVocableToServer(vocable: Vocable) = withOnline {
         requestAsync(action = {
             RetrofitServices.vocableRetrofitService.addVocable(vocableService.convertToDTO(vocable))
         }, onSuccess = {
-            updateHome()
+            val newVocable = vocableService.save(it, false)
+            MainContext.DictionaryContext.words.onNext(listOf(newVocable))
         })
     }
 
@@ -246,8 +255,10 @@ class MainViewModel(
         vocable: Vocable
     ) {
         val lesson = lessonService.findByServerId(lessonServerId)
+
         val newVocable = vocableService.save(vocableDTO, vocable.isOffline)
         lesson!!.words.add(newVocable)
+        lesson.lastChanged = DateTime.now()
         lessonService.save(lesson)
 
         MainContext.EditContext.lesson.onNext(lesson)
@@ -309,6 +320,7 @@ class MainViewModel(
                 request(action = {
                     runBlocking {
                         RetrofitServices.vocableRetrofitService.patchWord(vocableDTO.id, vocableDTO)
+
                     }
                 }, onSuccess = {
                     updateHome()
@@ -361,7 +373,7 @@ class MainViewModel(
     }
 
     fun setActiveLesson(id: Long) {
-        val lesson = lessonService.findByServerId(id)
+        val lesson = lessonService.findById(id)
         if (lesson != null) {
             MainContext.EditContext.lesson.onNext(lesson)
         }

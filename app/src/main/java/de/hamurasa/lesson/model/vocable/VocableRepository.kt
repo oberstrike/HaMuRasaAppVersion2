@@ -19,36 +19,42 @@ interface VocableRepository {
 
     fun size(): Int
 
+    fun deleteAll()
+
 }
 
 class VocableRepositoryImpl :
     VocableRepository {
-    private var activenessBox: Box<Vocable> = ObjectBox.boxStore.boxFor(
+    private var vocableBox: Box<Vocable> = ObjectBox.boxStore.boxFor(
         Vocable::class.java
     )
 
     override fun findById(id: Long): Vocable? {
-        return activenessBox.query().equal(Vocable_.id, id).build().findFirst()
+        return vocableBox.query().equal(Vocable_.id, id).build().findFirst()
     }
 
     override fun findByServerId(id: Long): Vocable? {
-        return activenessBox.query().equal(Vocable_.serverId, id).build().findFirst()
+        return vocableBox.query().equal(Vocable_.serverId, id).build().findFirst()
     }
 
     override fun save(vocable: Vocable): Long {
-        return activenessBox.put(vocable)
+        return vocableBox.put(vocable)
 }
 
     override fun delete(vocable: Vocable) {
-        activenessBox.remove(vocable)
+        vocableBox.remove(vocable)
     }
 
     override fun findAll(): Observable<List<Vocable>> {
-        return RxQuery.observable(activenessBox.query().build())
+        return RxQuery.observable(vocableBox.query().build())
     }
 
     override fun size(): Int {
-        return activenessBox.query().build().find().size
+        return vocableBox.query().build().find().size
+    }
+
+    override fun deleteAll() {
+        vocableBox.removeAll()
     }
 
 

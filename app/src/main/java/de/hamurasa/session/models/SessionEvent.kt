@@ -1,4 +1,4 @@
 package de.hamurasa.session.models
 
-class SessionState {
+class SessionEvent {
 }

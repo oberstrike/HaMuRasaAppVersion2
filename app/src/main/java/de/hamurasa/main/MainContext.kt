@@ -5,6 +5,7 @@ import de.hamurasa.lesson.model.lesson.Lesson
 import de.hamurasa.lesson.model.vocable.Vocable
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 
 object MainContext {
     lateinit var isLoggedIn: Observable<Boolean>
@@ -14,7 +15,7 @@ object MainContext {
     object HomeContext {
         lateinit var lessons: Observable<List<Lesson>>
 
-        lateinit var updateLessons: Observable<HashMap<Lesson, Lesson>>
+        var updateLessons: PublishSubject<Map<Lesson, Lesson>> = PublishSubject.create()
     }
 
     object EditContext {

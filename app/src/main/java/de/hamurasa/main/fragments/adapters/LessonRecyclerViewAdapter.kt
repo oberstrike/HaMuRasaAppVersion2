@@ -3,6 +3,7 @@ package de.hamurasa.main.fragments.adapters
 import android.content.Context
 import android.graphics.Color
 import android.view.*
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
@@ -25,6 +26,7 @@ class LessonRecyclerViewAdapter(
         View.OnClickListener,
         View.OnCreateContextMenuListener {
         val lessonId: TextView = itemView.findViewById(R.id.lesson_id)
+        val lessonView: LinearLayout = itemView.findViewById(R.id.lesson_view)
 
         init {
             itemView.setOnClickListener(this)
@@ -62,6 +64,12 @@ class LessonRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
+
+
+        val offline = item.isOffline
+        if (offline) {
+            holder.lessonView.setBackgroundColor(Color.parseColor("#D4D4D4"))
+        }
 
         holder.lessonId.text = context.resources.getString(R.string.lesson, position + 1)
         if (item.words.size == 0) {

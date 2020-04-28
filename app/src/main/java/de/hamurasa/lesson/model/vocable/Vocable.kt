@@ -13,19 +13,16 @@ data class Vocable(
     @Id var id: Long = 0,
     var serverId: Long = 0,
     var isOffline: Boolean = false,
-    var value: String,
+    var value: String = "",
     @Convert(converter = VocableTypeConverter::class, dbType = Long::class)
-    var type: VocableType,
+    var type: VocableType = VocableType.VERB,
     @Convert(converter = ListOfStringConverter::class, dbType = String::class)
-    var translation: List<String>,
+    var translation: List<String> = arrayListOf(),
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)
-    var language: Language
+    var language: Language = Language.ES,
+    @Convert(converter = DateTimeStringConverter::class, dbType = String::class)
+    var lastChanged: DateTime = DateTime.now()
 ) {
-
-    constructor() : this(0, 0, false, "",
-        VocableType.VERB, arrayListOf(),
-        Language.ES
-    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -75,12 +72,13 @@ class LanguageStringConverter : PropertyConverter<Language, Long> {
     }
 }
 
-class DateTimeStringConverter: PropertyConverter<DateTime, String> {
+class DateTimeStringConverter : PropertyConverter<DateTime, String> {
     override fun convertToDatabaseValue(entityProperty: DateTime?): String {
         return entityProperty.toString()
     }
 
     override fun convertToEntityProperty(databaseValue: String?): DateTime {
+        if (databaseValue == null) return DateTime.now()
         return DateTime.parse(databaseValue)
     }
 

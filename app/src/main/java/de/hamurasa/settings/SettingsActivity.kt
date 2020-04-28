@@ -3,6 +3,8 @@ package de.hamurasa.settings
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import de.hamurasa.R
+import de.util.hamurasa.utility.afterTextChanged
+import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.content_settings.*
 import kotlinx.coroutines.Dispatchers
@@ -16,18 +18,34 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        GlobalScope.launch(Dispatchers.IO) {
-            init()
-        }
+        init()
     }
 
     private fun init() {
         initObserver()
         offline_switch.setOnCheckedChangeListener { _, isChecked ->
-            SettingsContext.isOffline = BehaviorSubject.just(isChecked)
+            SettingsContext.isOffline = Observable.just(isChecked)
             SettingsContext.forceOffline = isChecked
             initObserver()
         }
+        maximum_vocable_count_editText.setText(SettingsContext.SessionSettings.maxVocableCount.toString())
+        maximum_vocable_count_editText.afterTextChanged {
+            if (it.isNotBlank() && it.isNotEmpty()) {
+                val count = it.toInt()
+                SettingsContext.SessionSettings.maxVocableCount = count
+            }
+        }
+
+        number_of_repetitions_editText.setText(SettingsContext.SessionSettings.maxRepetitions.toString())
+        number_of_repetitions_editText.afterTextChanged {
+            if (it.isNotBlank() && it.isNotEmpty()) {
+                val number = it.toInt()
+                SettingsContext.SessionSettings.maxRepetitions = number
+            }
+
+        }
+
+
     }
 
     private fun initObserver() {

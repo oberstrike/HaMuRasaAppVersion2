@@ -44,13 +44,15 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog<Vocable>(vocable)
         }
 
         translationEditText = view.findViewById(R.id.translationEditText)
-        translationEditText.setText(vocable.translation.reduce { acc, s -> "$acc,$s" })
+        translationEditText.setText(if (vocable.translation.isNotEmpty()) vocable.translation.reduce { acc, s -> "$acc,$s" } else "")
         translationEditText.afterTextChanged {
             if (it.isNotBlank()) vocable.translation = it.split(",")
         }
 
         isOfflineCheckBox = view.findViewById(R.id.editVocableOfflineCheckBox)
         isOfflineCheckBox.isChecked = vocable.isOffline
+        isOfflineCheckBox.isEnabled = !vocable.isOffline
+
         isOfflineCheckBox.setOnCheckedChangeListener { _, checked -> vocable.isOffline = checked }
 
         applyButton = view.findViewById(R.id.applyButton)
@@ -59,6 +61,7 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog<Vocable>(vocable)
         typeSpinner = view.findViewById(R.id.editVocableTypeSpinner)
         activity!!.createSpinner<VocableType>(typeSpinner)
         typeSpinner.afterSelectedChanged { vocable.type = VocableType.valueOf(it) }
+
         val position = VocableType.values().map { it.name }.indexOf(vocable.type.toString())
         typeSpinner.setSelection(position)
 
@@ -75,7 +78,6 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog<Vocable>(vocable)
         }
 
         myViewModel.patchVocable(vocable)
-
         dismiss()
     }
 

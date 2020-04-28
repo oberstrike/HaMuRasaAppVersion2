@@ -53,12 +53,13 @@ class VocableFragment : AbstractFragment(), View.OnClickListener {
 
     private fun initData() {
         myViewModel.observe(SessionContext.activeVocable) {
-            val value = when(SessionContext.sessionType){
+            val value = when (SessionContext.sessionType) {
                 SessionType.STANDARD -> it.value
                 SessionType.ALTERNATIVE -> it.translation
             }
             vocableFirstValueTextView.text = value
-            vocableProgressBar.progress = (it.level - 1) * 20
+            vocableProgressBar.progress =
+                (it.level - 1) * (100 / SettingsContext.SessionSettings.maxRepetitions)
 
         }
     }
@@ -67,7 +68,7 @@ class VocableFragment : AbstractFragment(), View.OnClickListener {
         if (vocable_second_value != null) {
             val activeVocable = SessionContext.activeVocable.blockingFirst()
 
-            val value = when(SessionContext.sessionType){
+            val value = when (SessionContext.sessionType) {
                 SessionType.STANDARD -> activeVocable.translation
                 SessionType.ALTERNATIVE -> activeVocable.value
             }

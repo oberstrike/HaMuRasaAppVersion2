@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:5489663250782794877",
-      "lastPropertyId": "6:6573138878846994453",
+      "lastPropertyId": "7:7790926071932722527",
       "name": "Lesson",
       "properties": [
         {
@@ -29,8 +29,8 @@
           "name": "isOffline"
         },
         {
-          "id": "6:6573138878846994453",
-          "name": "lastChange"
+          "id": "7:7790926071932722527",
+          "name": "lastChanged"
         }
       ],
       "relations": [
@@ -85,7 +85,9 @@
   "modelVersionParserMinimum": 4,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    6573138878846994453
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

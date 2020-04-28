@@ -6,7 +6,7 @@ import de.hamurasa.lesson.model.vocable.Vocable
 
 
 fun Vocable.isValid(): Boolean{
-    return value.isNotBlank() && translation.isNotEmpty()
+    return value.isNotBlank()
 }
 
 fun Lesson.isValid(): Boolean{

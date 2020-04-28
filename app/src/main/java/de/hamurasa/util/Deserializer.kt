@@ -44,6 +44,9 @@ class VocableDeserializer : JsonDeserializer<Vocable> {
                 val serverId = jsonObject.getAsJsonPrimitive("id").asLong
                 val type = VocableType.valueOf(jsonObject.getAsJsonPrimitive("type").asString)
                 val value = jsonObject.getAsJsonPrimitive("value").asString
+                val lastChangedString = jsonObject.getAsJsonPrimitive("lastChanged").asString
+                val lastChanged = DateTime.parse(lastChangedString)
+
 
                 return Vocable(
                     0,
@@ -52,7 +55,8 @@ class VocableDeserializer : JsonDeserializer<Vocable> {
                     value,
                     type,
                     translation,
-                    Language.ES
+                    Language.ES,
+                    lastChanged
                 )
             }
 

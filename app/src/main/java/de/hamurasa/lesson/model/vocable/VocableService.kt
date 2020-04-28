@@ -1,5 +1,7 @@
 package de.hamurasa.lesson.model.vocable
 
+import io.reactivex.Observable
+
 interface VocableService {
     fun findById(id: Long): Vocable?
 
@@ -13,9 +15,17 @@ interface VocableService {
 
     fun update(vocable: Vocable): Long
 
+    fun deleteAll()
+
+    fun findAll(): Observable<List<Vocable>>
+
 }
 
 class VocableServiceImpl(private val vocableRepository: VocableRepository) : VocableService {
+
+    override fun findAll(): Observable<List<Vocable>> {
+        return vocableRepository.findAll()
+    }
 
     override fun save(vocableDTO: VocableDTO): Long {
         val vocable = vocableRepository.findById(vocableDTO.id)
@@ -33,6 +43,10 @@ class VocableServiceImpl(private val vocableRepository: VocableRepository) : Voc
             return vocable.id
         }
         return 0
+    }
+
+    override fun deleteAll() {
+        vocableRepository.deleteAll()
     }
 
 
