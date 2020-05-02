@@ -1,6 +1,5 @@
 package de.hamurasa.main
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -13,24 +12,28 @@ import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.github.pwittchen.swipe.library.rx2.SwipeEvent
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.hamurasa.R
-import de.hamurasa.lesson.model.vocable.Language
 import de.hamurasa.lesson.model.lesson.Lesson
+import de.hamurasa.lesson.model.vocable.Language
 import de.hamurasa.login.LoginActivity
-import de.hamurasa.main.fragments.*
+import de.hamurasa.main.fragments.DictionaryFragment
+import de.hamurasa.main.fragments.HomeFragment
 import de.hamurasa.main.fragments.dialogs.NewLessonDialog
 import de.hamurasa.main.fragments.dialogs.NewVocableDialog
 import de.hamurasa.main.fragments.dialogs.UpdateLessonDialog
+import de.hamurasa.main.fragments.edit.EditFragment
 import de.hamurasa.network.requestAsync
 import de.hamurasa.settings.SettingsActivity
 import de.hamurasa.settings.SettingsContext
 import de.hamurasa.settings.model.Settings
+import de.util.hamurasa.utility.dialog
 import de.util.hamurasa.utility.findFirst
 import de.util.hamurasa.utility.foreach
 import de.util.hamurasa.utility.toast
-import de.util.hamurasa.utility.withDialog
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -43,7 +46,6 @@ class MainActivity : AppCompatActivity(),
 
     private val settings: Settings by inject()
 
-    private var loadingDialog: AlertDialog? = null
 
     private lateinit var swipe: Swipe
 
@@ -158,6 +160,8 @@ class MainActivity : AppCompatActivity(),
                 menuItem.setOnMenuItemClickListener {
                     val dialog: NewVocableDialog by inject()
                     dialog.show(supportFragmentManager, "New Vocable")
+
+
                     true
                 }
             }
@@ -187,7 +191,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun checkConnection() {
-        loadingDialog = withDialog(R.layout.dialog_loading).create()
+        val loadingDialog = dialog(R.layout.dialog_loading)
 
         requestAsync(action = {
             myViewModel.checkConnection()
@@ -200,7 +204,7 @@ class MainActivity : AppCompatActivity(),
 
             runBlocking {
                 withContext(Dispatchers.Main) {
-                    loadingDialog?.dismiss()
+                    loadingDialog.dismiss()
                 }
             }
 
@@ -212,7 +216,7 @@ class MainActivity : AppCompatActivity(),
             }
         })
 
-        loadingDialog?.show()
+        loadingDialog.show(supportFragmentManager, "Text")
     }
 
     private fun init() {

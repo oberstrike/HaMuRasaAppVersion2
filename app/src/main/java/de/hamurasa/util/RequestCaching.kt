@@ -8,7 +8,7 @@ import okhttp3.internal.EMPTY_REQUEST
 import java.lang.Exception
 import java.util.concurrent.atomic.AtomicBoolean
 
-inline fun MainViewModel.withOnline(
+inline fun AbstractViewModel.withOnline(
     observable: Observable<Boolean> = SettingsContext.isOffline,
     remember: Boolean = true,
     crossinline alternative: () -> Unit = {},

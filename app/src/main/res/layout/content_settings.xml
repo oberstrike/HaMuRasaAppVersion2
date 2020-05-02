@@ -9,6 +9,16 @@
 
 
     <View
+        android:id="@+id/view"
+        style="@style/OrangeText"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/setting_writing_type_checkBox" />
+
+    <View
         android:id="@+id/view3"
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -18,13 +28,13 @@
         app:layout_constraintTop_toBottomOf="@+id/offline_switch" />
 
     <TextView
-        style="@style/OrangeText"
         android:id="@+id/textView4"
+        style="@style/OrangeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:textSize="24sp"
+        android:layout_marginTop="14dp"
         android:text="Session settings"
+        android:textSize="24sp"
         app:layout_constraintStart_toStartOf="@+id/offline_switch"
         app:layout_constraintTop_toBottomOf="@+id/view3" />
 
@@ -80,11 +90,11 @@
         app:layout_constraintStart_toStartOf="@+id/textView6" />
 
     <EditText
-        style="@style/OrangeText"
         android:id="@+id/maximum_vocable_count_editText"
+        style="@style/OrangeText"
         android:layout_width="50dp"
         android:layout_height="35dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="14dp"
         android:background="@color/colorPrimary"
         android:ems="10"
         android:inputType="number"
@@ -92,25 +102,49 @@
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
     <EditText
-        style="@style/OrangeText"
         android:id="@+id/number_of_repetitions_editText"
+        style="@style/OrangeText"
         android:layout_width="50dp"
         android:layout_height="35dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginStart="68dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/colorPrimary"
         android:ems="10"
         android:inputType="number"
-        android:background="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="@+id/setting_alternative_type_checkBox"
         app:layout_constraintStart_toEndOf="@+id/textView7"
         app:layout_constraintTop_toBottomOf="@+id/maximum_vocable_count_editText" />
 
-    <View
-        android:id="@+id/view5"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="15dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintStart_toStartOf="parent"
+    <CheckBox
+        android:id="@+id/setting_standard_type_checkBox"
+        style="@style/OrangeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="Source language to target language"
+        app:layout_constraintStart_toStartOf="@+id/textView7"
         app:layout_constraintTop_toBottomOf="@+id/textView7" />
+
+    <CheckBox
+        style="@style/OrangeText"
+
+        android:id="@+id/setting_alternative_type_checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="Target language to source language"
+        app:layout_constraintStart_toStartOf="@+id/setting_standard_type_checkBox"
+        app:layout_constraintTop_toBottomOf="@+id/setting_standard_type_checkBox" />
+
+    <CheckBox
+        android:id="@+id/setting_writing_type_checkBox"
+
+        style="@style/OrangeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="Write out the word"
+        app:layout_constraintStart_toStartOf="@+id/setting_alternative_type_checkBox"
+        app:layout_constraintTop_toBottomOf="@+id/setting_alternative_type_checkBox" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,9 +1,7 @@
 package de.hamurasa.main.fragments.dialogs
 
+import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.Spinner
 import android.widget.Toast
 import de.hamurasa.R
 import de.hamurasa.lesson.model.vocable.Language
@@ -12,20 +10,12 @@ import de.hamurasa.main.MainViewModel
 import de.hamurasa.settings.SettingsContext
 import de.hamurasa.util.isValid
 import de.util.hamurasa.utility.*
+import kotlinx.android.synthetic.main.dialog_new_lesson.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 //Reworked
-class NewLessonDialog(private val lesson: Lesson) : AbstractDialog<Lesson>(lesson) {
+class NewLessonDialog(private val lesson: Lesson) : AbstractDialog(), View.OnClickListener  {
 
-    private lateinit var newLanguageSpinner: Spinner
-
-    private lateinit var newValidationLanguageSpinner: Spinner
-
-    private lateinit var addButton: Button
-
-    private lateinit var cancelButton: Button
-
-    private lateinit var istOfflineCheckBox: CheckBox
 
     private val myViewModel: MainViewModel by sharedViewModel()
 
@@ -44,44 +34,36 @@ class NewLessonDialog(private val lesson: Lesson) : AbstractDialog<Lesson>(lesso
 
     override fun getLayoutId(): Int = R.layout.dialog_new_lesson
 
-    override fun createView(view: View) {
-        addButton = view.findViewById(R.id.okButton)
-        addButton.setOnClickListener(this)
-
-        cancelButton = view.findViewById(R.id.cancelButton)
-        cancelButton.setOnClickListener {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        new_lesson_okButton.setOnClickListener(this)
+        new_lesson_cancelButton.setOnClickListener {
             dismiss()
         }
 
-        newLanguageSpinner = view.findViewById(R.id.new_language_spinner)
-        activity!!.createSpinner<Language>(newLanguageSpinner)
-        newLanguageSpinner.afterSelectedChanged {
-            val language = Language.valueOf(it)
-            lesson.language = language
+        //Language Binding
+
+        new_lesson_language_spinner.initAdapter<Language>()
+        new_lesson_language_spinner.bind(lesson::language) {
+            Language.valueOf(it)
         }
 
-
-        newValidationLanguageSpinner = view.findViewById(R.id.new_validation_language_spinner)
-        activity!!.createSpinner<Language>(newValidationLanguageSpinner)
-        newValidationLanguageSpinner.afterSelectedChanged {
-            val validationLanguage = Language.valueOf(it)
-            lesson.validationLanguage = validationLanguage
+        //Validation Language Binding
+        new_lesson_validation_language_spinner.initAdapter<Language>()
+        new_lesson_validation_language_spinner.bind(lesson::validationLanguage) {
+            Language.valueOf(it)
         }
 
-        istOfflineCheckBox = view.findViewById(R.id.new_lesson_offline_checkBox)
-        istOfflineCheckBox.setOnCheckedChangeListener { _, checked ->
-            lesson.isOffline = checked
-        }
-
-        myViewModel.observe(SettingsContext.isOffline){
-            if(it){
-                istOfflineCheckBox.isChecked = true
-                istOfflineCheckBox.isEnabled = false
-            }else{
-                istOfflineCheckBox.isEnabled = true
+        //Offline Binding
+        new_lesson_offline_checkBox.bind(lesson::isOffline)
+        myViewModel.observe(SettingsContext.isOffline) {
+            if (it) {
+                new_lesson_offline_checkBox.isChecked = true
+                new_lesson_offline_checkBox.isEnabled = false
+            } else {
+                new_lesson_offline_checkBox.isEnabled = true
             }
         }
+
     }
-
-
 }

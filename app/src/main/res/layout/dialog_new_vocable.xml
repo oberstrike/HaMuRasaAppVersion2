@@ -23,10 +23,10 @@
         android:text="Translations"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vocable_value_editText" />
+        app:layout_constraintTop_toBottomOf="@+id/new_vocable_value_editText" />
 
     <EditText
-        android:id="@+id/vocable_value_editText"
+        android:id="@+id/new_vocable_value_editText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <EditText
-        android:id="@+id/vocable_translations_editText"
+        android:id="@+id/new_vocable_translations_editText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -50,12 +50,12 @@
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <Button
-        android:id="@+id/add_vocable_button"
+        android:id="@+id/new_vocable_add_button"
         android:layout_width="74dp"
         android:layout_height="37dp"
         android:text="@string/ok"
         app:layout_constraintBottom_toBottomOf="@+id/new_vocable_offline_checkbox"
-        app:layout_constraintEnd_toEndOf="@+id/vocable_translations_editText"
+        app:layout_constraintEnd_toEndOf="@+id/new_vocable_translations_editText"
         app:layout_constraintHorizontal_bias="0.861"
         app:layout_constraintStart_toEndOf="@+id/new_vocable_offline_checkbox" />
 
@@ -64,8 +64,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        app:layout_constraintStart_toStartOf="@+id/vocable_translations_editText"
-        app:layout_constraintTop_toBottomOf="@+id/vocable_translations_editText" />
+        app:layout_constraintStart_toStartOf="@+id/new_vocable_translations_editText"
+        app:layout_constraintTop_toBottomOf="@+id/new_vocable_translations_editText" />
 
     <Spinner
         android:id="@+id/new_vocable_language_spinner"
@@ -81,7 +81,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="@string/offline"
-        app:layout_constraintStart_toStartOf="@+id/vocable_translations_editText"
+        app:layout_constraintStart_toStartOf="@+id/new_vocable_translations_editText"
         app:layout_constraintTop_toBottomOf="@+id/new_vocable_language_spinner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

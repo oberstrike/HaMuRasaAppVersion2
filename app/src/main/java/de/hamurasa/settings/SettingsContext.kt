@@ -14,6 +14,10 @@ object SettingsContext {
         activeLessonId = settings.activeLessonId
         SessionSettings.maxRepetitions = settings.maxRepetitions
         SessionSettings.maxVocableCount = settings.maxVocableCount
+        SessionSettings.standardInputType = settings.standardInputType
+        SessionSettings.alternativeInputType = settings.alternativeInputType
+        SessionSettings.writingInputType = settings.writingInputType
+
         isOffline = Observable.just(forceOffline)
 
     }
@@ -47,6 +51,23 @@ object SettingsContext {
                 settings.maxVocableCount = value
             }
 
+        var writingInputType: Boolean = true
+            set(value) {
+                field = value
+                settings.writingInputType = value
+            }
+
+        var standardInputType: Boolean = true
+            set(value) {
+                field = value
+                settings.standardInputType = value
+            }
+
+        var alternativeInputType: Boolean = true
+            set(value) {
+                field = value
+                settings.alternativeInputType = value
+            }
 
     }
 

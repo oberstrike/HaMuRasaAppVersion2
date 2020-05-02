@@ -47,10 +47,14 @@ class LessonServiceImpl(private val lessonRepository: LessonRepository) : Lesson
     override fun findByServerId(serverId: Long): Lesson? = lessonRepository.findByServerId(serverId)
 
     override fun removeVocable(lesson: Lesson, vocable: Vocable): Boolean {
-        val success = lesson.words.removeAll { it.id == vocable.id }
+        val oldSize = lesson.words.size
+        val new = lesson.words.filterNot { it.id == vocable.id }
+        lesson.words.clear()
+        lesson.words.addAll(new)
+        lesson.words.applyChangesToDb()
         lesson.lastChanged = DateTime.now()
         lessonRepository.save(lesson)
-        return success
+        return oldSize != new.size
     }
 
     override fun addVocable(lesson: Lesson, vocable: Vocable): Boolean {

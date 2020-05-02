@@ -3,7 +3,6 @@ package de.hamurasa.main
 import android.accounts.AccountManager
 import android.content.Context
 import de.hamurasa.lesson.model.lesson.Lesson
-import de.hamurasa.lesson.model.lesson.LessonDTO
 import de.hamurasa.lesson.model.lesson.LessonService
 import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.lesson.model.vocable.VocableDTO
@@ -16,15 +15,13 @@ import de.hamurasa.util.AbstractViewModel
 import de.hamurasa.util.SchedulerProvider
 import de.hamurasa.util.withOnline
 import io.reactivex.Observable
-import io.reactivex.internal.operators.single.SingleDoOnSuccess
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.coroutines.runBlocking
 import org.joda.time.DateTime
-import java.lang.Exception
 
 class MainViewModel(
     val context: Context,
-    val provider: SchedulerProvider,
+    private val provider: SchedulerProvider,
     private val lessonService: LessonService,
     private val vocableService: VocableService
 ) : AbstractViewModel() {
@@ -72,23 +69,9 @@ class MainViewModel(
         }
     }
 
-    //Only Online
-    fun updateEdit() = withOnline {
-        if (MainContext.EditContext.lesson.hasValue()) {
-            val oldServerId = MainContext.EditContext.lesson.blockingFirst().serverId
-            val newLesson = lessonService.findByServerId(oldServerId)
-            if (newLesson != null) {
-                MainContext.EditContext.lesson.onNext(newLesson)
-            }
-            //TODO WHEN LESSON IS DELETED
-        }
-    }
 
     //Only Online
     fun updateHome(async: Boolean = true) = withOnline(block = {
-        val result = vocableService.findAll()
-        val all = result.blockingFirst()
-
         val account = accountManager.accounts.first()
         val username = account.name
         val password = accountManager.getPassword(account)
@@ -174,7 +157,6 @@ class MainViewModel(
             saveLesson(lesson)
         }
         MainContext.HomeContext.updateLessons.onNext(updateLessons)
-        updateEdit()
     }
 
     //Only Online
@@ -278,15 +260,21 @@ class MainViewModel(
         }
     }
 
-    fun deleteLesson(lesson: Lesson) = withOnline {
-        requestAsync(action = {
-            RetrofitServices.lessonRetrofitService.deleteLesson(lesson.serverId)
-        }, onSuccess = {
+    fun deleteLesson(lesson: Lesson) {
+        if (!lesson.isOffline) {
+            withOnline {
+                requestAsync(action = {
+                    RetrofitServices.lessonRetrofitService.deleteLesson(lesson.serverId)
+                }, onSuccess = {
+                    lessonService.delete(lesson)
+                    updateHome()
+                }, onFailure = {
+                    it.printStackTrace()
+                })
+            }
+        } else {
             lessonService.delete(lesson)
-            updateHome()
-        }, onFailure = {
-            it.printStackTrace()
-        })
+        }
     }
 
     fun patchLesson(lesson: Lesson) = withOnline {
@@ -361,8 +349,14 @@ class MainViewModel(
         } else {
             val vocable = vocableService.findById(vocableDTO.id)!!
             val lesson = MainContext.EditContext.lesson.blockingFirst()
-            lessonService.removeVocable(lesson, vocable)
+
+            lesson.words.removeIf { it.id == vocable.id }
+            lesson.lastChanged = DateTime.now()
+            lessonService.save(lesson)
+
+            vocableService.delete(vocable)
             MainContext.EditContext.lesson.onNext(lesson)
+            updateHome()
         }
     }
 

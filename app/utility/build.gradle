@@ -23,6 +23,12 @@ android {
         }
     }
 
+    testOptions{
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
 }
 
 dependencies {
@@ -41,4 +47,6 @@ dependencies {
     //Objectbox Android
     implementation "io.objectbox:objectbox-kotlin:$objectboxVersion"
     implementation "io.objectbox:objectbox-rxjava:$objectboxVersion"
+
+    testImplementation 'org.robolectric:robolectric:4.3'
 }

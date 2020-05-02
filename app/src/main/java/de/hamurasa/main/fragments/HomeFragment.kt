@@ -1,34 +1,33 @@
 package de.hamurasa.main.fragments
 
 import android.content.Intent
+import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
-import de.hamurasa.session.SessionActivity
-import de.hamurasa.session.SessionContext
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.MainViewModel
 import de.hamurasa.main.fragments.adapters.LessonRecyclerViewAdapter
+import de.hamurasa.session.SessionActivity
+import de.hamurasa.session.SessionContext
 import de.hamurasa.session.models.VocableWrapper
 import de.util.hamurasa.utility.AbstractFragment
-import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
+import kotlinx.android.synthetic.main.home_fragment.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 class HomeFragment : AbstractFragment(), LessonRecyclerViewAdapter.OnClickListener {
     private val myViewModel: MainViewModel by sharedViewModel()
 
-    private lateinit var lessonsRecyclerView: RecyclerView
 
     private lateinit var lessonRecyclerViewAdapter: LessonRecyclerViewAdapter
 
     override fun getLayoutId(): Int = R.layout.home_fragment
 
-    override fun init(view: View) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         myViewModel.updateHome()
-        lessonsRecyclerView = view.findViewById(R.id.lessonsRecyclerView)
         initElements()
     }
 
@@ -43,18 +42,6 @@ class HomeFragment : AbstractFragment(), LessonRecyclerViewAdapter.OnClickListen
         }
 
     }
-
-
-    /*
-    override fun onItemClick(position: Int) {
-        val lesson = myViewModel.lessons.blockingFirst()[position]
-        val words = lesson.words
-        SessionContext.vocables = words
-        if (lesson.words.size == 0)
-            return
-
-
-    }*/
 
 
     override fun onItemClick(position: Int) {
@@ -83,11 +70,22 @@ class HomeFragment : AbstractFragment(), LessonRecyclerViewAdapter.OnClickListen
     private fun onActionDeleteExercise() {
         val position = lessonRecyclerViewAdapter.position
         val lesson = lessonRecyclerViewAdapter.getLesson(position)
+
         myViewModel.deleteLesson(lesson)
+        val value = MainContext.EditContext.lesson.value
+        if (value != null) {
+            if (value.id == lesson.id) {
+                MainContext.EditContext.lesson.onComplete()
+            }
+
+        }
 
     }
 
     private fun onActionRenameExercise() {
+        val position = lessonRecyclerViewAdapter.position
+        val lesson = lessonRecyclerViewAdapter.getLesson(position)
+
 
     }
 
@@ -102,6 +100,11 @@ class HomeFragment : AbstractFragment(), LessonRecyclerViewAdapter.OnClickListen
 
         val intent = Intent(activity, SessionActivity::class.java)
         startActivity(intent)
+    }
+
+    override fun onStop() {
+        myViewModel.onCleared()
+        super.onStop()
     }
 
 

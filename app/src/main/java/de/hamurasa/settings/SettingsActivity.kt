@@ -3,7 +3,9 @@ package de.hamurasa.settings
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import de.hamurasa.R
+import de.hamurasa.session.SessionContext
 import de.util.hamurasa.utility.afterTextChanged
+import de.util.hamurasa.utility.bind
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.content_settings.*
@@ -42,8 +44,13 @@ class SettingsActivity : AppCompatActivity() {
                 val number = it.toInt()
                 SettingsContext.SessionSettings.maxRepetitions = number
             }
-
         }
+
+        setting_writing_type_checkBox.bind(SettingsContext.SessionSettings::writingInputType)
+
+        setting_standard_type_checkBox.bind(SettingsContext.SessionSettings::standardInputType)
+
+        setting_alternative_type_checkBox.bind(SettingsContext.SessionSettings::alternativeInputType)
 
 
     }

@@ -7,9 +7,9 @@ import de.hamurasa.util.SchedulerProvider
 import de.hamurasa.util.SchedulerProviderImpl
 import de.hamurasa.session.SessionViewModel
 import de.hamurasa.lesson.model.vocable.*
-import de.hamurasa.main.fragments.dialogs.EditVocableDialog
+import de.hamurasa.main.fragments.edit.EditVocableDialog
 import de.hamurasa.main.fragments.dialogs.NewVocableDialog
-import de.hamurasa.session.fragments.VocableFragment
+import de.hamurasa.main.fragments.edit.EditViewModel
 import de.hamurasa.settings.SettingsViewModel
 import de.hamurasa.settings.model.Settings
 import org.koin.android.viewmodel.dsl.viewModel
@@ -38,6 +38,8 @@ val appModules = module {
     viewModel { SessionViewModel(get(), get()) }
 
     viewModel { SettingsViewModel(get()) }
+
+    viewModel { EditViewModel(get(), get(), get(), get()) }
 }
 
 
@@ -49,8 +51,6 @@ val modelModules = module {
     factory { NewVocableDialog(get()) }
 
     factory { params -> EditVocableDialog(params[0]) }
-
-    factory { VocableFragment() }
 
 
 }

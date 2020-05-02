@@ -14,8 +14,7 @@ import de.hamurasa.lesson.model.vocable.Vocable
 class VocableRecyclerViewAdapter(
     val context: Context,
     private val onClickListener: OnClickListener
-) :
-    RecyclerView.Adapter<VocableRecyclerViewAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<VocableRecyclerViewAdapter.ViewHolder>() {
 
     val items: ArrayList<Vocable> = ArrayList()
 

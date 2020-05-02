@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/searchEditText"
+        android:id="@+id/dictionary_search_editText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
@@ -19,27 +19,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:autofillHints=""
-        android:labelFor="@id/searchButton" />
+        android:labelFor="@id/dictionary_search_button" />
 
     <Button
-        android:id="@+id/searchButton"
+        android:id="@+id/dictionary_search_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:text="@string/search"
-        app:layout_constraintLeft_toRightOf="@id/searchEditText"
-        app:layout_constraintTop_toTopOf="@id/searchEditText" />
+        app:layout_constraintLeft_toRightOf="@id/dictionary_search_editText"
+        app:layout_constraintTop_toTopOf="@id/dictionary_search_editText" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/wordRecyclerView"
+        android:id="@+id/dictionary_word_recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="12dp"
         android:gravity="center_horizontal"
-        app:layout_constraintStart_toStartOf="@id/searchEditText"
-        app:layout_constraintTop_toBottomOf="@+id/searchEditText" />
+        app:layout_constraintStart_toStartOf="@id/dictionary_search_editText"
+        app:layout_constraintTop_toBottomOf="@+id/dictionary_search_editText" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

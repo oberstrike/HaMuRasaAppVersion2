@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/translation_text_view"
+        android:id="@+id/result_translation_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
@@ -19,14 +19,14 @@
         android:autofillHints=""/>
 
     <Button
-        android:id="@+id/add_to_lesson_button"
+        android:id="@+id/result_add_to_lesson_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_marginTop="10dp"
         android:text="Add to Lesson"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/translation_text_view" />
+        app:layout_constraintTop_toBottomOf="@+id/result_translation_textView" />
 
 
     <Spinner
@@ -36,7 +36,7 @@
         android:spinnerMode="dropdown"
         android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
-        app:layout_constraintStart_toEndOf="@+id/add_to_lesson_button"
-        app:layout_constraintTop_toTopOf="@+id/add_to_lesson_button" />
+        app:layout_constraintStart_toEndOf="@+id/result_add_to_lesson_button"
+        app:layout_constraintTop_toTopOf="@+id/result_add_to_lesson_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

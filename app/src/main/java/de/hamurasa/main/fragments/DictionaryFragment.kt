@@ -1,35 +1,27 @@
 package de.hamurasa.main.fragments
 
+import android.os.Bundle
 import android.view.View
-import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.MainViewModel
 import de.hamurasa.main.fragments.adapters.VocableRecyclerViewAdapter
 import de.hamurasa.main.fragments.dialogs.ResultAlertDialog
 import de.util.hamurasa.utility.AbstractFragment
-import de.util.hamurasa.utility.createSpinner
+import de.util.hamurasa.utility.initAdapter
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.dictionary_fragment.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 class DictionaryFragment : AbstractFragment(), VocableRecyclerViewAdapter.OnClickListener {
     private val myViewModel: MainViewModel by sharedViewModel()
 
     private lateinit var vocableRecyclerViewAdapter: VocableRecyclerViewAdapter
-    private lateinit var searchValueEditText: EditText
-    private lateinit var vocableRecyclerView: RecyclerView
-    private lateinit var searchButton: Button
-    private lateinit var modeSpinner: Spinner
+
 
     override fun getLayoutId(): Int = R.layout.dictionary_fragment
 
-    override fun init(view: View) {
-        vocableRecyclerView = view.findViewById(R.id.wordRecyclerView)
-        searchValueEditText = view.findViewById(R.id.searchEditText)
-        searchButton = view.findViewById(R.id.searchButton)
-        modeSpinner = activity!!.findViewById(R.id.modeSpinner)
-    }
 
     override fun onItemClick(position: Int) {
         val word = vocableRecyclerViewAdapter.items[position]
@@ -38,26 +30,22 @@ class DictionaryFragment : AbstractFragment(), VocableRecyclerViewAdapter.OnClic
         fragment.show(activity!!.supportFragmentManager, "Result")
     }
 
-    override fun onStart() {
-        super.onStart()
-        initElements()
-    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    private fun initElements() {
         vocableRecyclerViewAdapter = VocableRecyclerViewAdapter(context!!, this)
-        vocableRecyclerView.layoutManager = LinearLayoutManager(context!!)
-        vocableRecyclerView.adapter = vocableRecyclerViewAdapter
+        dictionary_word_recyclerView.layoutManager = LinearLayoutManager(context!!)
+        dictionary_word_recyclerView.adapter = vocableRecyclerViewAdapter
 
         myViewModel.observe(MainContext.DictionaryContext.words) {
             vocableRecyclerViewAdapter.setWords(it)
             vocableRecyclerViewAdapter.notifyDataSetChanged()
         }
 
-        searchButton.setOnClickListener {
-            myViewModel.getWord(searchValueEditText.text.toString())
+        dictionary_search_button.setOnClickListener {
+            myViewModel.getWord(dictionary_search_editText.text.toString())
         }
-
-        activity!!.createSpinner(modeSpinner, array = arrayOf("ES-GER", "GER-ES"))
+        modeSpinner.initAdapter(arrayOf("ES-GER", "GER-ES"))
     }
 
 }

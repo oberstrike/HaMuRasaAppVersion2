@@ -46,7 +46,6 @@ class LessonRecyclerViewAdapter(
             menu?.add(Menu.NONE, R.id.action_rename, Menu.NONE, R.string.action_rename)
             menu?.add(Menu.NONE, R.id.action_start, Menu.NONE, R.string.start)
         }
-
     }
 
     fun getLesson(position: Int): Lesson {

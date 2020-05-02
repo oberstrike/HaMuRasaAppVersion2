@@ -19,9 +19,15 @@ interface VocableService {
 
     fun findAll(): Observable<List<Vocable>>
 
+    fun delete(vocable: Vocable)
+
 }
 
 class VocableServiceImpl(private val vocableRepository: VocableRepository) : VocableService {
+
+    override fun delete(vocable: Vocable) {
+        vocableRepository.delete(vocable)
+    }
 
     override fun findAll(): Observable<List<Vocable>> {
         return vocableRepository.findAll()

@@ -9,7 +9,7 @@
 
 
     <Spinner
-        android:id="@+id/new_language_spinner"
+        android:id="@+id/new_lesson_language_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -19,14 +19,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
-        android:id="@+id/new_validation_language_spinner"
+        android:id="@+id/new_lesson_validation_language_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:spinnerMode="dropdown"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.234"
-        app:layout_constraintStart_toEndOf="@+id/new_language_spinner"
+        app:layout_constraintStart_toEndOf="@+id/new_lesson_language_spinner"
         app:layout_constraintTop_toTopOf="parent" />
 
     <CheckBox
@@ -34,26 +34,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
-        android:text="Offline"
-        app:layout_constraintStart_toStartOf="@+id/new_language_spinner"
-        app:layout_constraintTop_toBottomOf="@+id/new_language_spinner" />
+        android:text="@string/offline"
+        app:layout_constraintStart_toStartOf="@+id/new_lesson_language_spinner"
+        app:layout_constraintTop_toBottomOf="@+id/new_lesson_language_spinner" />
 
     <Button
-        android:id="@+id/okButton"
+        android:id="@+id/new_lesson_okButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="35dp"
         android:text="@android:string/ok"
         app:layout_constraintStart_toStartOf="@+id/new_lesson_offline_checkBox"
         app:layout_constraintTop_toBottomOf="@+id/new_lesson_offline_checkBox" />
 
     <Button
-        android:id="@+id/cancelButton"
+        android:id="@+id/new_lesson_cancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:text="@android:string/cancel"
-        app:layout_constraintStart_toEndOf="@+id/okButton"
-        app:layout_constraintTop_toTopOf="@+id/okButton" />
+        app:layout_constraintStart_toEndOf="@+id/new_lesson_okButton"
+        app:layout_constraintTop_toTopOf="@+id/new_lesson_okButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
