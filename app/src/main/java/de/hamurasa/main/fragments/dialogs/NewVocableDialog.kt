@@ -76,7 +76,7 @@ class NewVocableDialog(private val vocable: Vocable) : AbstractDialog(), View.On
             myViewModel.addVocableToServer(vocable)
         } else {
             val activeLesson = MainContext.EditContext.lesson.blockingFirst()
-            myViewModel.addVocableToLesson(vocable, activeLesson.serverId)
+            myViewModel.addVocableToLesson(vocable, activeLesson.id)
         }
 
         dismiss()

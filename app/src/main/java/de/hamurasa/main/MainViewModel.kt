@@ -232,11 +232,11 @@ class MainViewModel(
 
     //Only Offline
     private fun addVocableToLessonOffline(
-        lessonServerId: Long,
+        lessonId: Long,
         vocableDTO: VocableDTO,
         vocable: Vocable
     ) {
-        val lesson = lessonService.findByServerId(lessonServerId)
+        val lesson = lessonService.findById(lessonId)
 
         val newVocable = vocableService.save(vocableDTO, vocable.isOffline)
         lesson!!.words.add(newVocable)
