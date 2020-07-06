@@ -1,15 +1,13 @@
 package de.util.hamurasa.utility
 
 import android.os.Build
+import de.util.hamurasa.utility.util.weight
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import org.mockito.runners.MockitoJUnitRunner
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.P])
+@RunWith(MockitoJUnitRunner::class)
 class CollectionUtilTest {
 
     @Test

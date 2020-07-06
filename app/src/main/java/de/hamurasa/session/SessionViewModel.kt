@@ -1,21 +1,17 @@
 package de.hamurasa.session
 
 import android.content.Context
-import de.hamurasa.util.AbstractViewModel
 import de.hamurasa.util.SchedulerProvider
-import de.hamurasa.lesson.model.vocable.Vocable
 import de.hamurasa.session.models.VocableWrapper
 import de.hamurasa.settings.SettingsContext
-import de.util.hamurasa.utility.weight
+import de.hamurasa.util.BaseViewModel
+import de.util.hamurasa.utility.util.weight
 import io.reactivex.Observable
-import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
-import kotlin.math.acos
 
 class SessionViewModel(
-    private val provider: SchedulerProvider,
+    provider: SchedulerProvider,
     val context: Context
-) : AbstractViewModel() {
+) : BaseViewModel(provider) {
 
 
     fun init() {
@@ -23,7 +19,6 @@ class SessionViewModel(
             vocables = vocables.take(SettingsContext.SessionSettings.maxVocableCount)
             val next = vocables.random()
             activeVocable = next
-            running.onNext(true)
             val sessionTypesTmp = mutableListOf<SessionType>()
             if (SettingsContext.SessionSettings.standardInputType) {
                 sessionTypesTmp.add(SessionType.STANDARD)
@@ -36,7 +31,6 @@ class SessionViewModel(
                 sessionTypesTmp.add(SessionType.WRITING)
             }
             sessionTypes = sessionTypesTmp
-
             sessionType = sessionTypes.random()
         }
     }
@@ -62,7 +56,7 @@ class SessionViewModel(
             val next = weightedList.random()
             nextVocableWrapper = next
         } else {
-            SessionContext.running.onNext(false)
+            SessionContext.running = Observable.just(false)
         }
         SessionContext.sessionType = SessionContext.sessionTypes.random()
         if (nextVocableWrapper == null) {
@@ -71,13 +65,6 @@ class SessionViewModel(
         SessionContext.activeVocable = nextVocableWrapper
         SessionContext.sessionType = SessionContext.sessionTypes.random()
         return nextVocableWrapper
-    }
-
-
-    fun <T> observe(observable: Observable<T>, action: (value: T) -> Unit) {
-        observe(
-            observable, provider.computation(), provider.ui(), action
-        )
     }
 }
 

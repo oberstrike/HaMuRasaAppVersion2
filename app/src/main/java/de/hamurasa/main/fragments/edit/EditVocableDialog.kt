@@ -3,20 +3,20 @@ package de.hamurasa.main.fragments.edit
 import android.os.Bundle
 import android.view.View
 import de.hamurasa.R
-import de.hamurasa.lesson.model.vocable.Vocable
-import de.hamurasa.lesson.model.vocable.VocableDTO
-import de.hamurasa.lesson.model.vocable.VocableType
-import de.hamurasa.main.MainViewModel
+import de.hamurasa.main.MainContext
+import de.hamurasa.model.vocable.Vocable
+import de.hamurasa.model.vocable.VocableDTO
+import de.hamurasa.model.vocable.VocableType
 import de.hamurasa.util.isValid
-import de.util.hamurasa.utility.*
+import de.util.hamurasa.utility.util.*
 import kotlinx.android.synthetic.main.dialog_edit_vocable.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 
 //Reworked
-class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickListener  {
+class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickListener {
 
-    private val myViewModel: MainViewModel by sharedViewModel()
+    private val myViewModel: EditViewModel by sharedViewModel()
 
     override fun getLayoutId(): Int = R.layout.dialog_edit_vocable
 
@@ -31,14 +31,10 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
         }
 
 
-
-        editVocableOfflineCheckBox.isEnabled = !vocable.isOffline
-        editVocableOfflineCheckBox.bind(vocable::isOffline)
-
         applyButton.setOnClickListener(this)
 
         editVocableTypeSpinner.initAdapter<VocableType>()
-        editVocableTypeSpinner.bind(vocable::type){
+        editVocableTypeSpinner.bind(vocable::type) {
             VocableType.valueOf(it)
         }
 
@@ -50,7 +46,7 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
 
     override fun onClick(v: View?) {
         if (!vocable.isValid()) {
-            activity!!.toast("Please fill all required forms")
+            requireActivity().toast("Please fill all required forms")
             return
         }
 
@@ -59,8 +55,7 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
     }
 
     private fun delete() {
-        val isOffline = editVocableOfflineCheckBox.isChecked
-        val id = if (!isOffline) vocable.serverId else vocable.id
+        val id = vocable.id
 
         val vocableDTO = VocableDTO.create(
             id,
@@ -69,7 +64,10 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
             vocable.translation,
             vocable.language
         )
-        myViewModel.deleteVocableFromLesson(vocableDTO, isOffline)
+        myViewModel.deleteVocableFromLesson(
+            vocableDTO,
+            MainContext.EditContext.lesson.blockingFirst()
+        )
         dismiss()
     }
 }

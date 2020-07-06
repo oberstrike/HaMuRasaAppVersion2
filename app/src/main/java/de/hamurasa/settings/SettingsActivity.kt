@@ -1,35 +1,20 @@
 package de.hamurasa.settings
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import de.hamurasa.R
-import de.hamurasa.session.SessionContext
-import de.util.hamurasa.utility.afterTextChanged
-import de.util.hamurasa.utility.bind
-import io.reactivex.Observable
-import io.reactivex.subjects.BehaviorSubject
+import de.hamurasa.main.MainViewModel
+import de.util.hamurasa.utility.util.*
 import kotlinx.android.synthetic.main.content_settings.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class SettingsActivity : AppCompatActivity() {
-    private val myViewModel: SettingsViewModel by viewModel()
+class SettingsActivity : AbstractActivity<MainViewModel>() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
-        init()
-    }
+    override val myViewModel: MainViewModel by viewModel()
 
-    private fun init() {
-        initObserver()
-        offline_switch.setOnCheckedChangeListener { _, isChecked ->
-            SettingsContext.isOffline = Observable.just(isChecked)
-            SettingsContext.forceOffline = isChecked
-            initObserver()
-        }
+    override val layoutRes: Int = R.layout.activity_settings
+
+    override val toolbarToUse: androidx.appcompat.widget.Toolbar? = null
+
+    override fun init() {
         maximum_vocable_count_editText.setText(SettingsContext.SessionSettings.maxVocableCount.toString())
         maximum_vocable_count_editText.afterTextChanged {
             if (it.isNotBlank() && it.isNotEmpty()) {
@@ -53,17 +38,6 @@ class SettingsActivity : AppCompatActivity() {
         setting_alternative_type_checkBox.bind(SettingsContext.SessionSettings::alternativeInputType)
 
 
-    }
-
-    private fun initObserver() {
-        myViewModel.launch {
-            SettingsContext.isOffline
-                .subscribeOn(myViewModel.provider.computation())
-                .observeOn(myViewModel.provider.ui())
-                .subscribe {
-                    offline_switch.isChecked = it
-                }
-        }
     }
 
 

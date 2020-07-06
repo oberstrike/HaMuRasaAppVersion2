@@ -29,23 +29,14 @@
         app:layout_constraintStart_toEndOf="@+id/new_lesson_language_spinner"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <CheckBox
-        android:id="@+id/new_lesson_offline_checkBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:text="@string/offline"
-        app:layout_constraintStart_toStartOf="@+id/new_lesson_language_spinner"
-        app:layout_constraintTop_toBottomOf="@+id/new_lesson_language_spinner" />
-
     <Button
         android:id="@+id/new_lesson_okButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="32dp"
         android:text="@android:string/ok"
-        app:layout_constraintStart_toStartOf="@+id/new_lesson_offline_checkBox"
-        app:layout_constraintTop_toBottomOf="@+id/new_lesson_offline_checkBox" />
+        app:layout_constraintStart_toStartOf="@+id/new_lesson_language_spinner"
+        app:layout_constraintTop_toBottomOf="@+id/new_lesson_language_spinner" />
 
     <Button
         android:id="@+id/new_lesson_cancelButton"

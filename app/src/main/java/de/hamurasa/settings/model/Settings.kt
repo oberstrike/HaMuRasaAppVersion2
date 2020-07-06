@@ -2,14 +2,12 @@ package de.hamurasa.settings.model
 
 import android.content.Context
 import android.content.SharedPreferences
-import de.util.hamurasa.utility.boolean
-import de.util.hamurasa.utility.int
+import de.util.hamurasa.utility.util.boolean
+import de.util.hamurasa.utility.util.int
 
 class Settings(context: Context) {
 
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("", 0)
-
-    var appOffline: Boolean by sharedPreferences.boolean(APP_OFFLINE, false)
 
     var writingInputType by sharedPreferences.boolean(WRITING_INPUT_TYPE, true)
 

@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
-import de.hamurasa.lesson.model.vocable.Vocable
+import de.hamurasa.model.vocable.Vocable
 
 class VocableRecyclerViewAdapter(
     val context: Context,
@@ -41,11 +41,8 @@ class VocableRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val word = items[position]
+        holder.item.setBackgroundColor(Color.parseColor("#D4D4D4"))
 
-        val offline = word.isOffline
-        if(offline){
-            holder.item.setBackgroundColor(Color.parseColor("#D4D4D4"))
-        }
 
 
         holder.wordValueTextView.text = word.value
@@ -79,7 +76,7 @@ class VocableRecyclerViewAdapter(
     }
 
     fun setWords(words: List<Vocable>) {
-        if(words != items){
+        if (words != items) {
             items.clear()
             items.addAll(words)
         }

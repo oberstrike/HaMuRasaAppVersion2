@@ -35,4 +35,5 @@
     <string name="apply">Apply</string>
     <string name="word">Word</string>
     <string name="start">Start</string>
+    <string name="action_export">Export</string>
 </resources>

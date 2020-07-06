@@ -1,6 +1,6 @@
 package de.hamurasa.session.models
 
-import de.hamurasa.lesson.model.vocable.Vocable
+import de.hamurasa.model.vocable.Vocable
 
 class VocableWrapper(val vocable: Vocable) {
     var attempts: Int = 0

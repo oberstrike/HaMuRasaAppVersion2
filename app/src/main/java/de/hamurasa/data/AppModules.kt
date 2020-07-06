@@ -1,15 +1,19 @@
 package de.hamurasa.data
 
-import de.hamurasa.lesson.model.lesson.*
-import de.hamurasa.login.LoginViewModel
+import de.hamurasa.model.lesson.*
 import de.hamurasa.main.MainViewModel
+import de.hamurasa.main.fragments.dictionary.DictionaryFragment
 import de.hamurasa.util.SchedulerProvider
 import de.hamurasa.util.SchedulerProviderImpl
 import de.hamurasa.session.SessionViewModel
-import de.hamurasa.lesson.model.vocable.*
+import de.hamurasa.model.vocable.*
+import de.hamurasa.main.fragments.dictionary.DictionaryViewModel
+import de.hamurasa.main.fragments.edit.EditFragment
 import de.hamurasa.main.fragments.edit.EditVocableDialog
-import de.hamurasa.main.fragments.dialogs.NewVocableDialog
+import de.hamurasa.main.fragments.edit.NewVocableDialog
 import de.hamurasa.main.fragments.edit.EditViewModel
+import de.hamurasa.main.fragments.home.HomeFragment
+import de.hamurasa.main.fragments.home.HomeViewModel
 import de.hamurasa.settings.SettingsViewModel
 import de.hamurasa.settings.model.Settings
 import org.koin.android.viewmodel.dsl.viewModel
@@ -33,13 +37,15 @@ val appModules = module {
 
     viewModel { MainViewModel(get(), get(), get(), get()) }
 
-    viewModel { LoginViewModel(get()) }
-
     viewModel { SessionViewModel(get(), get()) }
 
     viewModel { SettingsViewModel(get()) }
 
     viewModel { EditViewModel(get(), get(), get(), get()) }
+
+    viewModel { HomeViewModel(get(), get(), get(), get()) }
+
+    viewModel { DictionaryViewModel(get(), get(), get(), get()) }
 }
 
 
@@ -51,6 +57,12 @@ val modelModules = module {
     factory { NewVocableDialog(get()) }
 
     factory { params -> EditVocableDialog(params[0]) }
+
+    factory { params -> HomeFragment(params[0]) }
+
+    factory { DictionaryFragment() }
+
+    factory { EditFragment() }
 
 
 }

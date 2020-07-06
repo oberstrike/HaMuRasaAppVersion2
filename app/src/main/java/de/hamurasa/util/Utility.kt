@@ -1,8 +1,8 @@
 package de.hamurasa.util
 
 //import com.fatboyindustrial.gsonjodatime.Converters
-import de.hamurasa.lesson.model.lesson.Lesson
-import de.hamurasa.lesson.model.vocable.Vocable
+import de.hamurasa.model.lesson.Lesson
+import de.hamurasa.model.vocable.Vocable
 
 
 fun Vocable.isValid(): Boolean{

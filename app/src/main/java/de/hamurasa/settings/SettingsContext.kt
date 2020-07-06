@@ -10,7 +10,6 @@ object SettingsContext {
 
     fun init(settings: Settings) {
         this.settings = settings
-        forceOffline = settings.appOffline
         activeLessonId = settings.activeLessonId
         SessionSettings.maxRepetitions = settings.maxRepetitions
         SessionSettings.maxVocableCount = settings.maxVocableCount
@@ -18,23 +17,14 @@ object SettingsContext {
         SessionSettings.alternativeInputType = settings.alternativeInputType
         SessionSettings.writingInputType = settings.writingInputType
 
-        isOffline = Observable.just(forceOffline)
-
     }
 
-    lateinit var isOffline: Observable<Boolean>
 
     var activeLessonId: Int = 0
         set(value) {
             field = value
             settings.activeLessonId = value
 
-        }
-
-    var forceOffline: Boolean = false
-        set(value) {
-            field = value
-            settings.appOffline = value
         }
 
     object SessionSettings {

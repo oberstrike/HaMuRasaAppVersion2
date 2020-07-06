@@ -3,7 +3,7 @@ package de.hamurasa.data
 import android.content.Context
 import android.util.Log
 import de.hamurasa.BuildConfig
-import de.hamurasa.lesson.model.MyObjectBox
+import de.hamurasa.model.MyObjectBox
 import io.objectbox.BoxStore
 import io.objectbox.android.AndroidObjectBrowser
 

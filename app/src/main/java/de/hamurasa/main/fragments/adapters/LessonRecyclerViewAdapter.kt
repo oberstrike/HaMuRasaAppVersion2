@@ -7,7 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hamurasa.R
-import de.hamurasa.lesson.model.lesson.Lesson
+import de.hamurasa.model.lesson.Lesson
 
 class LessonRecyclerViewAdapter(
     val context: Context,
@@ -64,13 +64,9 @@ class LessonRecyclerViewAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
 
-
-        val offline = item.isOffline
-        if (offline) {
-            holder.lessonView.setBackgroundColor(Color.parseColor("#D4D4D4"))
-        }
-
+        holder.lessonView.setBackgroundColor(Color.parseColor("#D4D4D4"))
         holder.lessonId.text = context.resources.getString(R.string.lesson, position + 1)
+
         if (item.words.size == 0) {
             holder.lessonId.setTextColor(Color.parseColor("#a1a1a1"))
         }

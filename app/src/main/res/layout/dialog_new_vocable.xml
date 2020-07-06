@@ -51,13 +51,12 @@
 
     <Button
         android:id="@+id/new_vocable_add_button"
-        android:layout_width="74dp"
-        android:layout_height="37dp"
+        android:layout_width="80dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="4dp"
         android:text="@string/ok"
-        app:layout_constraintBottom_toBottomOf="@+id/new_vocable_offline_checkbox"
         app:layout_constraintEnd_toEndOf="@+id/new_vocable_translations_editText"
-        app:layout_constraintHorizontal_bias="0.861"
-        app:layout_constraintStart_toEndOf="@+id/new_vocable_offline_checkbox" />
+        app:layout_constraintTop_toTopOf="@+id/new_vocable_language_spinner" />
 
     <Spinner
         android:id="@+id/new_vocable_type_spinner"
@@ -74,14 +73,5 @@
         android:layout_marginTop="15dp"
         app:layout_constraintEnd_toEndOf="@+id/new_vocable_type_spinner"
         app:layout_constraintTop_toBottomOf="@+id/new_vocable_type_spinner" />
-
-    <CheckBox
-        android:id="@+id/new_vocable_offline_checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="@string/offline"
-        app:layout_constraintStart_toStartOf="@+id/new_vocable_translations_editText"
-        app:layout_constraintTop_toBottomOf="@+id/new_vocable_language_spinner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,81 +1,76 @@
 package de.hamurasa.main
 
+import android.Manifest
+import android.content.ClipboardManager
 import android.content.Intent
-import android.os.Bundle
+import android.content.pm.PackageManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.github.pwittchen.swipe.library.rx2.SwipeEvent
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.hamurasa.R
-import de.hamurasa.lesson.model.lesson.Lesson
-import de.hamurasa.lesson.model.vocable.Language
-import de.hamurasa.login.LoginActivity
-import de.hamurasa.main.fragments.DictionaryFragment
-import de.hamurasa.main.fragments.HomeFragment
-import de.hamurasa.main.fragments.dialogs.NewLessonDialog
-import de.hamurasa.main.fragments.dialogs.NewVocableDialog
-import de.hamurasa.main.fragments.dialogs.UpdateLessonDialog
+import de.hamurasa.main.fragments.dialogs.ImportExportDialog
+import de.hamurasa.main.fragments.dictionary.DictionaryFragment
 import de.hamurasa.main.fragments.edit.EditFragment
-import de.hamurasa.network.requestAsync
+import de.hamurasa.main.fragments.edit.NewVocableDialog
+import de.hamurasa.main.fragments.home.HomeFragment
+import de.hamurasa.main.fragments.home.NewLessonDialog
+import de.hamurasa.main.fragments.home.OnItemClickListener
+import de.hamurasa.model.lesson.Lesson
 import de.hamurasa.settings.SettingsActivity
 import de.hamurasa.settings.SettingsContext
 import de.hamurasa.settings.model.Settings
-import de.util.hamurasa.utility.dialog
-import de.util.hamurasa.utility.findFirst
-import de.util.hamurasa.utility.foreach
-import de.util.hamurasa.utility.toast
+import de.util.hamurasa.utility.util.AbstractActivity
+import de.util.hamurasa.utility.util.findFirst
+import de.util.hamurasa.utility.util.fragment
+import de.util.hamurasa.utility.util.request
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import mu.KotlinLogging
 import org.joda.time.DateTime
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 
-class MainActivity : AppCompatActivity(),
-    BottomNavigationView.OnNavigationItemSelectedListener {
+//Logger
+private val logger = KotlinLogging.logger {}
 
-    private val myViewModel: MainViewModel by viewModel()
+class MainActivity : AbstractActivity<MainViewModel>(),
+    BottomNavigationView.OnNavigationItemSelectedListener,
+    OnItemClickListener {
+
+
+    override val myViewModel: MainViewModel by viewModel()
+
+    override val toolbarToUse: Toolbar
+        get() = toolbar
+
+    override val layoutRes: Int = R.layout.activity_main
 
     private val settings: Settings by inject()
 
-
-    private lateinit var swipe: Swipe
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+    override fun init() {
         bottom_navigator.setOnNavigationItemSelectedListener(this)
         SettingsContext.init(settings)
-
         MainContext.EditContext.lesson = BehaviorSubject.create()
-
         swipe = Swipe(60, 300)
-        checkConnection()
 
-
-        requestAsync {
-            init()
+        request {
+            initObserver()
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        bottom_navigator.menu.foreach {
-            if (it.itemId == R.id.nav_search) {
-                it.isEnabled = !SettingsContext.forceOffline
-            }
-        }
-    }
 
+    private lateinit var swipe: Swipe
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -84,16 +79,9 @@ class MainActivity : AppCompatActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         if (item == null)
-            return super.onOptionsItemSelected(item)
+            return false
 
         when (item.itemId) {
-            R.id.logout -> {
-                myViewModel.logout()
-
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
-                finish()
-            }
             R.id.action_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
                 startActivity(intent)
@@ -101,34 +89,33 @@ class MainActivity : AppCompatActivity(),
             R.id.action_new_lesson -> {
                 val fragment =
                     NewLessonDialog(
-                        Lesson(
-                            0,
-                            language = Language.ES,
-                            validationLanguage = Language.GER,
-                            lastChanged = DateTime.now()
-                        )
+                        Lesson(lastChanged = DateTime.now())
                     )
                 fragment.show(supportFragmentManager, "New Lesson")
+            }
+            R.id.action_export -> {
+                val json = myViewModel.export()
+                val clipboard = getSystemService(ClipboardManager::class.java) as ClipboardManager
+
+                val dialog = ImportExportDialog(json, clipboard)
+
+                dialog.show(supportFragmentManager, "Import/Export Json")
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
-
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
             R.id.nav_search -> {
                 if (MainContext.activeFragment !is DictionaryFragment) {
-                    if (!SettingsContext.isOffline.blockingFirst()) {
-                        loadFragment(DictionaryFragment())
-                        return true
-                    }
-
+                    loadFragment(get<DictionaryFragment> { parametersOf() })
+                    return true
                 }
             }
             R.id.nav_edit_lesson -> {
                 if (MainContext.activeFragment !is EditFragment) {
-                    loadFragment(EditFragment())
+                    loadFragment(get<EditFragment> { parametersOf() })
                     return true
                 }
 
@@ -136,7 +123,7 @@ class MainActivity : AppCompatActivity(),
 
             R.id.nav_home -> {
                 if (MainContext.activeFragment !is HomeFragment) {
-                    loadFragment(HomeFragment())
+                    loadFragment(get<HomeFragment> { parametersOf(this) })
                     return true
                 }
             }
@@ -145,140 +132,48 @@ class MainActivity : AppCompatActivity(),
         return false
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.main_container, fragment)
-        transaction.addToBackStack(null)
-        transaction.commit()
-        MainContext.activeFragment = fragment
 
-        if (fragment::class.java == DictionaryFragment::class.java || fragment::class.java == EditFragment::class.java) {
-            val oldMenuItem = toolbar.menu.findFirst { each -> each.itemId == 1 }
-            if (oldMenuItem == null) {
-                toolbar.menu.add(Menu.NONE, 1, Menu.NONE, "Add Vocable")
-                val menuItem = toolbar.menu.findItem(1)
-                menuItem.setOnMenuItemClickListener {
-                    val dialog: NewVocableDialog by inject()
-                    dialog.show(supportFragmentManager, "New Vocable")
+    private fun initObserver() {
+        loadFragment(get<HomeFragment> { parametersOf(this) })
 
-
-                    true
-                }
-            }
-            if (fragment::class.java == DictionaryFragment::class.java) {
-                modeSpinner.visibility = View.VISIBLE
-            } else {
-                modeSpinner.visibility = View.INVISIBLE
-            }
-        } else {
-            toolbar.menu.removeItem(1)
-            modeSpinner.visibility = View.INVISIBLE
-        }
-    }
-
-    private fun checkLoggedIn() {
-        myViewModel.observe(myViewModel.isLoggedIn) {
-            if (!it) {
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
-                finish()
-            } else {
-                myViewModel.init()
-                //       myViewModel.updateHome(false)
-
-            }
-        }
-    }
-
-    private fun checkConnection() {
-        val loadingDialog = dialog(R.layout.dialog_loading)
-
-        requestAsync(action = {
-            myViewModel.checkConnection()
-        }, onSuccess = {
-            with(SettingsContext.activeLessonId) {
-                if (this != 0) {
-                    myViewModel.setActiveLesson(this.toLong())
-                }
-            }
-
-            runBlocking {
-                withContext(Dispatchers.Main) {
-                    loadingDialog.dismiss()
-                }
-            }
-
-            myViewModel.observe(SettingsContext.isOffline) {
-                myViewModel.init()
-                if (it) toast("You are in offline mode.")
-                else checkLoggedIn()
-                loadFragment(HomeFragment())
-            }
-        })
-
-        loadingDialog.show(supportFragmentManager, "Text")
-    }
-
-    private fun init() {
-
-        myViewModel.observe(SettingsContext.isOffline) {
-            bottom_navigator.menu.foreach { menuItem ->
-                if (menuItem.itemId == R.id.nav_search) {
-                    menuItem.isEnabled = !it
-                }
-            }
-        }
-
-        myViewModel.observe(MainContext.EditContext.lesson) {
-            println(it)
-        }
-
-        myViewModel.observe(MainContext.HomeContext.updateLessons) {
-            for (pair in it) {
-                val dialog = UpdateLessonDialog(pair.toPair())
-                dialog.show(supportFragmentManager, "Update Lesson Dialog")
-            }
-        }
-
+        //Swipe Binding extreme short
         myViewModel.observe(swipe.observe()) {
-            val activeFragment = MainContext.activeFragment
-            var newFragment: Fragment? = null
+            if (it != SwipeEvent.SWIPED_RIGHT && it != SwipeEvent.SWIPED_LEFT)
+                return@observe
 
-            if (it == SwipeEvent.SWIPED_RIGHT) {
-                newFragment = when (activeFragment::class) {
-                    HomeFragment::class -> EditFragment()
-                    EditFragment::class -> if (SettingsContext.isOffline.blockingFirst()) HomeFragment() else DictionaryFragment()
-                    DictionaryFragment::class -> HomeFragment()
-                    else -> HomeFragment()
+            val newFragmentId = with(MainContext.activeFragment) {
+                with(getIdFromFragment(this)) {
+                    when (it) {
+                        SwipeEvent.SWIPED_RIGHT -> if (this == 2) 0 else this + 1
+                        else -> if (this == 0) 2 else this - 1
+                    }
                 }
-            } else if (it == SwipeEvent.SWIPED_LEFT) {
-                newFragment = when (activeFragment::class) {
-                    HomeFragment::class -> if (SettingsContext.isOffline.blockingFirst()) EditFragment() else DictionaryFragment()
-                    EditFragment::class -> HomeFragment()
-                    DictionaryFragment::class -> EditFragment()
-                    else -> HomeFragment()
-                }
-
             }
-            if (newFragment != null) {
-                val newSelectedItem = when (newFragment) {
-                    is HomeFragment -> R.id.nav_home
-                    is DictionaryFragment -> R.id.nav_search
-                    else -> R.id.nav_edit_lesson
-                }
-                bottom_navigator.selectedItemId = newSelectedItem
 
-                loadFragment(newFragment)
-
+            with(newFragmentId) {
+                bottom_navigator.selectedItemId = bottom_navigator.menu.getItem(this).itemId
+                loadFragment(getFragmentById(this))
             }
+
         }
     }
 
-
-    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-        swipe.dispatchTouchEvent(event)
-        return super.dispatchTouchEvent(event)
+    private fun getFragmentById(newFragmentId: Int): Fragment {
+        return when (newFragmentId) {
+            0 -> get<HomeFragment> { parametersOf(this) }
+            1 -> get<EditFragment>()
+            else -> get<DictionaryFragment>()
+        }
     }
+
+    private fun getIdFromFragment(fragment: Fragment): Int {
+        return when (fragment::class) {
+            HomeFragment::class -> 0
+            EditFragment::class -> 1
+            else -> 2
+        }
+    }
+
 
     override fun onPause() {
         super.onPause()
@@ -288,11 +183,54 @@ class MainActivity : AppCompatActivity(),
                 SettingsContext.activeLessonId = id
             }
         }
-        val lessons = MainContext.HomeContext.lessons.blockingFirst()
-        for (lesson in lessons) {
-            myViewModel.saveLesson(lesson)
+    }
+
+    //Select Menu Item OnClick
+    override fun onItemClick() {
+        bottom_navigator.selectedItemId = R.id.nav_edit_lesson
+        loadFragment(get<EditFragment>())
+    }
+
+    private fun loadFragment(fragment: Fragment) {
+        MainContext.activeFragment = fragment
+
+        if (fragment is DictionaryFragment || fragment is EditFragment) {
+            val oldMenuItem = toolbarToUse.menu.findFirst { each -> each.itemId == 1 }
+            if (oldMenuItem == null) {
+                toolbarToUse.menu.add(Menu.NONE, 1, Menu.NONE, "Add Vocable")
+                val menuItem = toolbarToUse.menu.findItem(1)
+                menuItem.setOnMenuItemClickListener {
+                    val dialog: NewVocableDialog by inject()
+                    dialog.show(supportFragmentManager, "New Vocable")
+                    true
+                }
+            }
+            if (fragment is DictionaryFragment) {
+                modeSpinner.visibility = View.VISIBLE
+            } else {
+                modeSpinner.visibility = View.INVISIBLE
+            }
+        } else {
+            toolbarToUse.menu.removeItem(1)
+            modeSpinner.visibility = View.INVISIBLE
         }
 
+        val newSelectedItem = when (fragment) {
+            is HomeFragment -> R.id.nav_home
+            is DictionaryFragment -> R.id.nav_search
+            else -> R.id.nav_edit_lesson
+        }
+        bottom_navigator.selectedItemId = newSelectedItem
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.main_container, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
     }
+
+    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+        swipe.dispatchTouchEvent(event)
+        return super.dispatchTouchEvent(event)
+    }
+
 
 }

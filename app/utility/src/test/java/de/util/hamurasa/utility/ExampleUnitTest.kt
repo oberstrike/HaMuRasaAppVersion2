@@ -1,27 +1,23 @@
 package de.util.hamurasa.utility
 
-import android.app.Activity
-import android.os.Build
-import android.widget.LinearLayout
+import android.content.Context
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Robolectric
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+import org.mockito.Mock
+import org.mockito.runners.MockitoJUnitRunner
 
 /**
  * Example local unit test, which will execute on the development machine (host).
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.P])
+@RunWith(MockitoJUnitRunner::class)
 class ExampleUnitTest {
 
+    @Mock
+    private lateinit var mockContext: Context
 
-    private val activity = Robolectric.buildActivity(Activity::class.java)
 
     @Test
     fun addition_isCorrect() {
@@ -30,10 +26,7 @@ class ExampleUnitTest {
 
     @Test
     fun test_observer_with_interface() {
-        val context = activity.get().applicationContext
-        val layout = LinearLayout(context)
 
-        assertNotNull(layout)
     }
 
 

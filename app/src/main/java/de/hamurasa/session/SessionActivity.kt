@@ -5,32 +5,35 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.github.pwittchen.swipe.library.rx2.SwipeEvent
 import de.hamurasa.R
 import de.hamurasa.main.MainActivity
-import de.hamurasa.session.models.VocableWrapper
 import de.hamurasa.settings.SettingsContext
-import de.util.hamurasa.utility.AbstractFragment
-import de.util.hamurasa.utility.afterTextChanged
-import de.util.hamurasa.utility.bind
-import de.util.hamurasa.utility.toast
+import de.util.hamurasa.utility.util.AbstractActivity
+import de.util.hamurasa.utility.util.AbstractFragment
+import de.util.hamurasa.utility.util.afterTextChanged
+import de.util.hamurasa.utility.util.toast
 import kotlinx.android.synthetic.main.activity_lesson.*
 import kotlinx.android.synthetic.main.vocable_session_fragment.*
 import org.koin.android.viewmodel.ext.android.viewModel
-import kotlin.reflect.KMutableProperty0
 
-class SessionActivity : AppCompatActivity() {
+class SessionActivity : AbstractActivity<SessionViewModel>() {
 
-    private val myViewModel: SessionViewModel by viewModel()
+    override val myViewModel: SessionViewModel by viewModel()
+
+    override val layoutRes = R.layout.activity_lesson
+
+    override val toolbarToUse: Toolbar? = null
+
+    private var activeFragment: BasicFragment? = null
 
     private lateinit var swipe: Swipe
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_lesson)
-        setSupportActionBar(toolbar)
+    override fun init() {
+        changeFragment(R.anim.enter_from_left, R.anim.exit_to_right)
+
         swipe = Swipe(40, 200)
 
         myViewModel.observe(swipe.observe()) {
@@ -45,42 +48,37 @@ class SessionActivity : AppCompatActivity() {
             }
         }
         myViewModel.init()
-        init()
+        initObserver()
+
     }
 
 
     private fun changeFragment(leftLayout: Int, rightLayout: Int) {
-        val fragment = BasicFragment(this::onTextChange)
-
+        activeFragment?.reset()
+        activeFragment = BasicFragment(this::onTextChange)
 
         supportFragmentManager
             .beginTransaction()
             .setCustomAnimations(leftLayout, rightLayout)
-            .replace(R.id.vocable_container, fragment)
+            .replace(R.id.vocable_container, activeFragment!!)
             .commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_login, menu)
+        menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
-    private fun init() {
-        changeFragment(R.anim.enter_from_left, R.anim.exit_to_right)
 
-
+    private fun initObserver() {
         myViewModel.observe(SessionContext.running) {
+            if (it)
+                return@observe
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             toast("You have successfully completed the training!")
             finish()
         }
-
-    }
-
-    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-        swipe.dispatchTouchEvent(event)
-        return super.dispatchTouchEvent(event)
     }
 
 
@@ -89,17 +87,28 @@ class SessionActivity : AppCompatActivity() {
 
         override fun getLayoutId() = R.layout.vocable_session_fragment
 
+        fun reset() {
+            val value = getInitValue()
+            session_vocable_first_value.text = value
+        }
+
+        private fun getInitValue(): String {
+            return with(SessionContext.activeVocable) {
+                when (SessionContext.sessionType) {
+                    SessionType.STANDARD -> this.value
+                    SessionType.ALTERNATIVE -> this.translation
+                    else -> this.translation
+                }
+            }
+        }
+
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
 
             session_vocable_second_value.setOnClickListener(this)
 
             with(SessionContext.activeVocable) {
-                val value = when (SessionContext.sessionType) {
-                    SessionType.STANDARD -> this.value
-                    SessionType.ALTERNATIVE -> this.translation
-                    else -> this.translation
-                }
+                val value = getInitValue()
 
                 if (SessionContext.sessionType == SessionType.WRITING) {
                     session_value_editText.afterTextChanged(onTextChange)
@@ -121,16 +130,9 @@ class SessionActivity : AppCompatActivity() {
                     SessionType.ALTERNATIVE -> this.value
                     else -> this.value
                 }
-
                 session_vocable_second_value.text = value
-
-
             }
         }
-
-    }
-
-    private fun onClick() {
 
     }
 
@@ -141,6 +143,12 @@ class SessionActivity : AppCompatActivity() {
                 changeFragment(R.anim.enter_from_left, R.anim.exit_to_right)
             }
         }
+    }
+
+
+    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+        swipe.dispatchTouchEvent(event)
+        return super.dispatchTouchEvent(event)
     }
 
 }
