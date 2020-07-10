@@ -6,7 +6,7 @@ import de.hamurasa.session.models.VocableWrapper
 import de.hamurasa.settings.SettingsContext
 import de.hamurasa.util.BaseViewModel
 import de.util.hamurasa.utility.util.weight
-import io.reactivex.Observable
+import kotlinx.coroutines.flow.flowOf
 
 class SessionViewModel(
     provider: SchedulerProvider,
@@ -56,7 +56,7 @@ class SessionViewModel(
             val next = weightedList.random()
             nextVocableWrapper = next
         } else {
-            SessionContext.running = Observable.just(false)
+            SessionContext.running = flowOf(false)
         }
         SessionContext.sessionType = SessionContext.sessionTypes.random()
         if (nextVocableWrapper == null) {

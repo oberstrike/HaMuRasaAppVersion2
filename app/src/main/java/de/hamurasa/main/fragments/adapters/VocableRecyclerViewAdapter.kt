@@ -76,10 +76,8 @@ class VocableRecyclerViewAdapter(
     }
 
     fun setWords(words: List<Vocable>) {
-        if (words != items) {
-            items.clear()
-            items.addAll(words)
-        }
+        items.clear()
+        items.addAll(words)
     }
 
     interface OnClickListener {

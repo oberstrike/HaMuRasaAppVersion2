@@ -2,25 +2,28 @@ package de.hamurasa.main.fragments.edit
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.hamurasa.R
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.fragments.adapters.VocableRecyclerViewAdapter
+import de.hamurasa.model.vocable.Vocable
 import de.util.hamurasa.utility.util.AbstractFragment
 import kotlinx.android.synthetic.main.edit_fragment.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.core.parameter.parametersOf
 
-class EditFragment : AbstractFragment(), VocableRecyclerViewAdapter.OnClickListener {
+class EditFragment : AbstractFragment(), VocableRecyclerViewAdapter.OnClickListener{
 
-    private val myViewModel: EditViewModel by sharedViewModel()
+    override val myViewModel: EditViewModel by sharedViewModel()
 
     private lateinit var vocableEditRecyclerViewAdapter: VocableRecyclerViewAdapter
 
     override fun getLayoutId(): Int = R.layout.edit_fragment
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         vocableEditRecyclerViewAdapter = VocableRecyclerViewAdapter(requireContext(), this)
@@ -28,33 +31,44 @@ class EditFragment : AbstractFragment(), VocableRecyclerViewAdapter.OnClickListe
         edit_fragment_recyclerView.adapter = vocableEditRecyclerViewAdapter
         listIsEmpty.visibility = View.VISIBLE
 
-        myViewModel.observe(MainContext.EditContext.lesson) {
+
+        myViewModel.launchJob {
+            initObserver()
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    private suspend fun initObserver() {
+        MainContext.EditContext.lesson.collect {
+            if (it == null)
+                return@collect
             val lessons = it.words.toList().sortedBy { vocable -> vocable.value }
-            vocableEditRecyclerViewAdapter.setWords(lessons)
-            vocableEditRecyclerViewAdapter.notifyDataSetChanged()
-            if (listIsEmpty != null) {
-                if (lessons.isEmpty()) {
-                    listIsEmpty.visibility = View.VISIBLE
-                } else {
-                    listIsEmpty.visibility = View.INVISIBLE
+            withContext(Dispatchers.Main) {
+                vocableEditRecyclerViewAdapter.setWords(lessons)
+                vocableEditRecyclerViewAdapter.notifyDataSetChanged()
+                if (listIsEmpty != null) {
+                    if (lessons.isEmpty()) {
+                        listIsEmpty.visibility = View.VISIBLE
+                    } else {
+                        listIsEmpty.visibility = View.INVISIBLE
+                    }
+
                 }
             }
         }
 
+        println("finish")
     }
 
 
+    @ExperimentalCoroutinesApi
     override fun onItemClick(position: Int) {
-        val vocable = MainContext.EditContext.lesson.blockingFirst()
-            .words
-            .sortedBy { vocable -> vocable.value }[position]
-        val fragment by inject<EditVocableDialog> { parametersOf(vocable) }
-        fragment.show(parentFragmentManager, "")
-    }
+        val vocable: Vocable? =
+            MainContext.EditContext.lesson.value?.words?.sortedBy { vocable -> vocable.value }
+                ?.get(position)
 
-    override fun onStop() {
-        myViewModel.onCleared()
-        super.onStop()
+        val fragment by inject<EditVocableDialog> { parametersOf(vocable, this) }
+        fragment.show(parentFragmentManager, "")
     }
 
 

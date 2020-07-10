@@ -12,7 +12,9 @@ import de.hamurasa.util.isValid
 import de.util.hamurasa.utility.util.*
 import kotlinx.android.synthetic.main.dialog_new_vocable.*
 
-abstract class AbstractNewVocableDialog(private val vocable: Vocable) : AbstractDialog(),
+abstract class AbstractNewVocableDialog(
+    private val vocable: Vocable
+) : AbstractDialog(),
     View.OnClickListener {
 
     protected abstract val myViewModel: BaseViewModel
@@ -55,9 +57,7 @@ abstract class AbstractNewVocableDialog(private val vocable: Vocable) : Abstract
             activity?.toast("Please fill in all the information.")
             return
         }
-
         onAddVocable()
-
         dismiss()
     }
 

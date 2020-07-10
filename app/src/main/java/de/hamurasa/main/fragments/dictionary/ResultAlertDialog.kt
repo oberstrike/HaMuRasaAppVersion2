@@ -10,6 +10,10 @@ import de.util.hamurasa.utility.util.afterSelectedChanged
 import de.util.hamurasa.utility.util.initAdapter
 import de.util.hamurasa.utility.util.toast
 import kotlinx.android.synthetic.main.dialog_result.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 //Reworked
@@ -21,6 +25,7 @@ class ResultAlertDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
 
     override fun getLayoutId(): Int = R.layout.dialog_result
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         result_add_to_lesson_button.setOnClickListener(this)
@@ -31,12 +36,19 @@ class ResultAlertDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
             lessonId = it.toLong()
         }
 
-        val array = MainContext.HomeContext.lessons.blockingFirst().map { it.id.toString() }
-            .toTypedArray()
-        result_lesson_Spinner.initAdapter(array = array)
+
+        myViewModel.launchJob {
+            MainContext.HomeContext.lessons.collect {
+                if (it == null)
+                    return@collect
+                val array = it.map { value -> value.id.toString() }.toTypedArray()
+                result_lesson_Spinner.initAdapter(array = array)
+            }
+        }
     }
 
 
+    @ExperimentalCoroutinesApi
     override fun onClick(v: View?) {
         if (lessonId != 0L) {
             myViewModel.addVocableToLesson(vocable, lessonId)

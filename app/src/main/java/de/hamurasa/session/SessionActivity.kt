@@ -10,13 +10,18 @@ import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.github.pwittchen.swipe.library.rx2.SwipeEvent
 import de.hamurasa.R
 import de.hamurasa.main.MainActivity
+import de.hamurasa.main.MainContext
 import de.hamurasa.settings.SettingsContext
+import de.util.hamurasa.utility.main.AbstractViewModel
 import de.util.hamurasa.utility.util.AbstractActivity
 import de.util.hamurasa.utility.util.AbstractFragment
 import de.util.hamurasa.utility.util.afterTextChanged
 import de.util.hamurasa.utility.util.toast
 import kotlinx.android.synthetic.main.activity_lesson.*
 import kotlinx.android.synthetic.main.vocable_session_fragment.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class SessionActivity : AbstractActivity<SessionViewModel>() {
@@ -48,14 +53,15 @@ class SessionActivity : AbstractActivity<SessionViewModel>() {
             }
         }
         myViewModel.init()
-        initObserver()
-
+        runBlocking {
+            initObserver()
+        }
     }
 
 
     private fun changeFragment(leftLayout: Int, rightLayout: Int) {
         activeFragment?.reset()
-        activeFragment = BasicFragment(this::onTextChange)
+        activeFragment = BasicFragment(this::onTextChange, myViewModel)
 
         supportFragmentManager
             .beginTransaction()
@@ -70,19 +76,23 @@ class SessionActivity : AbstractActivity<SessionViewModel>() {
     }
 
 
-    private fun initObserver() {
-        myViewModel.observe(SessionContext.running) {
+    private suspend fun initObserver() {
+        SessionContext.running.collect {
             if (it)
-                return@observe
+                return@collect
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             toast("You have successfully completed the training!")
             finish()
         }
+
     }
 
 
-    class BasicFragment(private val onTextChange: (String) -> Unit) : AbstractFragment(),
+    class BasicFragment(
+        private val onTextChange: (String) -> Unit,
+        override val myViewModel: AbstractViewModel
+    ) : AbstractFragment(),
         View.OnClickListener {
 
         override fun getLayoutId() = R.layout.vocable_session_fragment

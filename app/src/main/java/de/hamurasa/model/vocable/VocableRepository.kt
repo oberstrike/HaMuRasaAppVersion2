@@ -2,16 +2,17 @@ package de.hamurasa.model.vocable
 
 import de.hamurasa.data.ObjectBox
 import io.objectbox.Box
-import io.objectbox.rx.RxQuery
-import io.reactivex.Observable
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 interface VocableRepository {
 
     fun findById(id: Long): Vocable?
 
-    fun findByName(name: String): Observable<List<Vocable>>
+    fun findByName(value: String): List<Vocable>
 
-    fun findAll(): Observable<List<Vocable>>
+    fun findAll(): Flow<List<Vocable>>
 
     fun save(vocable: Vocable): Long
 
@@ -41,9 +42,9 @@ class VocableRepositoryImpl :
         vocableBox.remove(vocable)
     }
 
-    override fun findAll(): Observable<List<Vocable>> {
-        return RxQuery.observable(vocableBox.query().build())
-    }
+    @ExperimentalCoroutinesApi
+    override fun findAll(): Flow<List<Vocable>> = flowOf(vocableBox.query().build().find())
+
 
     override fun size(): Int {
         return vocableBox.query().build().find().size
@@ -53,9 +54,9 @@ class VocableRepositoryImpl :
         vocableBox.removeAll()
     }
 
-    override fun findByName(name: String): Observable<List<Vocable>> {
-        return RxQuery.observable(vocableBox.query().contains(Vocable_.value, name).build())
-    }
+    @ExperimentalCoroutinesApi
+    override fun findByName(value: String): List<Vocable> =
+        vocableBox.query().equal(Vocable_.value, value).build().find()
 
 
 }

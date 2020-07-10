@@ -1,16 +1,12 @@
 package de.hamurasa.main
 
-import android.Manifest
 import android.content.ClipboardManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.github.pwittchen.swipe.library.rx2.SwipeEvent
@@ -29,11 +25,9 @@ import de.hamurasa.settings.SettingsContext
 import de.hamurasa.settings.model.Settings
 import de.util.hamurasa.utility.util.AbstractActivity
 import de.util.hamurasa.utility.util.findFirst
-import de.util.hamurasa.utility.util.fragment
-import de.util.hamurasa.utility.util.request
-import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.activity_main.*
-import mu.KotlinLogging
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.joda.time.DateTime
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -42,68 +36,38 @@ import org.koin.core.parameter.parametersOf
 
 
 //Logger
-private val logger = KotlinLogging.logger {}
 
 class MainActivity : AbstractActivity<MainViewModel>(),
     BottomNavigationView.OnNavigationItemSelectedListener,
     OnItemClickListener {
 
-
     override val myViewModel: MainViewModel by viewModel()
 
-    override val toolbarToUse: Toolbar
-        get() = toolbar
+    override val toolbarToUse: Toolbar get() = toolbar
 
     override val layoutRes: Int = R.layout.activity_main
 
     private val settings: Settings by inject()
 
+    private lateinit var swipe: Swipe
+
     override fun init() {
         bottom_navigator.setOnNavigationItemSelectedListener(this)
         SettingsContext.init(settings)
-        MainContext.EditContext.lesson = BehaviorSubject.create()
-        swipe = Swipe(60, 300)
 
-        request {
-            initObserver()
+        loadFragment(get<HomeFragment> { parametersOf(this) })
+
+        runBlocking {
+            initSwipe()
         }
     }
 
-
-    private lateinit var swipe: Swipe
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item == null)
-            return false
-
-        when (item.itemId) {
-            R.id.action_settings -> {
-                val intent = Intent(this, SettingsActivity::class.java)
-                startActivity(intent)
-            }
-            R.id.action_new_lesson -> {
-                val fragment =
-                    NewLessonDialog(
-                        Lesson(lastChanged = DateTime.now())
-                    )
-                fragment.show(supportFragmentManager, "New Lesson")
-            }
-            R.id.action_export -> {
-                val json = myViewModel.export()
-                val clipboard = getSystemService(ClipboardManager::class.java) as ClipboardManager
-
-                val dialog = ImportExportDialog(json, clipboard)
-
-                dialog.show(supportFragmentManager, "Import/Export Json")
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
@@ -133,9 +97,8 @@ class MainActivity : AbstractActivity<MainViewModel>(),
     }
 
 
-    private fun initObserver() {
-        loadFragment(get<HomeFragment> { parametersOf(this) })
-
+    private fun initSwipe() {
+        swipe = Swipe(60, 300)
         //Swipe Binding extreme short
         myViewModel.observe(swipe.observe()) {
             if (it != SwipeEvent.SWIPED_RIGHT && it != SwipeEvent.SWIPED_LEFT)
@@ -175,13 +138,13 @@ class MainActivity : AbstractActivity<MainViewModel>(),
     }
 
 
+    @ExperimentalCoroutinesApi
     override fun onPause() {
         super.onPause()
-        if (MainContext.EditContext.lesson.hasValue()) {
-            val id = MainContext.EditContext.lesson.value?.id?.toInt()
-            if (id != null) {
-                SettingsContext.activeLessonId = id
-            }
+        runBlocking {
+            val id = MainContext.EditContext.lesson.value?.id ?: return@runBlocking
+            SettingsContext.activeLessonId = id.toInt()
+
         }
     }
 
@@ -200,7 +163,7 @@ class MainActivity : AbstractActivity<MainViewModel>(),
                 toolbarToUse.menu.add(Menu.NONE, 1, Menu.NONE, "Add Vocable")
                 val menuItem = toolbarToUse.menu.findItem(1)
                 menuItem.setOnMenuItemClickListener {
-                    val dialog: NewVocableDialog by inject()
+                    val dialog: NewVocableDialog by inject { parametersOf(this) }
                     dialog.show(supportFragmentManager, "New Vocable")
                     true
                 }
@@ -232,5 +195,32 @@ class MainActivity : AbstractActivity<MainViewModel>(),
         return super.dispatchTouchEvent(event)
     }
 
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item == null)
+            return false
+
+        when (item.itemId) {
+            R.id.action_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+            }
+            R.id.action_new_lesson -> {
+                val fragment =
+                    NewLessonDialog(
+                        Lesson(lastChanged = DateTime.now())
+                    )
+                fragment.show(supportFragmentManager, "New Lesson")
+            }
+            R.id.action_export -> {
+                val json = myViewModel.export()
+                val clipboard = getSystemService(ClipboardManager::class.java) as ClipboardManager
+
+                val dialog = ImportExportDialog(json, clipboard)
+
+                dialog.show(supportFragmentManager, "Import/Export Json")
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
 }

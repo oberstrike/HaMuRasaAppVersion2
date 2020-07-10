@@ -4,119 +4,101 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "1:5489663250782794877",
-      "lastPropertyId": "7:7790926071932722527",
+      "id": "1:1697350923784911457",
+      "lastPropertyId": "4:4485869277285346436",
       "name": "Lesson",
       "properties": [
         {
-          "id": "1:2826322604057123900",
-          "name": "id",
-          "type": 6,
-          "flags": 1
+          "id": "1:385778066820139415",
+          "name": "id"
         },
         {
-          "id": "2:8749619108269247619",
-          "name": "serverId",
-          "type": 6,
-          "flags": 4
+          "id": "2:3919881130638660044",
+          "name": "language"
         },
         {
-          "id": "3:1030419953406718283",
-          "name": "language",
-          "type": 6,
-          "flags": 2
+          "id": "3:5800881003897233654",
+          "name": "validationLanguage"
         },
         {
-          "id": "4:4330071765460681761",
-          "name": "validationLanguage",
-          "type": 6,
-          "flags": 2
-        },
-        {
-          "id": "5:519028318910989127",
-          "name": "isOffline",
-          "type": 1,
-          "flags": 4
-        },
-        {
-          "id": "7:7790926071932722527",
-          "name": "lastChanged",
-          "type": 9
+          "id": "4:4485869277285346436",
+          "name": "lastChanged"
         }
       ],
       "relations": [
         {
-          "id": "1:6204580206949688283",
-          "name": "words",
-          "targetId": "2:7757629347621521464"
+          "id": "1:5399224680479332851",
+          "name": "words"
         }
       ]
     },
     {
-      "id": "2:7757629347621521464",
-      "lastPropertyId": "8:7144044326347916378",
+      "id": "2:1425526070670067240",
+      "lastPropertyId": "6:3681891706278096684",
       "name": "Vocable",
       "properties": [
         {
-          "id": "1:4047069483659205260",
-          "name": "id",
-          "type": 6,
-          "flags": 1
+          "id": "1:8403767566738913041",
+          "name": "id"
         },
         {
-          "id": "2:8496678067223322053",
-          "name": "value",
-          "type": 9
+          "id": "2:1220089793395522853",
+          "name": "value"
         },
         {
-          "id": "3:5337020572798411533",
-          "name": "type",
-          "type": 6,
-          "flags": 2
+          "id": "3:6449674959245597349",
+          "name": "type"
         },
         {
-          "id": "4:4216756173047299712",
-          "name": "translation",
-          "type": 9
+          "id": "4:548493307908025609",
+          "name": "translation"
         },
         {
-          "id": "5:3294276495813231705",
-          "name": "serverId",
-          "type": 6,
-          "flags": 4
+          "id": "5:579106710325953899",
+          "name": "language"
         },
         {
-          "id": "6:8659791068748455406",
-          "name": "language",
-          "type": 6,
-          "flags": 2
-        },
-        {
-          "id": "7:1462626545283373617",
-          "name": "isOffline",
-          "type": 1,
-          "flags": 4
-        },
-        {
-          "id": "8:7144044326347916378",
-          "name": "lastChanged",
-          "type": 9
+          "id": "6:3681891706278096684",
+          "name": "lastChanged"
         }
       ],
       "relations": []
+    },
+    {
+      "id": "3:2720226328564991509",
+      "lastPropertyId": "3:1684863216882141435",
+      "name": "Profile",
+      "properties": [
+        {
+          "id": "1:6814858511842638357",
+          "name": "id"
+        },
+        {
+          "id": "2:7223007155643590273",
+          "name": "name"
+        },
+        {
+          "id": "3:1684863216882141435",
+          "name": "offline"
+        }
+      ],
+      "relations": [
+        {
+          "id": "2:2677116915056696071",
+          "name": "lessons"
+        }
+      ]
     }
   ],
-  "lastEntityId": "2:7757629347621521464",
+  "lastEntityId": "3:2720226328564991509",
   "lastIndexId": "0:0",
-  "lastRelationId": "1:6204580206949688283",
+  "lastRelationId": "2:2677116915056696071",
   "lastSequenceId": "0:0",
-  "modelVersion": 5,
-  "modelVersionParserMinimum": 5,
+  "modelVersion": 4,
+  "modelVersionParserMinimum": 4,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [
-    6573138878846994453
-  ],
+  "retiredPropertyUids": [],
   "retiredRelationUids": [],
   "version": 1
 }

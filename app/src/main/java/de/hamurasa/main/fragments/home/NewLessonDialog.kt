@@ -12,12 +12,14 @@ import de.util.hamurasa.utility.util.bind
 import de.util.hamurasa.utility.util.initAdapter
 import de.util.hamurasa.utility.util.toast
 import kotlinx.android.synthetic.main.dialog_new_lesson.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 //Reworked
 class NewLessonDialog(private val lesson: Lesson) : AbstractDialog(), View.OnClickListener {
     private val myViewModel: HomeViewModel by sharedViewModel()
 
+    @ExperimentalCoroutinesApi
     override fun onClick(v: View?) {
         if (!lesson.isValid()) {
             requireActivity().toast("The language have to be different")

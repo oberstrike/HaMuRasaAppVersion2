@@ -9,6 +9,12 @@ import de.hamurasa.model.vocable.VocableDTO
 import de.hamurasa.model.vocable.VocableService
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.joda.time.DateTime
 
 class EditViewModel(
@@ -19,18 +25,17 @@ class EditViewModel(
 ) : BaseViewModel(provider) {
 
 
+    @ExperimentalCoroutinesApi
     fun patchVocable(vocable: Vocable) {
-        val vocableDTO = vocableService.convertToDTO(vocable)
-        vocableDTO.id = vocable.id
-        val id = vocableService.save(vocableDTO)?.id ?: return
-        val oldVocable = vocableService.findById(id)!!
+        vocableService.update(vocable)
 
-        vocableService.update(oldVocable)
-        val lessonId = MainContext.EditContext.lesson.blockingFirst().id
-        val lesson = lessonService.findById(lessonId)!!
-        MainContext.EditContext.lesson.onNext(lesson)
+        val activeLesson = MainContext.EditContext.lesson.value ?: return
+        val newLesson = lessonService.findById(activeLesson.id) ?: return
+        MainContext.EditContext.setLesson(newLesson)
+
     }
 
+    @ExperimentalCoroutinesApi
     fun deleteVocableFromLesson(vocableDTO: VocableDTO, lesson: Lesson) {
         val vocable = vocableService.findById(vocableDTO.id)!!
 
@@ -39,8 +44,7 @@ class EditViewModel(
         lessonService.save(lesson)
 
         vocableService.delete(vocable)
-        MainContext.EditContext.lesson.onNext(lesson)
+     //   MainContext.EditContext.setLesson(null)
+        MainContext.EditContext.setLesson(lesson)
     }
-
-
 }

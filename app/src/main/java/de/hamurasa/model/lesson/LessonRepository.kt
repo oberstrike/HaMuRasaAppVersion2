@@ -2,13 +2,24 @@ package de.hamurasa.model.lesson
 
 import de.hamurasa.data.ObjectBox
 import io.objectbox.Box
+import io.objectbox.query.Query
+import io.objectbox.reactive.DataSubscription
 import io.objectbox.rx.RxQuery
 import io.reactivex.Observable
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.rx2.asFlow
+import org.joda.time.DateTime
 
 interface LessonRepository {
     fun findById(id: Long): Lesson?
 
-    fun findAll(): Observable<List<Lesson>>
+    fun findAll(): List<Lesson>
 
     fun save(lesson: Lesson)
 
@@ -35,13 +46,15 @@ class LessonRepositoryImpl : LessonRepository {
         lessonBox.remove(lesson)
     }
 
-    override fun findAll(): Observable<List<Lesson>> {
-        return RxQuery.observable(lessonBox.query().build())
+    @ExperimentalCoroutinesApi
+    override fun findAll(): List<Lesson> {
+        return lessonBox.query().build().find()
     }
 
+
     override fun findById(id: Long): Lesson? {
-        return RxQuery.observable(lessonBox.query().equal(Lesson_.id, id).build())
-            .blockingFirst().firstOrNull()
+        return (lessonBox.query().equal(Lesson_.id, id).build()).findFirst()
+
     }
 
     override fun findByServerId(serverId: Long): Lesson? =
@@ -49,6 +62,7 @@ class LessonRepositoryImpl : LessonRepository {
 
 
     override fun save(lesson: Lesson) {
+        lesson.lastChanged = DateTime.now()
         lessonBox.put(lesson)
     }
 

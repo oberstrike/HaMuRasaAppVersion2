@@ -1,8 +1,6 @@
 package de.hamurasa.settings
 
 import de.hamurasa.settings.model.Settings
-import io.reactivex.Observable
-import io.reactivex.subjects.BehaviorSubject
 
 object SettingsContext {
 

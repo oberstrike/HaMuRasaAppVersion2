@@ -2,13 +2,13 @@ package de.hamurasa.model.lesson
 
 import de.hamurasa.model.vocable.Vocable
 import de.hamurasa.model.vocable.VocableDTO
-import io.reactivex.Observable
+import kotlinx.coroutines.flow.Flow
 import org.joda.time.DateTime
 
 interface LessonService {
     fun findById(id: Long): Lesson?
 
-    fun findAll(): Observable<List<Lesson>>
+    fun findAll(): List<Lesson>
 
     fun save(lesson: Lesson)
 
@@ -31,7 +31,7 @@ class LessonServiceImpl(private val lessonRepository: LessonRepository) : Lesson
 
     override fun findById(id: Long): Lesson? = lessonRepository.findById(id)
 
-    override fun findAll(): Observable<List<Lesson>> = lessonRepository.findAll()
+    override fun findAll(): List<Lesson> = lessonRepository.findAll()
 
     override fun save(lesson: Lesson) {
         lessonRepository.save(lesson)

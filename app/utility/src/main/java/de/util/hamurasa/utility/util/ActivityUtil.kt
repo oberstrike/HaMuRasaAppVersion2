@@ -32,10 +32,8 @@ abstract class AbstractActivity<T : AbstractViewModel>
         if (toolbarToUse != null)
             setSupportActionBar(toolbarToUse)
 
-        request(onFailure = { onFailure(it) }, onSuccess = { onSuccess() }) {
-            init()
-        }
 
+        init()
     }
 
 

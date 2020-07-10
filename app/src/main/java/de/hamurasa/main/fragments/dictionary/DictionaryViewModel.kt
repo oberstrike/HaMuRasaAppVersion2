@@ -8,8 +8,8 @@ import de.hamurasa.model.vocable.VocableDTO
 import de.hamurasa.model.vocable.VocableService
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
-import io.reactivex.Observable
-import io.reactivex.subjects.BehaviorSubject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import org.joda.time.DateTime
 
 class DictionaryViewModel(
@@ -19,11 +19,9 @@ class DictionaryViewModel(
     private val vocableService: VocableService
 ) : BaseViewModel(provider) {
 
-    fun init() {
-        MainContext.DictionaryContext.words = Observable.just(listOf())
-    }
 
     //Only Online + Offline
+    @ExperimentalCoroutinesApi
     fun addVocableToLesson(
         vocable: Vocable,
         lessonServerId: Long
@@ -34,23 +32,28 @@ class DictionaryViewModel(
     }
 
     //Only Offline
+    @ExperimentalCoroutinesApi
     private fun addVocableToLesson(
         lessonId: Long,
         vocableDTO: VocableDTO
     ) {
-        val lesson = lessonService.findById(lessonId)
+        val lesson = lessonService.findById(lessonId)?: return
 
         val newVocable = vocableService.save(vocableDTO)
         if (newVocable != null) {
-            lesson!!.words.add(newVocable)
+            lesson.words.add(newVocable)
             lesson.lastChanged = DateTime.now()
             lessonService.save(lesson)
-            MainContext.EditContext.lesson.onNext(lesson)
+            MainContext.EditContext.setLesson(lesson)
+
         }
     }
 
+    @ExperimentalCoroutinesApi
     fun getWord(name: String) {
-        MainContext.DictionaryContext.words = vocableService.findByName(name)
+        val vocables = vocableService.findByName(name)
+        MainContext.DictionaryContext.setWords(vocables)
+
     }
 
 }

@@ -1,10 +1,9 @@
 package de.util.hamurasa.utility
 
-import android.os.Build
 import de.util.hamurasa.utility.util.weight
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Assert.assertEquals
 import org.mockito.runners.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)

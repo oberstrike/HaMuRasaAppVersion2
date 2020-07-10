@@ -1,6 +1,7 @@
 package de.hamurasa.model.vocable
 
-import io.reactivex.Observable
+
+import kotlinx.coroutines.flow.Flow
 import org.joda.time.DateTime
 
 interface VocableService {
@@ -16,9 +17,9 @@ interface VocableService {
 
     fun deleteAll()
 
-    fun findAll(): Observable<List<Vocable>>
+    fun findAll(): Flow<List<Vocable>>
 
-    fun findByName(name: String): Observable<List<Vocable>>
+    fun findByName(name: String): List<Vocable>
 
     fun delete(vocable: Vocable)
 
@@ -30,7 +31,7 @@ class VocableServiceImpl(private val vocableRepository: VocableRepository) : Voc
         vocableRepository.delete(vocable)
     }
 
-    override fun findAll(): Observable<List<Vocable>> {
+    override fun findAll(): Flow<List<Vocable>> {
         return vocableRepository.findAll()
     }
 
@@ -81,7 +82,7 @@ class VocableServiceImpl(private val vocableRepository: VocableRepository) : Voc
         )
     }
 
-    override fun findByName(name: String): Observable<List<Vocable>> {
+    override fun findByName(name: String): List<Vocable> {
         return vocableRepository.findByName(name)
     }
 

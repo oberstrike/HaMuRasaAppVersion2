@@ -1,18 +1,53 @@
 package de.util.hamurasa.utility.main
 
-import androidx.annotation.CallSuper
 import androidx.lifecycle.ViewModel
 import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
-abstract class AbstractViewModel : ViewModel() {
-    private val disposables = CompositeDisposable()
+interface RxViewModel {
+    val disposables: CompositeDisposable
 
-    fun launch(job: () -> Disposable) {
+    fun launchRx(job: () -> Disposable) {
         disposables.add(job())
     }
+}
+
+interface FlowViewModel {
+    val jobs: MutableSet<Job>
+
+    fun <T> launchJob( job: suspend () -> T) {
+        jobs.add(
+            GlobalScope.launch(Dispatchers.IO) {
+                job()
+            }
+        )
+
+    }
+
+}
+
+abstract class AbstractViewModel : ViewModel(), RxViewModel, FlowViewModel {
+    override val disposables = CompositeDisposable()
+    override val jobs: MutableSet<Job> = mutableSetOf()
+
+
+    public override fun onCleared() {
+        jobs.forEach {
+            it.cancel()
+        }
+
+        jobs.removeIf { it.isCompleted || it.isCancelled }
+
+        disposables.clear()
+        super.onCleared()
+    }
+
 
     inline fun <T> observe(
         observable: Observable<T>,
@@ -20,7 +55,7 @@ abstract class AbstractViewModel : ViewModel() {
         observeOn: Scheduler,
         crossinline action: (value: T) -> Unit
     ) {
-        launch {
+        launchRx {
             observable
                 .subscribeOn(subscribeOn)
                 .observeOn(observeOn)
@@ -28,13 +63,6 @@ abstract class AbstractViewModel : ViewModel() {
                     action.invoke(value)
                 }
         }
-    }
-
-
-    @CallSuper
-    public override fun onCleared() {
-        super.onCleared()
-        disposables.clear()
     }
 
 

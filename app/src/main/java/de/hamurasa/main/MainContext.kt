@@ -1,28 +1,59 @@
 package de.hamurasa.main
 
 import androidx.fragment.app.Fragment
-import de.hamurasa.main.fragments.home.HomeFragment
 import de.hamurasa.model.lesson.Lesson
 import de.hamurasa.model.vocable.Vocable
-import io.reactivex.Observable
-import io.reactivex.subjects.BehaviorSubject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 
 object MainContext {
     var isLoggedIn: Boolean = false
 
     lateinit var activeFragment: Fragment
 
+    @ExperimentalCoroutinesApi
     object HomeContext {
-        lateinit var lessons: Observable<List<Lesson>>
+        private val lessonsMutableStateFlow: MutableStateFlow<List<Lesson>?> =
+            MutableStateFlow(null)
+
+        var lessons: StateFlow<List<Lesson>?> = lessonsMutableStateFlow
+
+        fun setLessons(lessons: List<Lesson>) {
+            lessonsMutableStateFlow.value = null
+            lessonsMutableStateFlow.value = lessons
+        }
+
+
     }
 
+    @ExperimentalCoroutinesApi
     object EditContext {
-        lateinit var lesson: BehaviorSubject<Lesson>
+
+        private var lessonMutableStateFlow: MutableStateFlow<Lesson?> = MutableStateFlow(null)
+
+        val lesson: StateFlow<Lesson?> = lessonMutableStateFlow
+
+        fun setLesson(newLesson: Lesson?) {
+            if (newLesson == lessonMutableStateFlow.value)
+                lessonMutableStateFlow.value = null
+            lessonMutableStateFlow.value = newLesson
+        }
+
 
     }
-
+    @ExperimentalCoroutinesApi
     object DictionaryContext {
-        lateinit var words: Observable<List<Vocable>>
+        private val wordMutableStateFlow: MutableStateFlow<List<Vocable>> = MutableStateFlow(listOf())
+
+        val words: StateFlow<List<Vocable>> = wordMutableStateFlow
+
+        fun setWords(newWords: List<Vocable>){
+            wordMutableStateFlow.value = newWords
+        }
     }
 }
 

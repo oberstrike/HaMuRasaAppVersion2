@@ -20,6 +20,7 @@ class ImportExportDialog(
         jsonMultiLineText.setText(json)
         exportButton.setOnClickListener(this)
         importButton.setOnClickListener(this)
+        import_export_close_button.setOnClickListener(this)
     }
 
     override fun onClick(v: View?) {
@@ -31,6 +32,9 @@ class ImportExportDialog(
             }
             R.id.importButton -> {
 
+            }
+            R.id.import_export_close_button -> {
+                dismiss()
             }
         }
     }

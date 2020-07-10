@@ -10,17 +10,22 @@ import de.hamurasa.model.vocable.VocableType
 import de.hamurasa.util.isValid
 import de.util.hamurasa.utility.util.*
 import kotlinx.android.synthetic.main.dialog_edit_vocable.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 
 //Reworked
-class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickListener {
+class EditVocableDialog(val vocable: Vocable) :
+    AbstractDialog(), View.OnClickListener {
 
     private val myViewModel: EditViewModel by sharedViewModel()
 
     override fun getLayoutId(): Int = R.layout.dialog_edit_vocable
 
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         valueEditText.bind(vocable::value)
@@ -44,6 +49,7 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
         }
     }
 
+    @ExperimentalCoroutinesApi
     override fun onClick(v: View?) {
         if (!vocable.isValid()) {
             requireActivity().toast("Please fill all required forms")
@@ -54,6 +60,7 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
         dismiss()
     }
 
+    @ExperimentalCoroutinesApi
     private fun delete() {
         val id = vocable.id
 
@@ -64,10 +71,13 @@ class EditVocableDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
             vocable.translation,
             vocable.language
         )
+        val lesson = MainContext.EditContext.lesson.value ?: return
+
         myViewModel.deleteVocableFromLesson(
             vocableDTO,
-            MainContext.EditContext.lesson.blockingFirst()
+            lesson
         )
         dismiss()
+
     }
 }

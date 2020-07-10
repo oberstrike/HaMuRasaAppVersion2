@@ -7,6 +7,9 @@ import de.hamurasa.model.lesson.LessonService
 import de.hamurasa.model.vocable.VocableService
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 
 class HomeViewModel(
     val context: Context,
@@ -15,17 +18,25 @@ class HomeViewModel(
     private val vocableService: VocableService
 ) : BaseViewModel(provider) {
 
+    @ExperimentalCoroutinesApi
     fun updateHome() {
-        MainContext.HomeContext.lessons = lessonService.findAll()
+        MainContext.HomeContext.setLessons(lessonService.findAll())
     }
 
+
+    @ExperimentalCoroutinesApi
     fun deleteLesson(lesson: Lesson) {
         lessonService.delete(lesson)
+
+        MainContext.HomeContext.setLessons(lessonService.findAll())
     }
 
 
+    @ExperimentalCoroutinesApi
     fun saveLesson(lesson: Lesson) {
         lessonService.save(lesson)
+
+        MainContext.HomeContext.setLessons(lessonService.findAll())
     }
 
 }
