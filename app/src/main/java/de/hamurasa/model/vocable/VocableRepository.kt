@@ -12,7 +12,7 @@ interface VocableRepository {
 
     fun findByName(value: String): List<Vocable>
 
-    fun findAll(): Flow<List<Vocable>>
+    fun findAll(): List<Vocable>
 
     fun save(vocable: Vocable): Long
 
@@ -42,8 +42,7 @@ class VocableRepositoryImpl :
         vocableBox.remove(vocable)
     }
 
-    @ExperimentalCoroutinesApi
-    override fun findAll(): Flow<List<Vocable>> = flowOf(vocableBox.query().build().find())
+    override fun findAll(): List<Vocable> = vocableBox.query().build().find()
 
 
     override fun size(): Int {
@@ -54,9 +53,6 @@ class VocableRepositoryImpl :
         vocableBox.removeAll()
     }
 
-    @ExperimentalCoroutinesApi
     override fun findByName(value: String): List<Vocable> =
         vocableBox.query().equal(Vocable_.value, value).build().find()
-
-
 }

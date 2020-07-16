@@ -9,7 +9,6 @@ import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.github.pwittchen.swipe.library.rx2.Swipe
-import com.github.pwittchen.swipe.library.rx2.SwipeEvent
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.hamurasa.R
 import de.hamurasa.main.fragments.dialogs.ImportExportDialog
@@ -21,13 +20,11 @@ import de.hamurasa.main.fragments.home.NewLessonDialog
 import de.hamurasa.main.fragments.home.OnItemClickListener
 import de.hamurasa.model.lesson.Lesson
 import de.hamurasa.settings.SettingsActivity
-import de.hamurasa.settings.SettingsContext
 import de.hamurasa.settings.model.Settings
-import de.util.hamurasa.utility.util.AbstractActivity
+import de.hamurasa.util.AbstractSwipeActivity
 import de.util.hamurasa.utility.util.findFirst
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.joda.time.DateTime
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -37,7 +34,7 @@ import org.koin.core.parameter.parametersOf
 
 //Logger
 
-class MainActivity : AbstractActivity<MainViewModel>(),
+class MainActivity : AbstractSwipeActivity<MainViewModel>(),
     BottomNavigationView.OnNavigationItemSelectedListener,
     OnItemClickListener {
 
@@ -49,17 +46,13 @@ class MainActivity : AbstractActivity<MainViewModel>(),
 
     private val settings: Settings by inject()
 
-    private lateinit var swipe: Swipe
+    override val swipe = Swipe(40, 300)
 
     override fun init() {
+        super.init()
         bottom_navigator.setOnNavigationItemSelectedListener(this)
-        SettingsContext.init(settings)
 
         loadFragment(get<HomeFragment> { parametersOf(this) })
-
-        runBlocking {
-            initSwipe()
-        }
     }
 
 
@@ -96,29 +89,32 @@ class MainActivity : AbstractActivity<MainViewModel>(),
         return false
     }
 
-
-    private fun initSwipe() {
-        swipe = Swipe(60, 300)
-        //Swipe Binding extreme short
-        myViewModel.observe(swipe.observe()) {
-            if (it != SwipeEvent.SWIPED_RIGHT && it != SwipeEvent.SWIPED_LEFT)
-                return@observe
-
-            val newFragmentId = with(MainContext.activeFragment) {
-                with(getIdFromFragment(this)) {
-                    when (it) {
-                        SwipeEvent.SWIPED_RIGHT -> if (this == 2) 0 else this + 1
-                        else -> if (this == 0) 2 else this - 1
-                    }
-                }
+    private fun swiped(right: Boolean) {
+        with(
+            with(getIdFromFragment(MainContext.activeFragment)) {
+                if (right)
+                    if (this == 2) 0 else this + 1
+                else
+                    if (this == 0) 2 else this - 1
             }
-
-            with(newFragmentId) {
-                bottom_navigator.selectedItemId = bottom_navigator.menu.getItem(this).itemId
-                loadFragment(getFragmentById(this))
-            }
-
+        )
+        {
+            bottom_navigator.selectedItemId = bottom_navigator.menu.getItem(this).itemId
+            loadFragment(getFragmentById(this))
         }
+
+    }
+
+
+    override fun onSwipeEventLeft(): Boolean {
+        swiped(false)
+        return true
+    }
+
+
+    override fun onSwipeEventRight(): Boolean {
+        swiped(true)
+        return true
     }
 
     private fun getFragmentById(newFragmentId: Int): Fragment {
@@ -143,7 +139,7 @@ class MainActivity : AbstractActivity<MainViewModel>(),
         super.onPause()
         runBlocking {
             val id = MainContext.EditContext.lesson.value?.id ?: return@runBlocking
-            SettingsContext.activeLessonId = id.toInt()
+            settings.activeLessonId = id.toInt()
 
         }
     }
@@ -190,11 +186,6 @@ class MainActivity : AbstractActivity<MainViewModel>(),
         transaction.commit()
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-        swipe.dispatchTouchEvent(event)
-        return super.dispatchTouchEvent(event)
-    }
-
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         if (item == null)
             return false
@@ -212,15 +203,24 @@ class MainActivity : AbstractActivity<MainViewModel>(),
                 fragment.show(supportFragmentManager, "New Lesson")
             }
             R.id.action_export -> {
-                val json = myViewModel.export()
-                val clipboard = getSystemService(ClipboardManager::class.java) as ClipboardManager
+                myViewModel.launchJob {
+                    val json = myViewModel.export()
+                    val clipboard =
+                        getSystemService(ClipboardManager::class.java) as ClipboardManager
 
-                val dialog = ImportExportDialog(json, clipboard)
-
-                dialog.show(supportFragmentManager, "Import/Export Json")
+                    withContext(Dispatchers.Main) {
+                        val dialog = ImportExportDialog(json, clipboard)
+                        dialog.show(supportFragmentManager, "Import/Export Json")
+                    }
+                }
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+        swipe.dispatchTouchEvent(event)
+        return super.dispatchTouchEvent(event)
     }
 
 }

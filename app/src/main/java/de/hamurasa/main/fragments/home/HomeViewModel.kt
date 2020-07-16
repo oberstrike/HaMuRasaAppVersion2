@@ -19,13 +19,13 @@ class HomeViewModel(
 ) : BaseViewModel(provider) {
 
     @ExperimentalCoroutinesApi
-    fun updateHome() {
+    suspend fun updateHome() {
         MainContext.HomeContext.setLessons(lessonService.findAll())
     }
 
 
     @ExperimentalCoroutinesApi
-    fun deleteLesson(lesson: Lesson) {
+    suspend fun deleteLesson(lesson: Lesson) {
         lessonService.delete(lesson)
 
         MainContext.HomeContext.setLessons(lessonService.findAll())
@@ -33,7 +33,7 @@ class HomeViewModel(
 
 
     @ExperimentalCoroutinesApi
-    fun saveLesson(lesson: Lesson) {
+    suspend fun saveLesson(lesson: Lesson) {
         lessonService.save(lesson)
 
         MainContext.HomeContext.setLessons(lessonService.findAll())

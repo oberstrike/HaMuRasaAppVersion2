@@ -20,7 +20,10 @@ class NewVocableDialog(
     @ExperimentalCoroutinesApi
     override fun onAddVocable() {
         val lesson = MainContext.EditContext.lesson.value ?: return
-        myViewModel.addVocableToLesson(vocable, lesson.id)
+
+        myViewModel.launchJob {
+            myViewModel.addVocableToLesson(vocable, lesson.id)
+        }
     }
 
 

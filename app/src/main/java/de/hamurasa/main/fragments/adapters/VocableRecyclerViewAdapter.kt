@@ -16,7 +16,7 @@ class VocableRecyclerViewAdapter(
     private val onClickListener: OnClickListener
 ) : RecyclerView.Adapter<VocableRecyclerViewAdapter.ViewHolder>() {
 
-    val items: ArrayList<Vocable> = ArrayList()
+    val items: MutableList<Vocable> = mutableListOf()
 
     class ViewHolder(
         val item: View,
@@ -42,8 +42,6 @@ class VocableRecyclerViewAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val word = items[position]
         holder.item.setBackgroundColor(Color.parseColor("#D4D4D4"))
-
-
 
         holder.wordValueTextView.text = word.value
         if (word.value.length < 6) {

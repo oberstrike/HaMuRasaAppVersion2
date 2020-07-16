@@ -7,12 +7,14 @@ import de.hamurasa.R
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.fragments.adapters.VocableRecyclerViewAdapter
 import de.util.hamurasa.utility.util.AbstractFragment
+import de.util.hamurasa.utility.util.AbstractSelfCleanupFragment
 import kotlinx.android.synthetic.main.dictionary_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class DictionaryFragment : AbstractFragment(), VocableRecyclerViewAdapter.OnClickListener {
+class DictionaryFragment : AbstractSelfCleanupFragment(),
+    VocableRecyclerViewAdapter.OnClickListener {
     override val myViewModel: DictionaryViewModel by sharedViewModel()
     private lateinit var vocableRecyclerViewAdapter: VocableRecyclerViewAdapter
 

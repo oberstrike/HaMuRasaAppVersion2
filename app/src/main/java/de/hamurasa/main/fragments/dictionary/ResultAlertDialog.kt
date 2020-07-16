@@ -10,10 +10,9 @@ import de.util.hamurasa.utility.util.afterSelectedChanged
 import de.util.hamurasa.utility.util.initAdapter
 import de.util.hamurasa.utility.util.toast
 import kotlinx.android.synthetic.main.dialog_result.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 //Reworked
@@ -51,8 +50,12 @@ class ResultAlertDialog(val vocable: Vocable) : AbstractDialog(), View.OnClickLi
     @ExperimentalCoroutinesApi
     override fun onClick(v: View?) {
         if (lessonId != 0L) {
-            myViewModel.addVocableToLesson(vocable, lessonId)
-            dismiss()
+            myViewModel.launchJob {
+                myViewModel.addVocableToLesson(vocable, lessonId)
+                withContext(Dispatchers.Main) {
+                    dismiss()
+                }
+            }
         } else {
             requireActivity().toast("There was an error.")
         }

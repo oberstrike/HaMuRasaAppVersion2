@@ -34,8 +34,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     packagingOptions {
@@ -114,6 +118,7 @@ dependencies {
     implementation "io.objectbox:objectbox-kotlin:$objectboxVersion"
   //
     implementation "io.objectbox:objectbox-rxjava:$objectboxVersion"
+    implementation "io.objectbox:objectbox-kotlin:$objectboxVersion"
 
     testImplementation 'junit:junit:4.13'
     testImplementation("org.powermock:powermock-module-junit4:1.6.2")
@@ -133,4 +138,7 @@ dependencies {
 
     //Login
     implementation 'io.github.microutils:kotlin-logging:1.7.10'
+
+    // core
+    implementation 'com.chibatching.kotpref:kotpref:2.11.0'
 }

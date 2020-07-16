@@ -2,50 +2,50 @@ package de.hamurasa.model.lesson
 
 import de.hamurasa.model.vocable.Vocable
 import de.hamurasa.model.vocable.VocableDTO
-import kotlinx.coroutines.flow.Flow
 import org.joda.time.DateTime
 
 interface LessonService {
-    fun findById(id: Long): Lesson?
+    suspend fun findById(id: Long): Lesson?
 
-    fun findAll(): List<Lesson>
+    suspend fun findAll(): List<Lesson>
 
-    fun save(lesson: Lesson)
+    suspend fun save(lesson: Lesson)
 
-    fun delete(lesson: Lesson)
+    suspend fun delete(lesson: Lesson)
 
-    fun size(): Int
+    suspend fun size(): Int
 
-    fun deleteAll()
+    suspend fun deleteAll()
 
-    fun findByServerId(serverId: Long): Lesson?
+    suspend fun findByServerId(serverId: Long): Lesson?
 
-    fun removeVocable(lesson: Lesson, vocable: Vocable): Boolean
+    suspend fun removeVocable(lesson: Lesson, vocable: Vocable): Boolean
 
-    fun addVocable(lesson: Lesson, vocable: Vocable): Boolean
+    suspend fun addVocable(lesson: Lesson, vocable: Vocable): Boolean
 
     fun convertToDTO(lesson: Lesson, vocableDTOs: List<VocableDTO>): LessonDTO
 }
 
 class LessonServiceImpl(private val lessonRepository: LessonRepository) : LessonService {
 
-    override fun findById(id: Long): Lesson? = lessonRepository.findById(id)
+    override suspend fun findById(id: Long): Lesson? = lessonRepository.findById(id)
 
-    override fun findAll(): List<Lesson> = lessonRepository.findAll()
+    override suspend fun findAll(): List<Lesson> = lessonRepository.findAll()
 
-    override fun save(lesson: Lesson) {
+    override suspend fun save(lesson: Lesson) {
         lessonRepository.save(lesson)
     }
 
-    override fun delete(lesson: Lesson) = lessonRepository.delete(lesson)
+    override suspend fun delete(lesson: Lesson) = lessonRepository.delete(lesson)
 
-    override fun size(): Int = lessonRepository.size()
+    override suspend fun size(): Int = lessonRepository.getNumberOfLessons()
 
-    override fun deleteAll() = lessonRepository.deleteAll()
+    override suspend fun deleteAll() = lessonRepository.deleteAll()
 
-    override fun findByServerId(serverId: Long): Lesson? = lessonRepository.findByServerId(serverId)
+    override suspend fun findByServerId(serverId: Long): Lesson? =
+        lessonRepository.findByServerId(serverId)
 
-    override fun removeVocable(lesson: Lesson, vocable: Vocable): Boolean {
+    override suspend fun removeVocable(lesson: Lesson, vocable: Vocable): Boolean {
         val oldSize = lesson.words.size
         val new = lesson.words.filterNot { it.id == vocable.id }
         lesson.words.clear()
@@ -56,7 +56,7 @@ class LessonServiceImpl(private val lessonRepository: LessonRepository) : Lesson
         return oldSize != new.size
     }
 
-    override fun addVocable(lesson: Lesson, vocable: Vocable): Boolean {
+    override suspend fun addVocable(lesson: Lesson, vocable: Vocable): Boolean {
         val success = lesson.words.add(vocable)
         lesson.lastChanged = DateTime.now()
         lessonRepository.save(lesson)

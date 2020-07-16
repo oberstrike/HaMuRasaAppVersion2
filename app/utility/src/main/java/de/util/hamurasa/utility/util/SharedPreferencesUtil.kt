@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+/*
 private class PreferenceProperty<T>(
     private val sharedPreferences: SharedPreferences,
     private val key: String,
@@ -50,3 +51,4 @@ fun SharedPreferences.string(key: String, defaultValue: String? = null): ReadWri
 
 
 
+*/

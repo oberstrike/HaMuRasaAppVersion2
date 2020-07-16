@@ -5,10 +5,7 @@ import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 interface RxViewModel {
     val disposables: CompositeDisposable
@@ -19,11 +16,11 @@ interface RxViewModel {
 }
 
 interface FlowViewModel {
-    val jobs: MutableSet<Job>
+    val jobs: MutableSet<Deferred<*>>
 
-    fun <T> launchJob( job: suspend () -> T) {
+    fun <T> launchJob(job: suspend () -> T) {
         jobs.add(
-            GlobalScope.launch(Dispatchers.IO) {
+            GlobalScope.async(Dispatchers.IO) {
                 job()
             }
         )
@@ -34,15 +31,14 @@ interface FlowViewModel {
 
 abstract class AbstractViewModel : ViewModel(), RxViewModel, FlowViewModel {
     override val disposables = CompositeDisposable()
-    override val jobs: MutableSet<Job> = mutableSetOf()
+    override val jobs: MutableSet<Deferred<*>> = mutableSetOf()
 
 
     public override fun onCleared() {
         jobs.forEach {
             it.cancel()
         }
-
-        jobs.removeIf { it.isCompleted || it.isCancelled }
+        jobs.clear()
 
         disposables.clear()
         super.onCleared()

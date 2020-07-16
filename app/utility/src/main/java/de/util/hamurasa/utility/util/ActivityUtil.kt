@@ -31,10 +31,6 @@ abstract class AbstractActivity<T : AbstractViewModel>
         setContentView(layoutRes)
         if (toolbarToUse != null)
             setSupportActionBar(toolbarToUse)
-
-
         init()
     }
-
-
 }

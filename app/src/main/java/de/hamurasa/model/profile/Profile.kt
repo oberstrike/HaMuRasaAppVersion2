@@ -10,20 +10,14 @@ import io.objectbox.relation.ToMany
 data class Profile(
     @Id
     var id: Long = 0,
-    var name: String = "Profile $staticId",
+    var name: String = "Profile",
     var offline: Boolean = false
 ) {
 
 
     lateinit var lessons: ToMany<Lesson>
 
-    companion object {
-        var staticId: Long = 0
-            get() {
-                field += 1
-                return field
-            }
-    }
+
 }
 
 data class ProfileDTO(

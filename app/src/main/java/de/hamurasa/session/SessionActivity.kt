@@ -1,30 +1,34 @@
 package de.hamurasa.session
 
 import android.content.Intent
-import android.os.Bundle
 import android.view.Menu
 import android.view.MotionEvent
-import android.view.View
 import androidx.appcompat.widget.Toolbar
 import com.github.pwittchen.swipe.library.rx2.Swipe
-import com.github.pwittchen.swipe.library.rx2.SwipeEvent
 import de.hamurasa.R
 import de.hamurasa.main.MainActivity
-import de.hamurasa.main.MainContext
-import de.hamurasa.settings.SettingsContext
-import de.util.hamurasa.utility.main.AbstractViewModel
-import de.util.hamurasa.utility.util.AbstractActivity
-import de.util.hamurasa.utility.util.AbstractFragment
-import de.util.hamurasa.utility.util.afterTextChanged
+import de.hamurasa.session.fragments.AlternativeFragment
+import de.hamurasa.session.fragments.BasicFragment
+import de.hamurasa.session.fragments.StandardFragment
+import de.hamurasa.session.fragments.WritingFragment
+import de.hamurasa.session.models.SessionEvent
+import de.hamurasa.session.models.SessionType
+import de.hamurasa.util.AbstractSwipeActivity
 import de.util.hamurasa.utility.util.toast
-import kotlinx.android.synthetic.main.activity_lesson.*
-import kotlinx.android.synthetic.main.vocable_session_fragment.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.TickerMode
+import kotlinx.coroutines.channels.ticker
+import kotlinx.coroutines.launch
+import org.joda.time.LocalDateTime
+import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
+import java.util.*
+import kotlin.concurrent.fixedRateTimer
 
-class SessionActivity : AbstractActivity<SessionViewModel>() {
+class SessionActivity : AbstractSwipeActivity<SessionViewModel>() {
 
     override val myViewModel: SessionViewModel by viewModel()
 
@@ -32,41 +36,87 @@ class SessionActivity : AbstractActivity<SessionViewModel>() {
 
     override val toolbarToUse: Toolbar? = null
 
-    private var activeFragment: BasicFragment? = null
+    override val swipe = Swipe(40, 300)
 
-    private lateinit var swipe: Swipe
+    private var oldFragment: BasicFragment? = null
 
-    override fun init() {
-        changeFragment(R.anim.enter_from_left, R.anim.exit_to_right)
+    lateinit var timer: Timer
 
-        swipe = Swipe(40, 200)
+    private val session: SessionEvent by inject()
 
-        myViewModel.observe(swipe.observe()) {
-            if (SessionContext.sessionType != SessionType.WRITING) {
-                if (it == SwipeEvent.SWIPED_RIGHT) {
-                    myViewModel.next(true) ?: return@observe
-                    changeFragment(R.anim.enter_from_left, R.anim.exit_to_right)
-                } else if (it == SwipeEvent.SWIPED_LEFT) {
-                    myViewModel.next(false) ?: return@observe
-                    changeFragment(R.anim.enter_from_right, R.anim.exit_to_left)
-                }
-            }
+    @ExperimentalCoroutinesApi
+    override fun onSwipeEventLeft(): Boolean {
+        val isRunning = myViewModel.next(false)
+        if (!isRunning) {
+            close()
+            return true
         }
-        myViewModel.init()
-        runBlocking {
-            initObserver()
+        changeFragment(R.anim.enter_from_right, R.anim.exit_to_left, getNewFragment())
+        return true
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun onSwipeEventRight(): Boolean {
+        val isRunning = myViewModel.next(true)
+        if (!isRunning) {
+            close()
+            return true
         }
+
+        changeFragment(R.anim.enter_from_left, R.anim.exit_to_right, getNewFragment())
+        return true
+    }
+
+    override fun onDestroy() {
+        myViewModel.onCleared()
+        timer.cancel()
+        super.onDestroy()
     }
 
 
-    private fun changeFragment(leftLayout: Int, rightLayout: Int) {
-        activeFragment?.reset()
-        activeFragment = BasicFragment(this::onTextChange, myViewModel)
+    @ExperimentalCoroutinesApi
+    override fun init() {
+        super.init()
+        myViewModel.init()
+
+        timer = fixedRateTimer(period = 1000L, daemon = true)
+        {
+            session.time += 1
+            println(session.time)
+        }
+
+
+        val fragment = getNewFragment()
+        changeFragment(R.anim.enter_from_right, R.anim.exit_to_left, fragment)
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun getNewFragment(): BasicFragment {
+        return when (session.sessionType) {
+            SessionType.STANDARD -> get<StandardFragment> { parametersOf(session.activeVocable) }
+            SessionType.ALTERNATIVE -> get<AlternativeFragment> { parametersOf(session.activeVocable) }
+            else -> get<WritingFragment> {
+                parametersOf(
+                    session.activeVocable,
+                    this::onTextChange
+                )
+            }
+        }
+
+    }
+
+    private fun changeFragment(leftLayout: Int, rightLayout: Int, fragment: BasicFragment) {
+        oldFragment = if (oldFragment == null)
+            fragment
+        else {
+            oldFragment!!.reset()
+            fragment
+        }
 
         supportFragmentManager
             .beginTransaction()
             .setCustomAnimations(leftLayout, rightLayout)
-            .replace(R.id.vocable_container, activeFragment!!)
+            .replace(R.id.vocable_container, fragment)
             .commit()
     }
 
@@ -76,89 +126,30 @@ class SessionActivity : AbstractActivity<SessionViewModel>() {
     }
 
 
-    private suspend fun initObserver() {
-        SessionContext.running.collect {
-            if (it)
-                return@collect
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            toast("You have successfully completed the training!")
-            finish()
-        }
-
-    }
-
-
-    class BasicFragment(
-        private val onTextChange: (String) -> Unit,
-        override val myViewModel: AbstractViewModel
-    ) : AbstractFragment(),
-        View.OnClickListener {
-
-        override fun getLayoutId() = R.layout.vocable_session_fragment
-
-        fun reset() {
-            val value = getInitValue()
-            session_vocable_first_value.text = value
-        }
-
-        private fun getInitValue(): String {
-            return with(SessionContext.activeVocable) {
-                when (SessionContext.sessionType) {
-                    SessionType.STANDARD -> this.value
-                    SessionType.ALTERNATIVE -> this.translation
-                    else -> this.translation
-                }
-            }
-        }
-
-        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-            super.onViewCreated(view, savedInstanceState)
-
-            session_vocable_second_value.setOnClickListener(this)
-
-            with(SessionContext.activeVocable) {
-                val value = getInitValue()
-
-                if (SessionContext.sessionType == SessionType.WRITING) {
-                    session_value_editText.afterTextChanged(onTextChange)
-                } else {
-                    session_value_editText.visibility = View.INVISIBLE
-                }
-
-                session_vocable_first_value.text = value
-                vocableProgressBar.parent
-                vocableProgressBar.progress =
-                    (this.level - 1) * (100 / SettingsContext.SessionSettings.maxRepetitions)
-            }
-        }
-
-        override fun onClick(v: View?) {
-            with(SessionContext.activeVocable) {
-                val value = when (SessionContext.sessionType) {
-                    SessionType.STANDARD -> this.translation
-                    SessionType.ALTERNATIVE -> this.value
-                    else -> this.value
-                }
-                session_vocable_second_value.text = value
-            }
-        }
-
-    }
-
-    private fun onTextChange(value: String) {
-        if (value.isNotEmpty()) {
-            if (value == SessionContext.activeVocable.value) {
-                myViewModel.next(true) ?: return
-                changeFragment(R.anim.enter_from_left, R.anim.exit_to_right)
-            }
-        }
+    private fun close() {
+        val intent2 = Intent(this, MainActivity::class.java)
+        startActivity(intent2)
+        toast("You have successfully completed the training!")
+        finish()
     }
 
 
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
         swipe.dispatchTouchEvent(event)
         return super.dispatchTouchEvent(event)
+    }
+
+
+    @ExperimentalCoroutinesApi
+    private fun onTextChange(value: String) {
+        if (value.isNotEmpty()) {
+            if (value == session.activeVocable.value) {
+                if ((oldFragment!! as WritingFragment).isPressed)
+                    onSwipeEventLeft()
+                else
+                    onSwipeEventRight()
+            }
+        }
     }
 
 }

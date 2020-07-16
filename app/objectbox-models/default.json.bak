@@ -88,11 +88,32 @@
           "name": "lessons"
         }
       ]
+    },
+    {
+      "id": "4:9177549983569560646",
+      "lastPropertyId": "2:6918937486594646670",
+      "name": "User",
+      "properties": [
+        {
+          "id": "1:1455943094628261729",
+          "name": "id"
+        },
+        {
+          "id": "2:6918937486594646670",
+          "name": "name"
+        }
+      ],
+      "relations": [
+        {
+          "id": "3:7677753300694186410",
+          "name": "profiles"
+        }
+      ]
     }
   ],
-  "lastEntityId": "3:2720226328564991509",
+  "lastEntityId": "4:9177549983569560646",
   "lastIndexId": "0:0",
-  "lastRelationId": "2:2677116915056696071",
+  "lastRelationId": "3:7677753300694186410",
   "lastSequenceId": "0:0",
   "modelVersion": 4,
   "modelVersionParserMinimum": 4,

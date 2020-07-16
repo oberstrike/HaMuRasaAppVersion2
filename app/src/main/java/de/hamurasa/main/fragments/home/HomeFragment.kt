@@ -10,21 +10,25 @@ import de.hamurasa.R
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.fragments.adapters.LessonRecyclerViewAdapter
 import de.hamurasa.session.SessionActivity
-import de.hamurasa.session.SessionContext
+import de.hamurasa.session.models.SessionEvent
 import de.hamurasa.session.models.VocableWrapper
-import de.util.hamurasa.utility.main.AbstractViewModel
-import de.util.hamurasa.utility.util.AbstractFragment
+import de.util.hamurasa.utility.util.AbstractSelfCleanupFragment
 import de.util.hamurasa.utility.util.dialog
 import kotlinx.android.synthetic.main.home_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOf
+import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class HomeFragment(private val onItemClickListener: OnItemClickListener) : AbstractFragment(),
+class HomeFragment(
+    private val onItemClickListener: OnItemClickListener
+) :
+    AbstractSelfCleanupFragment(),
     LessonRecyclerViewAdapter.OnClickListener {
 
     override val myViewModel: HomeViewModel by sharedViewModel()
+
+    private val sessionEvent: SessionEvent by inject()
 
     private lateinit var lessonRecyclerViewAdapter: LessonRecyclerViewAdapter
 
@@ -109,8 +113,10 @@ class HomeFragment(private val onItemClickListener: OnItemClickListener) : Abstr
                 dialog.requireView().findViewById<Button>(R.id.delete_lesson_button)
 
             deleteLessonButton.setOnClickListener {
-                myViewModel.deleteLesson(lesson)
-                dialog.dismiss()
+                runBlocking {
+                    myViewModel.deleteLesson(lesson)
+                    dialog.dismiss()
+                }
             }
         }.show(parentFragmentManager, "Delete")
 
@@ -120,7 +126,6 @@ class HomeFragment(private val onItemClickListener: OnItemClickListener) : Abstr
     private fun onActionRenameExercise() {
         val position = lessonRecyclerViewAdapter.position
         val lesson = lessonRecyclerViewAdapter.getLesson(position)
-        //TODO
 
     }
 
@@ -131,9 +136,11 @@ class HomeFragment(private val onItemClickListener: OnItemClickListener) : Abstr
         if (lesson.words.isEmpty())
             return
 
-        SessionContext.vocables = lesson.words.map { VocableWrapper(it) }
+        sessionEvent.vocables = lesson.words.map { VocableWrapper(it) }
+        sessionEvent.activeVocable = sessionEvent.vocables.random()
 
         val intent = Intent(activity, SessionActivity::class.java)
+
         startActivity(intent)
     }
 }

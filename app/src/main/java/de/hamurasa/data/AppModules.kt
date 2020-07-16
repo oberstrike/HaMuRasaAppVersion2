@@ -14,6 +14,8 @@ import de.hamurasa.main.fragments.edit.NewVocableDialog
 import de.hamurasa.main.fragments.edit.EditViewModel
 import de.hamurasa.main.fragments.home.HomeFragment
 import de.hamurasa.main.fragments.home.HomeViewModel
+import de.hamurasa.model.profile.Profile
+import de.hamurasa.model.user.User
 import de.hamurasa.settings.SettingsViewModel
 import de.hamurasa.settings.model.Settings
 import org.koin.android.viewmodel.dsl.viewModel
@@ -37,7 +39,7 @@ val appModules = module {
 
     viewModel { MainViewModel(get(), get(), get(), get()) }
 
-    viewModel { SessionViewModel(get(), get()) }
+    viewModel { SessionViewModel(get(), get(), get(), get()) }
 
     viewModel { SettingsViewModel(get()) }
 
@@ -54,15 +56,8 @@ val modelModules = module {
 
     factory { Lesson() }
 
-    factory { NewVocableDialog(get()) }
+    factory { Profile() }
 
-    factory { params -> EditVocableDialog(params[0]) }
-
-    factory { params -> HomeFragment(params[0]) }
-
-    factory { DictionaryFragment() }
-
-    factory { EditFragment() }
-
+    factory { User() }
 
 }

@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="200dp"
         android:text="Vocable"
-        android:textSize="50dp"
+        android:textSize="45sp"
         app:layout_constraintBottom_toBottomOf="@id/session_vocable_second_value"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="250dp"
         android:text="@string/show"
-        android:textSize="50dp"
+        android:textSize="45sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

@@ -9,7 +9,7 @@ import io.objectbox.converter.PropertyConverter
 import org.joda.time.DateTime
 
 @Entity
-data class Vocable(
+class Vocable(
     @Id var id: Long = 0,
     var value: String = "",
     @Convert(converter = VocableTypeConverter::class, dbType = Long::class)
@@ -27,9 +27,9 @@ data class Vocable(
         if (javaClass != other?.javaClass) return false
 
         other as Vocable
-
         if (id != other.id) return false
-
+        if (value != other.value) return false
+        
         return true
     }
 

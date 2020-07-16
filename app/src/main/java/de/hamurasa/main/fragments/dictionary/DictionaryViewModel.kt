@@ -22,7 +22,7 @@ class DictionaryViewModel(
 
     //Only Online + Offline
     @ExperimentalCoroutinesApi
-    fun addVocableToLesson(
+    suspend fun addVocableToLesson(
         vocable: Vocable,
         lessonServerId: Long
     ) {
@@ -33,7 +33,7 @@ class DictionaryViewModel(
 
     //Only Offline
     @ExperimentalCoroutinesApi
-    private fun addVocableToLesson(
+    private suspend fun addVocableToLesson(
         lessonId: Long,
         vocableDTO: VocableDTO
     ) {

@@ -15,6 +15,7 @@ object ObjectBox {
         boxStore = MyObjectBox
             .builder()
             .androidContext(context.applicationContext).build()
+
         boxStore.close()
    //     boxStore.deleteAllFiles()
         boxStore = MyObjectBox

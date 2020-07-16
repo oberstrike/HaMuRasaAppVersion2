@@ -10,9 +10,11 @@ import de.hamurasa.model.vocable.VocableType
 import de.hamurasa.util.isValid
 import de.util.hamurasa.utility.util.*
 import kotlinx.android.synthetic.main.dialog_edit_vocable.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 
@@ -56,8 +58,13 @@ class EditVocableDialog(val vocable: Vocable) :
             return
         }
 
-        myViewModel.patchVocable(vocable)
-        dismiss()
+        myViewModel.launchJob {
+            myViewModel.patchVocable(vocable)
+            withContext(Dispatchers.Main) {
+                dismiss()
+            }
+        }
+
     }
 
     @ExperimentalCoroutinesApi
@@ -73,11 +80,14 @@ class EditVocableDialog(val vocable: Vocable) :
         )
         val lesson = MainContext.EditContext.lesson.value ?: return
 
-        myViewModel.deleteVocableFromLesson(
-            vocableDTO,
-            lesson
-        )
-        dismiss()
-
+        myViewModel.launchJob {
+            myViewModel.deleteVocableFromLesson(
+                vocableDTO,
+                lesson
+            )
+            withContext(Dispatchers.Main) {
+                dismiss()
+            }
+        }
     }
 }

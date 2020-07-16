@@ -26,7 +26,7 @@ class EditViewModel(
 
 
     @ExperimentalCoroutinesApi
-    fun patchVocable(vocable: Vocable) {
+    suspend fun patchVocable(vocable: Vocable) {
         vocableService.update(vocable)
 
         val activeLesson = MainContext.EditContext.lesson.value ?: return
@@ -36,7 +36,7 @@ class EditViewModel(
     }
 
     @ExperimentalCoroutinesApi
-    fun deleteVocableFromLesson(vocableDTO: VocableDTO, lesson: Lesson) {
+    suspend fun deleteVocableFromLesson(vocableDTO: VocableDTO, lesson: Lesson) {
         val vocable = vocableService.findById(vocableDTO.id)!!
 
         lesson.words.removeIf { it.id == vocable.id }

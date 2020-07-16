@@ -12,7 +12,9 @@ import de.util.hamurasa.utility.util.bind
 import de.util.hamurasa.utility.util.initAdapter
 import de.util.hamurasa.utility.util.toast
 import kotlinx.android.synthetic.main.dialog_new_lesson.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 //Reworked
@@ -26,11 +28,16 @@ class NewLessonDialog(private val lesson: Lesson) : AbstractDialog(), View.OnCli
             return
         }
 
-        myViewModel.saveLesson(lesson)
-        val text = "The creation was successful!"
-        val toast = Toast.makeText(activity, text, Toast.LENGTH_LONG)
-        toast.show()
-        dismiss()
+        myViewModel.launchJob {
+            myViewModel.saveLesson(lesson)
+            withContext(Dispatchers.Main) {
+                val text = "The creation was successful!"
+                val toast = Toast.makeText(activity, text, Toast.LENGTH_LONG)
+                toast.show()
+                dismiss()
+            }
+        }
+
     }
 
     override fun getLayoutId(): Int = R.layout.dialog_new_lesson

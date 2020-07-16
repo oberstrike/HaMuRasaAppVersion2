@@ -17,7 +17,7 @@ interface VocableService {
 
     fun deleteAll()
 
-    fun findAll(): Flow<List<Vocable>>
+    fun findAll(): List<Vocable>
 
     fun findByName(name: String): List<Vocable>
 
@@ -31,7 +31,7 @@ class VocableServiceImpl(private val vocableRepository: VocableRepository) : Voc
         vocableRepository.delete(vocable)
     }
 
-    override fun findAll(): Flow<List<Vocable>> {
+    override fun findAll(): List<Vocable> {
         return vocableRepository.findAll()
     }
 

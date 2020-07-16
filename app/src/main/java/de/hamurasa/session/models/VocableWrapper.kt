@@ -1,8 +1,9 @@
 package de.hamurasa.session.models
 
 import de.hamurasa.model.vocable.Vocable
+import de.hamurasa.model.vocable.VocableType
 
-class VocableWrapper(val vocable: Vocable) {
+data class VocableWrapper(val vocable: Vocable) {
     var attempts: Int = 0
 
     var level: Int = 1
@@ -10,14 +11,11 @@ class VocableWrapper(val vocable: Vocable) {
             field = if (value > 0) value else 1
         }
 
-    val value: String
-        get() {
-            return vocable.value
-        }
+    val value: String = vocable.value
 
-    val translation: String
-        get() {
-            return vocable.translation.reduce { a, b -> "$a, $b" }
-        }
 
+    val translation: String = vocable.translation.reduce { a, b -> "$a, $b" }
+
+
+    val type: VocableType = vocable.type
 }

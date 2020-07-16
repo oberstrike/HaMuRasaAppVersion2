@@ -10,25 +10,33 @@
       "properties": [
         {
           "id": "1:385778066820139415",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:3919881130638660044",
-          "name": "language"
+          "name": "language",
+          "type": 6,
+          "flags": 2
         },
         {
           "id": "3:5800881003897233654",
-          "name": "validationLanguage"
+          "name": "validationLanguage",
+          "type": 6,
+          "flags": 2
         },
         {
           "id": "4:4485869277285346436",
-          "name": "lastChanged"
+          "name": "lastChanged",
+          "type": 9
         }
       ],
       "relations": [
         {
           "id": "1:5399224680479332851",
-          "name": "words"
+          "name": "words",
+          "targetId": "2:1425526070670067240"
         }
       ]
     },
@@ -39,27 +47,36 @@
       "properties": [
         {
           "id": "1:8403767566738913041",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:1220089793395522853",
-          "name": "value"
+          "name": "value",
+          "type": 9
         },
         {
           "id": "3:6449674959245597349",
-          "name": "type"
+          "name": "type",
+          "type": 6,
+          "flags": 2
         },
         {
           "id": "4:548493307908025609",
-          "name": "translation"
+          "name": "translation",
+          "type": 9
         },
         {
           "id": "5:579106710325953899",
-          "name": "language"
+          "name": "language",
+          "type": 6,
+          "flags": 2
         },
         {
           "id": "6:3681891706278096684",
-          "name": "lastChanged"
+          "name": "lastChanged",
+          "type": 9
         }
       ],
       "relations": []
@@ -71,21 +88,27 @@
       "properties": [
         {
           "id": "1:6814858511842638357",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:7223007155643590273",
-          "name": "name"
+          "name": "name",
+          "type": 9
         },
         {
           "id": "3:1684863216882141435",
-          "name": "offline"
+          "name": "offline",
+          "type": 1,
+          "flags": 4
         }
       ],
       "relations": [
         {
           "id": "2:2677116915056696071",
-          "name": "lessons"
+          "name": "lessons",
+          "targetId": "1:1697350923784911457"
         }
       ]
     },
@@ -96,17 +119,21 @@
       "properties": [
         {
           "id": "1:1455943094628261729",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:6918937486594646670",
-          "name": "name"
+          "name": "name",
+          "type": 9
         }
       ],
       "relations": [
         {
           "id": "3:7677753300694186410",
-          "name": "profiles"
+          "name": "profiles",
+          "targetId": "3:2720226328564991509"
         }
       ]
     }
@@ -115,8 +142,8 @@
   "lastIndexId": "0:0",
   "lastRelationId": "3:7677753300694186410",
   "lastSequenceId": "0:0",
-  "modelVersion": 4,
-  "modelVersionParserMinimum": 4,
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
   "retiredPropertyUids": [],

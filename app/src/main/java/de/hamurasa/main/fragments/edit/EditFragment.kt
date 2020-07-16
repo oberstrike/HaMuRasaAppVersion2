@@ -8,6 +8,7 @@ import de.hamurasa.main.MainContext
 import de.hamurasa.main.fragments.adapters.VocableRecyclerViewAdapter
 import de.hamurasa.model.vocable.Vocable
 import de.util.hamurasa.utility.util.AbstractFragment
+import de.util.hamurasa.utility.util.AbstractSelfCleanupFragment
 import kotlinx.android.synthetic.main.edit_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -15,7 +16,7 @@ import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.core.parameter.parametersOf
 
-class EditFragment : AbstractFragment(), VocableRecyclerViewAdapter.OnClickListener{
+class EditFragment : AbstractSelfCleanupFragment(), VocableRecyclerViewAdapter.OnClickListener {
 
     override val myViewModel: EditViewModel by sharedViewModel()
 

@@ -6,7 +6,6 @@ import de.hamurasa.R
 import de.hamurasa.model.vocable.Language
 import de.hamurasa.model.vocable.Vocable
 import de.hamurasa.model.vocable.VocableType
-import de.hamurasa.settings.SettingsContext
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.isValid
 import de.util.hamurasa.utility.util.*

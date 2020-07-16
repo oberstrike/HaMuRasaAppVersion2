@@ -27,12 +27,12 @@ class MainViewModel(
 
 
     @ExperimentalCoroutinesApi
-    fun init() {
+    suspend fun init() {
         MainContext.HomeContext.setLessons(lessonService.findAll())
     }
 
 
-    fun export(): String {
+    suspend fun export(): String {
         val allLessons = lessonService.findAll()
         return GsonObject.gson.toJson(allLessons)
     }

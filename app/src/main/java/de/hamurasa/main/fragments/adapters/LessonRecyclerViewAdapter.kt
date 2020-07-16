@@ -14,7 +14,7 @@ class LessonRecyclerViewAdapter(
     private val onClickListener: OnClickListener
 ) : RecyclerView.Adapter<LessonRecyclerViewAdapter.ViewHolder>() {
 
-    private val items = ArrayList<Lesson>()
+    private val items: MutableList<Lesson> = mutableListOf()
 
     var position: Int = 0
 

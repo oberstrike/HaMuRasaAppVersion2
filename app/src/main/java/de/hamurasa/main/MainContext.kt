@@ -4,14 +4,10 @@ import androidx.fragment.app.Fragment
 import de.hamurasa.model.lesson.Lesson
 import de.hamurasa.model.vocable.Vocable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 
 object MainContext {
-    var isLoggedIn: Boolean = false
 
     lateinit var activeFragment: Fragment
 

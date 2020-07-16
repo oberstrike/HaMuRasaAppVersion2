@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import de.util.hamurasa.utility.main.AbstractViewModel
 
@@ -27,8 +26,15 @@ abstract class AbstractFragment : Fragment(),
         return inflater.inflate(getLayoutId(), container, false)
     }
 
+
+}
+
+
+abstract class AbstractSelfCleanupFragment : AbstractFragment() {
+
     override fun onDestroyView() {
         myViewModel.onCleared()
         super.onDestroyView()
     }
+
 }

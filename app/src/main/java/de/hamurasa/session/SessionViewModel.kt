@@ -1,70 +1,80 @@
 package de.hamurasa.session
 
 import android.content.Context
-import de.hamurasa.util.SchedulerProvider
+import de.hamurasa.session.models.SessionEvent
+import de.hamurasa.session.models.SessionType
 import de.hamurasa.session.models.VocableWrapper
-import de.hamurasa.settings.SettingsContext
+import de.hamurasa.settings.model.Settings
 import de.hamurasa.util.BaseViewModel
+import de.hamurasa.util.SchedulerProvider
 import de.util.hamurasa.utility.util.weight
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.koin.android.ext.android.inject
 
 class SessionViewModel(
     provider: SchedulerProvider,
-    val context: Context
+    val context: Context,
+    val settings: Settings,
+    val session: SessionEvent
 ) : BaseViewModel(provider) {
 
+    private lateinit var sessionTypes: List<SessionType>
 
+
+    @ExperimentalCoroutinesApi
     fun init() {
-        with(SessionContext) {
-            vocables = vocables.take(SettingsContext.SessionSettings.maxVocableCount)
+        with(session) {
+            vocables = vocables.take(settings.maxVocableCount)
             val next = vocables.random()
             activeVocable = next
-            val sessionTypesTmp = mutableListOf<SessionType>()
-            if (SettingsContext.SessionSettings.standardInputType) {
-                sessionTypesTmp.add(SessionType.STANDARD)
-            }
-            if (SettingsContext.SessionSettings.alternativeInputType) {
-                sessionTypesTmp.add(SessionType.ALTERNATIVE)
 
+            val tmp: MutableList<SessionType> = mutableListOf()
+            if (settings.standardType) {
+                tmp.add(SessionType.STANDARD)
             }
-            if (SettingsContext.SessionSettings.writingInputType) {
-                sessionTypesTmp.add(SessionType.WRITING)
+            if (settings.alternativeType) {
+                tmp.add(SessionType.ALTERNATIVE)
             }
-            sessionTypes = sessionTypesTmp
-            sessionType = sessionTypes.random()
+            if (settings.writingType) {
+                tmp.add(SessionType.WRITING)
+            }
+            sessionTypes = tmp
+            session.sessionType = sessionTypes.random()
+
+
         }
     }
 
-    fun next(correct: Boolean): VocableWrapper? {
-        val vocable = SessionContext.activeVocable
+    @ExperimentalCoroutinesApi
+    fun next(correct: Boolean): Boolean {
+        val vocable = session.activeVocable
         vocable.level += if (correct) 1 else -1
         vocable.attempts += 1
-        var nextVocableWrapper: VocableWrapper? = null
 
-        if (vocable.level >= (SettingsContext.SessionSettings.maxRepetitions + 1)) {
-            SessionContext.vocables =
-                SessionContext.vocables.filterNot { it.value == vocable.value }
-        }
 
-        if (SessionContext.vocables.isNotEmpty()) {
-            val weightedList = SessionContext.vocables.weight(keySelector = {
-                it.level
-            }, weightFunction = {
-                SettingsContext.SessionSettings.maxRepetitions - it
-            })
+        val nextVocableWrapper: VocableWrapper = getNextVocableWrapper(vocable) ?: return false
 
-            val next = weightedList.random()
-            nextVocableWrapper = next
-        } else {
-            SessionContext.running = flowOf(false)
+        val nextSessionType: SessionType = sessionTypes.random()
+        session.activeVocable = nextVocableWrapper
+        session.sessionType = nextSessionType
+        return true
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun getNextVocableWrapper(vocable: VocableWrapper): VocableWrapper? {
+        return with(session) {
+            if (vocable.level >= (settings.maxRepetitions + 1))
+                vocables = vocables.filterNot { it.value == vocable.value }
+            if (vocables.isNotEmpty()) {
+                vocables.weight(
+                    keySelector = {
+                        it.level
+                    }, weightFunction = {
+                        settings.maxRepetitions - it
+                    }).random()
+            } else
+                null
         }
-        SessionContext.sessionType = SessionContext.sessionTypes.random()
-        if (nextVocableWrapper == null) {
-            return null
-        }
-        SessionContext.activeVocable = nextVocableWrapper
-        SessionContext.sessionType = SessionContext.sessionTypes.random()
-        return nextVocableWrapper
     }
 }
 
