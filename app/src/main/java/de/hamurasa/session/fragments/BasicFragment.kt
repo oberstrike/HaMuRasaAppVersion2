@@ -1,14 +1,11 @@
 package de.hamurasa.session.fragments
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import de.hamurasa.R
-import de.hamurasa.session.SessionViewModel
 import de.hamurasa.session.models.VocableWrapper
 import de.hamurasa.settings.model.Settings
-import de.util.hamurasa.utility.util.AbstractFragment
+import de.hamurasa.util.AbstractFragment
 import org.koin.android.ext.android.inject
 
 abstract class BasicFragment(

@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import de.hamurasa.R
-import de.hamurasa.model.vocable.Language
-import de.hamurasa.model.lesson.Lesson
+import de.hamurasa.main.MainContext
+import de.hamurasa.data.vocable.Language
+import de.hamurasa.data.lesson.Lesson
+import de.hamurasa.util.BaseDialog
 import de.hamurasa.util.isValid
-import de.util.hamurasa.utility.util.AbstractDialog
-import de.util.hamurasa.utility.util.bind
-import de.util.hamurasa.utility.util.initAdapter
-import de.util.hamurasa.utility.util.toast
+import de.hamurasa.util.toast
+import de.hamurasa.util.widgets.bind
+import de.hamurasa.util.widgets.initAdapter
 import kotlinx.android.synthetic.main.dialog_new_lesson.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,7 +19,11 @@ import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 //Reworked
-class NewLessonDialog(private val lesson: Lesson) : AbstractDialog(), View.OnClickListener {
+class NewLessonDialog(
+    private val lesson: de.hamurasa.data.lesson.Lesson,
+    private val homeFragment: HomeFragment
+) :
+    BaseDialog(), View.OnClickListener {
     private val myViewModel: HomeViewModel by sharedViewModel()
 
     @ExperimentalCoroutinesApi
@@ -34,6 +39,7 @@ class NewLessonDialog(private val lesson: Lesson) : AbstractDialog(), View.OnCli
                 val text = "The creation was successful!"
                 val toast = Toast.makeText(activity, text, Toast.LENGTH_LONG)
                 toast.show()
+                homeFragment.updateRecyclerView(MainContext.HomeContext.profile.value!!)
                 dismiss()
             }
         }
@@ -50,16 +56,15 @@ class NewLessonDialog(private val lesson: Lesson) : AbstractDialog(), View.OnCli
         }
 
         //Language Binding
-
-        new_lesson_language_spinner.initAdapter<Language>()
+        new_lesson_language_spinner.initAdapter<de.hamurasa.data.vocable.Language>()
         new_lesson_language_spinner.bind(lesson::language) {
-            Language.valueOf(it)
+            de.hamurasa.data.vocable.Language.valueOf(it)
         }
 
         //Validation Language Binding
-        new_lesson_validation_language_spinner.initAdapter<Language>()
+        new_lesson_validation_language_spinner.initAdapter<de.hamurasa.data.vocable.Language>()
         new_lesson_validation_language_spinner.bind(lesson::validationLanguage) {
-            Language.valueOf(it)
+            de.hamurasa.data.vocable.Language.valueOf(it)
         }
     }
 }

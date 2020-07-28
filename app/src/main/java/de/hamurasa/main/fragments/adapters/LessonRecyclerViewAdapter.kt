@@ -1,96 +1,65 @@
 package de.hamurasa.main.fragments.adapters
 
-import android.content.Context
 import android.graphics.Color
-import android.view.*
-import android.widget.LinearLayout
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.mitteloupe.solid.recyclerview.InflatedViewProvider
+import com.mitteloupe.solid.recyclerview.SimpleViewBinder
 import de.hamurasa.R
-import de.hamurasa.model.lesson.Lesson
+import kotlinx.android.extensions.LayoutContainer
 
-class LessonRecyclerViewAdapter(
-    val context: Context,
-    private val onClickListener: OnClickListener
-) : RecyclerView.Adapter<LessonRecyclerViewAdapter.ViewHolder>() {
+class SolidViewProvider(
+    layoutInflater: LayoutInflater
+) : InflatedViewProvider(layoutInflater, R.layout.holder_lesson_fragment)
 
-    private val items: MutableList<Lesson> = mutableListOf()
+class SolidLessonViewHolder(
+    override val containerView: View
+) : RecyclerView.ViewHolder(containerView), LayoutContainer {
+    val lessonId: TextView = itemView.findViewById(R.id.lesson_id)
+    val lessonView: ConstraintLayout = itemView.findViewById(R.id.lesson_view)
 
-    var position: Int = 0
 
-    class ViewHolder(
-        itemView: View,
-        private val onClickListener: OnClickListener
-    ) :
-        RecyclerView.ViewHolder(itemView),
-        View.OnClickListener,
-        View.OnCreateContextMenuListener {
-        val lessonId: TextView = itemView.findViewById(R.id.lesson_id)
-        val lessonView: LinearLayout = itemView.findViewById(R.id.lesson_view)
+}
 
-        init {
-            itemView.setOnClickListener(this)
-            itemView.setOnCreateContextMenuListener(this)
+class SolidLessonViewBinder(
+    private val lessonRecyclerViewListener: ILessonRecyclerViewListener
+) : SimpleViewBinder<SolidLessonViewHolder, de.hamurasa.data.lesson.Lesson>() {
+
+    private var position: Int = 0
+
+    override fun bindView(viewHolder: SolidLessonViewHolder, data: de.hamurasa.data.lesson.Lesson) {
+
+        viewHolder.lessonId.text = "Lesson: ${data.id}"
+        viewHolder.lessonView.setBackgroundColor(Color.parseColor("#D4D4D4"))
+
+
+        viewHolder.itemView.setOnClickListener {
+            lessonRecyclerViewListener.onLessonClick(data)
         }
 
-        override fun onClick(v: View?) {
-            onClickListener.onItemClick(adapterPosition)
-        }
 
-        override fun onCreateContextMenu(
-            menu: ContextMenu?,
-            v: View?,
-            menuInfo: ContextMenu.ContextMenuInfo?
-        ) {
-            menu?.add(Menu.NONE, R.id.action_delete, Menu.NONE, R.string.action_delete)
-            menu?.add(Menu.NONE, R.id.action_rename, Menu.NONE, R.string.action_rename)
-            menu?.add(Menu.NONE, R.id.action_start, Menu.NONE, R.string.start)
-        }
-    }
-
-    fun getLesson(position: Int): Lesson {
-        return items[position]
-    }
-
-    fun setLessons(lessons: List<Lesson>) {
-        items.clear()
-        items.addAll(lessons)
-    }
-
-    override fun getItemCount(): Int {
-        return items.size
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-
-        holder.lessonView.setBackgroundColor(Color.parseColor("#D4D4D4"))
-        holder.lessonId.text = context.resources.getString(R.string.lesson, position + 1)
-
-        if (item.words.size == 0) {
-            holder.lessonId.setTextColor(Color.parseColor("#a1a1a1"))
-        }
-
-        holder.itemView.setOnLongClickListener {
-            this.position = holder.adapterPosition
+        viewHolder.itemView.setOnLongClickListener {
+            lessonRecyclerViewListener.onLessonLongClick(viewHolder.adapterPosition)
             false
         }
-    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view =
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.holder_lesson_fragment, parent, false)
-
-        return ViewHolder(
-            view,
-            onClickListener
-        )
-    }
-
-    interface OnClickListener {
-        fun onItemClick(position: Int)
-
+        viewHolder.itemView.setOnCreateContextMenuListener(lessonRecyclerViewListener)
     }
 }
 
+interface OnLessonClickListener {
+    fun onLessonClick(lesson: de.hamurasa.data.lesson.Lesson)
+}
+
+interface OnLessonLongClickListener {
+    fun onLessonLongClick(position: Int)
+}
+
+
+interface ILessonRecyclerViewListener :
+    OnLessonClickListener,
+    View.OnCreateContextMenuListener,
+    OnLessonLongClickListener

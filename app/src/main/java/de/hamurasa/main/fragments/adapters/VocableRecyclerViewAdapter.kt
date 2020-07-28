@@ -1,84 +1,57 @@
 package de.hamurasa.main.fragments.adapters
 
-import android.content.Context
-import android.graphics.Color
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.mitteloupe.solid.recyclerview.InflatedViewProvider
+import com.mitteloupe.solid.recyclerview.SimpleViewBinder
 import de.hamurasa.R
-import de.hamurasa.model.vocable.Vocable
+import de.hamurasa.data.vocable.Vocable
+import kotlinx.android.extensions.LayoutContainer
 
-class VocableRecyclerViewAdapter(
-    val context: Context,
-    private val onClickListener: OnClickListener
-) : RecyclerView.Adapter<VocableRecyclerViewAdapter.ViewHolder>() {
+interface VocableOnClickListener {
+    fun onItemClick(vocable: de.hamurasa.data.vocable.Vocable)
+}
 
-    val items: MutableList<Vocable> = mutableListOf()
+class SolidVocableViewProvider(
+    layoutInflater: LayoutInflater
+) : InflatedViewProvider(layoutInflater, R.layout.holder_vocable_fragment)
 
-    class ViewHolder(
-        val item: View,
-        private val onClickListener: OnClickListener
-    ) : RecyclerView.ViewHolder(item), View.OnClickListener {
 
-        val wordValueTextView: TextView = itemView.findViewById(R.id.vocable_value)
-        val wordTranslationTextView: TextView = itemView.findViewById(R.id.vocable_translation)
+class SolidVocableViewHolder(
+    override val containerView: View
+) : RecyclerView.ViewHolder(containerView), LayoutContainer {
+    val wordValueTextView: TextView = itemView.findViewById(R.id.vocable_value)
+    val wordTranslationTextView: TextView = itemView.findViewById(R.id.vocable_translation)
+}
 
-        init {
-            itemView.setOnClickListener(this)
+
+class SolidVocableViewBinder(
+    private val vocableOnClickListener: VocableOnClickListener
+) : SimpleViewBinder<SolidVocableViewHolder, de.hamurasa.data.vocable.Vocable>() {
+
+    override fun bindView(viewHolder: SolidVocableViewHolder, data: de.hamurasa.data.vocable.Vocable) {
+        viewHolder.itemView.setOnClickListener {
+            vocableOnClickListener.onItemClick(data)
         }
 
-        override fun onClick(v: View?) {
-            onClickListener.onItemClick(adapterPosition)
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return items.size
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val word = items[position]
-        holder.item.setBackgroundColor(Color.parseColor("#D4D4D4"))
-
-        holder.wordValueTextView.text = word.value
-        if (word.value.length < 6) {
-            holder.wordValueTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24f)
+        viewHolder.wordValueTextView.text = data.value
+        if (data.value!!.length < 6) {
+            viewHolder.wordValueTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24f)
         } else {
-            holder.wordValueTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20f)
+            viewHolder.wordValueTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20f)
         }
 
-        val translation = word.translation.firstOrNull().orEmpty().toString()
-
-        holder.wordTranslationTextView.text = translation.split(',').first()
+        val translation = data.translation.first()
+        viewHolder.wordTranslationTextView.text = translation
 
         if (translation.length < 6) {
-            holder.wordTranslationTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22f)
+            viewHolder.wordTranslationTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22f)
         } else {
-            holder.wordTranslationTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16f)
+            viewHolder.wordTranslationTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16f)
         }
-
-
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view =
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.holder_vocable_fragment, parent, false)
-        return ViewHolder(
-            view,
-            onClickListener
-        )
-    }
-
-    fun setWords(words: List<Vocable>) {
-        items.clear()
-        items.addAll(words)
-    }
-
-    interface OnClickListener {
-        fun onItemClick(position: Int)
-    }
 }

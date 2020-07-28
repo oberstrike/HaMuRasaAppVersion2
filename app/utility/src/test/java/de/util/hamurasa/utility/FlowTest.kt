@@ -1,12 +1,11 @@
 package de.util.hamurasa.utility
 
-import io.reactivex.Observable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.rx2.asFlow
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.runners.MockitoJUnitRunner
+import kotlin.coroutines.CoroutineContext
 
 @RunWith(MockitoJUnitRunner::class)
 class FlowTest {
@@ -15,47 +14,77 @@ class FlowTest {
     @Test
     fun test() = runBlocking {
         val eventHandler = EventHandler()
+        val listOfString = mutableListOf<String>()
 
-        GlobalScope.launch(Dispatchers.IO) {
+
+        val job = GlobalScope.async(Dispatchers.IO) {
             eventHandler.event.collect {
-                println(it)
+                listOfString.add(it.toString())
             }
         }
 
-        eventHandler.change(Event.TWO)
+        for (i in 0..3) {
+            eventHandler.change(Event())
+        }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        job.cancel()
+        assert(listOfString.size == 5)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun dataClassesTest() = runBlocking {
+        val event = Event()
+        val copyEvent = event.copy()
+        val eventHandler = EventHandler()
+        var job: Job = Job()
+        val scope = Dispatchers.IO + job
+
+
+
+
+        job = GlobalScope.async(Dispatchers.IO) {
             eventHandler.event.collect {
                 println(it)
             }
+
         }
 
-        eventHandler.change(Event.ONE)
-        println("finished")
+        eventHandler.change(Event())
 
+        job.join()
+        assert(event == copyEvent)
     }
 
 
 }
 
-enum class Event {
-    ONE, TWO
+
+data class Event(
+    val id: Long = c_id,
+    val names: List<String> = listOf()
+) {
+    companion object {
+        var c_id: Long = 0
+            get() {
+                return field++
+            }
+    }
+
 }
+
 
 @ExperimentalCoroutinesApi
 class EventHandler {
 
-    private val _events: MutableStateFlow<Event> = MutableStateFlow(Event.ONE)
+    private val _events: MutableStateFlow<Event> = MutableStateFlow(Event())
 
-    val event: StateFlow<Event> get() = _events
+    val event: StateFlow<Event> = _events
 
     suspend fun change(event: Event) {
         delay(500)
         _events.value = event
     }
-
-
-
 
 
 }

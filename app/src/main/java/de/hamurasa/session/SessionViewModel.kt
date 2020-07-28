@@ -7,9 +7,8 @@ import de.hamurasa.session.models.VocableWrapper
 import de.hamurasa.settings.model.Settings
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
-import de.util.hamurasa.utility.util.weight
+import de.hamurasa.util.weight
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.android.ext.android.inject
 
 class SessionViewModel(
     provider: SchedulerProvider,

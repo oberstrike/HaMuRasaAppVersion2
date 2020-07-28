@@ -1,6 +1,6 @@
 package de.util.hamurasa.utility
 
-import de.util.hamurasa.utility.util.weight
+import de.hamurasa.util.weight
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith

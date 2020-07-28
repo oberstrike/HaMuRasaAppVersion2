@@ -36,4 +36,5 @@
     <string name="word">Word</string>
     <string name="start">Start</string>
     <string name="action_export">Export</string>
+    <string name="new_profile">New Profile</string>
 </resources>

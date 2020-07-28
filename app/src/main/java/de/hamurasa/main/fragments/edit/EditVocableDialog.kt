@@ -1,26 +1,25 @@
 package de.hamurasa.main.fragments.edit
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import de.hamurasa.R
 import de.hamurasa.main.MainContext
-import de.hamurasa.model.vocable.Vocable
-import de.hamurasa.model.vocable.VocableDTO
-import de.hamurasa.model.vocable.VocableType
-import de.hamurasa.util.isValid
-import de.util.hamurasa.utility.util.*
+import de.hamurasa.util.*
+import de.hamurasa.util.widgets.afterTextChanged
+import de.hamurasa.util.widgets.bind
+import de.hamurasa.util.widgets.initAdapter
 import kotlinx.android.synthetic.main.dialog_edit_vocable.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 
 //Reworked
-class EditVocableDialog(val vocable: Vocable) :
-    AbstractDialog(), View.OnClickListener {
+class EditVocableDialog(
+    val vocable: de.hamurasa.data.vocable.Vocable,
+    private val editFragment: EditFragment
+) :
+    BaseDialog(), View.OnClickListener {
 
     private val myViewModel: EditViewModel by sharedViewModel()
 
@@ -37,12 +36,20 @@ class EditVocableDialog(val vocable: Vocable) :
             if (it.isNotBlank()) vocable.translation = it.split(",")
         }
 
+        GlobalScope.launch {
+            val stats = myViewModel.stats(vocable) ?: return@launch
+            withContext(Dispatchers.Main) {
+                val color =
+                    if (stats.repetitions == 0L) Color.RED else if (stats.repetitions < 5) Color.YELLOW else Color.GREEN
+                valueEditText.setTextColor(color)
+            }
+        }
 
         applyButton.setOnClickListener(this)
 
-        editVocableTypeSpinner.initAdapter<VocableType>()
+        editVocableTypeSpinner.initAdapter<de.hamurasa.data.vocable.VocableType>()
         editVocableTypeSpinner.bind(vocable::type) {
-            VocableType.valueOf(it)
+            de.hamurasa.data.vocable.VocableType.valueOf(it)
         }
 
 
@@ -69,23 +76,15 @@ class EditVocableDialog(val vocable: Vocable) :
 
     @ExperimentalCoroutinesApi
     private fun delete() {
-        val id = vocable.id
-
-        val vocableDTO = VocableDTO.create(
-            id,
-            vocable.value,
-            vocable.type,
-            vocable.translation,
-            vocable.language
-        )
         val lesson = MainContext.EditContext.lesson.value ?: return
 
         myViewModel.launchJob {
             myViewModel.deleteVocableFromLesson(
-                vocableDTO,
+                vocable,
                 lesson
             )
             withContext(Dispatchers.Main) {
+                editFragment.updateLesson(lesson)
                 dismiss()
             }
         }

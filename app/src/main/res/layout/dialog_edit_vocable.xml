@@ -56,6 +56,7 @@
         android:id="@+id/applyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
         android:text="@string/apply"
         app:layout_constraintEnd_toEndOf="@+id/translationEditText"
         app:layout_constraintTop_toBottomOf="@+id/editVocableTypeSpinner" />
@@ -74,9 +75,21 @@
         android:id="@+id/editVocableTypeSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/infoButton"
         app:layout_constraintStart_toStartOf="@+id/translationTextView"
         app:layout_constraintTop_toBottomOf="@+id/translationEditText" />
+
+    <ImageButton
+        android:id="@+id/infoButton"
+        android:layout_width="66dp"
+        android:layout_height="47dp"
+        android:layout_marginEnd="24dp"
+        android:contentDescription="Hallo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/deleteButton"
+        app:srcCompat="@android:drawable/ic_dialog_info" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

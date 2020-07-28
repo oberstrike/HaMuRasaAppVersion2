@@ -4,7 +4,8 @@ import android.view.View
 import de.hamurasa.R
 import de.hamurasa.session.SessionViewModel
 import de.hamurasa.session.models.VocableWrapper
-import de.util.hamurasa.utility.util.afterTextChanged
+
+import de.hamurasa.util.widgets.afterTextChanged
 import kotlinx.android.synthetic.main.vocable_session_fragment.*
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 

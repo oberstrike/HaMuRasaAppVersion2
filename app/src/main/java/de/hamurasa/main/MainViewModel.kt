@@ -1,39 +1,44 @@
 package de.hamurasa.main
 
 
-import android.accounts.AccountManager
 import android.content.Context
-import com.google.gson.Gson
 
-import de.hamurasa.model.lesson.LessonService
-import de.hamurasa.model.vocable.VocableService
+import de.hamurasa.data.lesson.LessonService
+import de.hamurasa.data.profile.Profile
+import de.hamurasa.data.profile.ProfileService
 import de.hamurasa.util.BaseViewModel
-import de.hamurasa.util.GsonObject
 import de.hamurasa.util.SchedulerProvider
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 
 class MainViewModel(
     val context: Context,
     private val provider: SchedulerProvider,
     private val lessonService: LessonService,
-    private val vocableService: VocableService
+    private val profileService: ProfileService
 ) : BaseViewModel(provider) {
 
 
     @ExperimentalCoroutinesApi
     suspend fun init() {
-        MainContext.HomeContext.setLessons(lessonService.findAll())
+        val profiles = profileService.findAll()
+        if (profiles.isEmpty()) {
+            val profile = Profile()
+            profile.name = MainContext.name
+            profile.lessons.addAll(lessonService.findAll())
+            profileService.save(profile)
+        }
+
+        MainContext.HomeContext.setProfile(profileService.findByName(MainContext.name)!!)
     }
 
 
     suspend fun export(): String {
         val allLessons = lessonService.findAll()
-        return GsonObject.gson.toJson(allLessons)
+        return de.hamurasa.data.util.GsonObject.gson.toJson(allLessons)
+    }
+
+    suspend fun save(profile: Profile) {
+        profileService.save(profile)
     }
 }

@@ -6,13 +6,13 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import de.hamurasa.R
-import de.util.hamurasa.utility.util.AbstractDialog
+import de.hamurasa.util.BaseDialog
 import kotlinx.android.synthetic.main.dialog_import_export.*
 
 class ImportExportDialog(
     private val json: String,
     private val clipboardManager: ClipboardManager
-) : AbstractDialog(), View.OnClickListener {
+) : BaseDialog(), View.OnClickListener {
     override fun getLayoutId() = R.layout.dialog_import_export
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

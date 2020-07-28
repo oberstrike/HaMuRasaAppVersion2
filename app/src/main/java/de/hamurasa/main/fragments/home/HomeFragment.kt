@@ -2,35 +2,46 @@ package de.hamurasa.main.fragments.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.ContextMenu
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mitteloupe.solid.recyclerview.SolidAdapter
 import de.hamurasa.R
 import de.hamurasa.main.MainContext
-import de.hamurasa.main.fragments.adapters.LessonRecyclerViewAdapter
+import de.hamurasa.main.fragments.adapters.*
+import de.hamurasa.data.profile.Profile
 import de.hamurasa.session.SessionActivity
 import de.hamurasa.session.models.SessionEvent
 import de.hamurasa.session.models.VocableWrapper
-import de.util.hamurasa.utility.util.AbstractSelfCleanupFragment
-import de.util.hamurasa.utility.util.dialog
+import de.hamurasa.util.AbstractSelfCleanupFragment
+import de.hamurasa.util.widgets.bind
+import de.hamurasa.util.widgets.initAdapter
 import kotlinx.android.synthetic.main.home_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class HomeFragment(
-    private val onItemClickListener: OnItemClickListener
-) :
-    AbstractSelfCleanupFragment(),
-    LessonRecyclerViewAdapter.OnClickListener {
+
+class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
+    AbstractSelfCleanupFragment(), ILessonRecyclerViewListener {
+
+    private var position: Int = 0
+
+    override fun onLessonLongClick(position: Int) {
+        this.position = position
+    }
 
     override val myViewModel: HomeViewModel by sharedViewModel()
 
     private val sessionEvent: SessionEvent by inject()
 
-    private lateinit var lessonRecyclerViewAdapter: LessonRecyclerViewAdapter
+    private lateinit var lessonRecyclerLessonViewAdapter: SolidAdapter<SolidLessonViewHolder, de.hamurasa.data.lesson.Lesson>
+
+    @ExperimentalCoroutinesApi
+    private var activeProfile: Profile = MainContext.HomeContext.profile.value!!
 
     override fun getLayoutId(): Int = R.layout.home_fragment
 
@@ -38,51 +49,88 @@ class HomeFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val profiles = myViewModel.getAllProfiles().map { it.name }.toTypedArray()
+        profileSpinner.initAdapter(profiles)
 
-        //Init Observer
         myViewModel.launchJob {
+            profileSpinner.bind(this::activeProfile,
+                toString = {
+                    it.name
+                }, converter = {
+                    runBlocking {
+                        myViewModel.findProfileByName(it)!!
+                    }
+                }, onValueChanged = {
+                    MainContext.HomeContext.setProfile(it)
+                })
+        }
+
+        //Init Views
+        initElements()
+
+        launchJob {
             myViewModel.updateHome()
             initObserver()
         }
-        //Init Views
-        initElements()
+
+
     }
 
     private fun initElements() {
-        lessonRecyclerViewAdapter = LessonRecyclerViewAdapter(requireContext(), this)
+        lessonRecyclerLessonViewAdapter = SolidAdapter(
+            viewBinder = SolidLessonViewBinder(this),
+            viewProvider = SolidViewProvider(layoutInflater),
+            viewHoldersProvider = { view, _ -> SolidLessonViewHolder(view) }
+        )
+
+
         lessonsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        lessonsRecyclerView.adapter = lessonRecyclerViewAdapter
+        lessonsRecyclerView.adapter = lessonRecyclerLessonViewAdapter
     }
 
     @ExperimentalCoroutinesApi
     private suspend fun initObserver() {
-        MainContext.HomeContext.lessons.collect {
+        MainContext.HomeContext.profile.collect {
             if (it == null)
                 return@collect
             withContext(Dispatchers.Main) {
-                lessonRecyclerViewAdapter.setLessons(it)
-                lessonRecyclerViewAdapter.notifyDataSetChanged()
+                updateRecyclerView(it)
             }
         }
     }
 
+    fun updateRecyclerView(it: Profile) {
+        try {
+            lessonRecyclerLessonViewAdapter.setItems(it.lessons)
+            lessonRecyclerLessonViewAdapter.notifyDataSetChanged()
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
+    }
 
-    //ONCLICK LESSON
     @ExperimentalCoroutinesApi
-    override fun onItemClick(position: Int) {
+    override fun onLessonClick(lesson: de.hamurasa.data.lesson.Lesson) {
         myViewModel.launchJob {
             GlobalScope.launch(Dispatchers.IO) {
-                val lessons = MainContext.HomeContext.lessons.value ?: return@launch
-                val lesson = lessons[position]
                 MainContext.EditContext.setLesson(lesson)
 
                 withContext(Dispatchers.Main) {
-                    onItemClickListener.onItemClick()
+                    onItemClickListener.onLessonClick(lesson)
                 }
 
             }
         }
 
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        menu.add(Menu.NONE, R.id.action_delete, Menu.NONE, R.string.action_delete)
+        menu.add(Menu.NONE, R.id.action_rename, Menu.NONE, R.string.action_rename)
+        menu.add(Menu.NONE, R.id.action_start, Menu.NONE, R.string.start)
     }
 
 
@@ -105,33 +153,22 @@ class HomeFragment(
 
     @ExperimentalCoroutinesApi
     private fun onActionDeleteExercise() {
-        val position = lessonRecyclerViewAdapter.position
-        val lesson = lessonRecyclerViewAdapter.getLesson(position)
-
-        dialog(R.layout.dialog_delete_lesson) { dialog ->
-            val deleteLessonButton =
-                dialog.requireView().findViewById<Button>(R.id.delete_lesson_button)
-
-            deleteLessonButton.setOnClickListener {
-                runBlocking {
-                    myViewModel.deleteLesson(lesson)
-                    dialog.dismiss()
-                }
-            }
-        }.show(parentFragmentManager, "Delete")
-
-
+        val lesson = MainContext.HomeContext.profile.value?.lessons?.get(position) ?: return
+        val deleteLessonDialog = DeleteLessonDialog(lesson)
+        deleteLessonDialog.show(parentFragmentManager, "Delete")
     }
 
     private fun onActionRenameExercise() {
+        /*'
+    }
         val position = lessonRecyclerViewAdapter.position
         val lesson = lessonRecyclerViewAdapter.getLesson(position)
-
+*/
     }
 
+    @ExperimentalCoroutinesApi
     private fun onActionStart() {
-        val position = lessonRecyclerViewAdapter.position
-        val lesson = lessonRecyclerViewAdapter.getLesson(position)
+        val lesson = MainContext.HomeContext.profile.value?.lessons?.get(position) ?: return
 
         if (lesson.words.isEmpty())
             return
@@ -142,9 +179,7 @@ class HomeFragment(
         val intent = Intent(activity, SessionActivity::class.java)
 
         startActivity(intent)
-    }
-}
 
-interface OnItemClickListener {
-    fun onItemClick()
+    }
+
 }

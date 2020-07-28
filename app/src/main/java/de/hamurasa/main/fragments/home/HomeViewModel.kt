@@ -2,41 +2,56 @@ package de.hamurasa.main.fragments.home
 
 import android.content.Context
 import de.hamurasa.main.MainContext
-import de.hamurasa.model.lesson.Lesson
-import de.hamurasa.model.lesson.LessonService
-import de.hamurasa.model.vocable.VocableService
+import de.hamurasa.data.lesson.LessonService
+import de.hamurasa.data.profile.Profile
+import de.hamurasa.data.profile.ProfileService
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
+import org.joda.time.DateTime
 
 class HomeViewModel(
     val context: Context,
-    private val provider: SchedulerProvider,
+    provider: SchedulerProvider,
     private val lessonService: LessonService,
-    private val vocableService: VocableService
+    private val profileService: ProfileService
 ) : BaseViewModel(provider) {
+
+    lateinit var profile: Profile
 
     @ExperimentalCoroutinesApi
     suspend fun updateHome() {
-        MainContext.HomeContext.setLessons(lessonService.findAll())
+        val profile = profileService.findByName(MainContext.name)!!
+        MainContext.HomeContext.setProfile(profile)
     }
 
 
     @ExperimentalCoroutinesApi
-    suspend fun deleteLesson(lesson: Lesson) {
+    suspend fun deleteLesson(lesson: de.hamurasa.data.lesson.Lesson) {
         lessonService.delete(lesson)
-
-        MainContext.HomeContext.setLessons(lessonService.findAll())
+        val profile = MainContext.HomeContext.profile.value!!
+        profile.lessons.remove(lesson)
+        MainContext.HomeContext.setProfile(profile)
     }
 
 
     @ExperimentalCoroutinesApi
-    suspend fun saveLesson(lesson: Lesson) {
+    suspend fun saveLesson(lesson: de.hamurasa.data.lesson.Lesson) {
         lessonService.save(lesson)
+        val profile = MainContext.HomeContext.profile.value ?: return
 
-        MainContext.HomeContext.setLessons(lessonService.findAll())
+        profile.lessons.add(lesson)
+        profile.lastTimeChanged = DateTime.now()
+        profileService.save(profile)
+        MainContext.HomeContext.setProfile(profile)
+    }
+
+    suspend fun findProfileByName(it: String): Profile? {
+        return profileService.findByName(it)
+    }
+
+    fun getAllProfiles(): List<Profile> = runBlocking {
+        profileService.findAll()
     }
 
 }

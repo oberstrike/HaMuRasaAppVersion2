@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "567873480619",
+    "firebase_url": "https://utility-c7915.firebaseio.com",
+    "project_id": "utility-c7915",
+    "storage_bucket": "utility-c7915.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567873480619:android:9e4e65bece5d6c6c3094ee",
+        "android_client_info": {
+          "package_name": "de.hamurasa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "567873480619-s4gik21ur8b374qo659fb3icv8q9edso.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpDcUWAisHkgDd9y56eBZaWPTdsYqUvc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "567873480619-s4gik21ur8b374qo659fb3icv8q9edso.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

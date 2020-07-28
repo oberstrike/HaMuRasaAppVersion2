@@ -3,27 +3,25 @@ package de.hamurasa.main.fragments.dictionary
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mitteloupe.solid.recyclerview.SolidAdapter
 import de.hamurasa.R
 import de.hamurasa.main.MainContext
-import de.hamurasa.main.fragments.adapters.VocableRecyclerViewAdapter
-import de.util.hamurasa.utility.util.AbstractFragment
-import de.util.hamurasa.utility.util.AbstractSelfCleanupFragment
+import de.hamurasa.main.fragments.adapters.*
+import de.hamurasa.util.AbstractSelfCleanupFragment
 import kotlinx.android.synthetic.main.dictionary_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 class DictionaryFragment : AbstractSelfCleanupFragment(),
-    VocableRecyclerViewAdapter.OnClickListener {
+    VocableOnClickListener {
     override val myViewModel: DictionaryViewModel by sharedViewModel()
-    private lateinit var vocableRecyclerViewAdapter: VocableRecyclerViewAdapter
+    private lateinit var vocableRecyclerViewAdapter: SolidAdapter<SolidVocableViewHolder, de.hamurasa.data.vocable.Vocable>
 
     override fun getLayoutId() = R.layout.dictionary_fragment
 
-    override fun onItemClick(position: Int) {
-
-        val word = vocableRecyclerViewAdapter.items[position]
-        val fragment = ResultAlertDialog(word)
+    override fun onItemClick(vocable: de.hamurasa.data.vocable.Vocable) {
+        val fragment = DictionaryResultDialog(vocable)
 
         fragment.show(requireActivity().supportFragmentManager, "Result")
     }
@@ -32,7 +30,11 @@ class DictionaryFragment : AbstractSelfCleanupFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        vocableRecyclerViewAdapter = VocableRecyclerViewAdapter(requireContext(), this)
+        vocableRecyclerViewAdapter = SolidAdapter(
+            viewProvider = SolidVocableViewProvider(layoutInflater),
+            viewBinder = SolidVocableViewBinder(this),
+            viewHoldersProvider = { v, _ -> SolidVocableViewHolder(v) }
+        )
         dictionary_word_recyclerView.layoutManager = LinearLayoutManager(requireContext())
         dictionary_word_recyclerView.adapter = vocableRecyclerViewAdapter
 
@@ -41,7 +43,9 @@ class DictionaryFragment : AbstractSelfCleanupFragment(),
         }
 
         dictionary_search_button.setOnClickListener {
-            myViewModel.getWord(dictionary_search_editText.text.toString())
+            myViewModel.launchJob {
+                myViewModel.getWord(dictionary_search_editText.text.toString())
+            }
         }
     }
 
@@ -49,7 +53,7 @@ class DictionaryFragment : AbstractSelfCleanupFragment(),
     private suspend fun initObserver() {
         MainContext.DictionaryContext.words.collect {
             withContext(Dispatchers.Main) {
-                vocableRecyclerViewAdapter.setWords(it)
+                vocableRecyclerViewAdapter.setItems(it)
                 vocableRecyclerViewAdapter.notifyDataSetChanged()
             }
         }

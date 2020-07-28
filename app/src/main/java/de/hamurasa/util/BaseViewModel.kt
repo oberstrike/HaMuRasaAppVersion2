@@ -1,6 +1,6 @@
 package de.hamurasa.util
 
-import de.util.hamurasa.utility.main.AbstractViewModel
+import de.hamurasa.main.AbstractViewModel
 import io.reactivex.Observable
 
 abstract class BaseViewModel(private val provider: SchedulerProvider) : AbstractViewModel() {

@@ -10,25 +10,33 @@
       "properties": [
         {
           "id": "1:385778066820139415",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:3919881130638660044",
-          "name": "language"
+          "name": "language",
+          "type": 6,
+          "flags": 2
         },
         {
           "id": "3:5800881003897233654",
-          "name": "validationLanguage"
+          "name": "validationLanguage",
+          "type": 6,
+          "flags": 2
         },
         {
           "id": "4:4485869277285346436",
-          "name": "lastChanged"
+          "name": "lastChanged",
+          "type": 9
         }
       ],
       "relations": [
         {
           "id": "1:5399224680479332851",
-          "name": "words"
+          "name": "words",
+          "targetId": "2:1425526070670067240"
         }
       ]
     },
@@ -39,87 +47,131 @@
       "properties": [
         {
           "id": "1:8403767566738913041",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:1220089793395522853",
-          "name": "value"
+          "name": "value",
+          "type": 9
         },
         {
           "id": "3:6449674959245597349",
-          "name": "type"
+          "name": "type",
+          "type": 6,
+          "flags": 2
         },
         {
           "id": "4:548493307908025609",
-          "name": "translation"
+          "name": "translation",
+          "type": 9
         },
         {
           "id": "5:579106710325953899",
-          "name": "language"
+          "name": "language",
+          "type": 6,
+          "flags": 2
         },
         {
           "id": "6:3681891706278096684",
-          "name": "lastChanged"
+          "name": "lastChanged",
+          "type": 9
         }
       ],
       "relations": []
     },
     {
       "id": "3:2720226328564991509",
-      "lastPropertyId": "3:1684863216882141435",
+      "lastPropertyId": "4:5252776632891800218",
       "name": "Profile",
       "properties": [
         {
           "id": "1:6814858511842638357",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:7223007155643590273",
-          "name": "name"
+          "name": "name",
+          "type": 9
         },
         {
           "id": "3:1684863216882141435",
-          "name": "offline"
+          "name": "offline",
+          "type": 1,
+          "flags": 4
+        },
+        {
+          "id": "4:5252776632891800218",
+          "name": "lastTimeChanged",
+          "type": 9
         }
       ],
       "relations": [
         {
           "id": "2:2677116915056696071",
-          "name": "lessons"
+          "name": "lessons",
+          "targetId": "1:1697350923784911457"
         }
       ]
     },
     {
-      "id": "4:9177549983569560646",
-      "lastPropertyId": "2:6918937486594646670",
-      "name": "User",
+      "id": "5:7961538699375800802",
+      "lastPropertyId": "5:7385755824040099024",
+      "name": "VocableStats",
       "properties": [
         {
-          "id": "1:1455943094628261729",
-          "name": "id"
+          "id": "1:1842208249099265016",
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
-          "id": "2:6918937486594646670",
-          "name": "name"
+          "id": "2:7817929494183001968",
+          "name": "vocableId",
+          "indexId": "1:8055999905514639882",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "Vocable"
+        },
+        {
+          "id": "3:7150460290045271588",
+          "name": "repetitions",
+          "type": 6,
+          "flags": 4
+        },
+        {
+          "id": "4:2912914049910275321",
+          "name": "lastRepetitionDate",
+          "type": 9
+        },
+        {
+          "id": "5:7385755824040099024",
+          "name": "nextRepetitionDate",
+          "type": 9
         }
       ],
-      "relations": [
-        {
-          "id": "3:7677753300694186410",
-          "name": "profiles"
-        }
-      ]
+      "relations": []
     }
   ],
-  "lastEntityId": "4:9177549983569560646",
-  "lastIndexId": "0:0",
+  "lastEntityId": "5:7961538699375800802",
+  "lastIndexId": "1:8055999905514639882",
   "lastRelationId": "3:7677753300694186410",
   "lastSequenceId": "0:0",
-  "modelVersion": 4,
-  "modelVersionParserMinimum": 4,
-  "retiredEntityUids": [],
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [
+    9177549983569560646
+  ],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
-  "retiredRelationUids": [],
+  "retiredPropertyUids": [
+    1455943094628261729,
+    6918937486594646670
+  ],
+  "retiredRelationUids": [
+    7677753300694186410
+  ],
   "version": 1
 }

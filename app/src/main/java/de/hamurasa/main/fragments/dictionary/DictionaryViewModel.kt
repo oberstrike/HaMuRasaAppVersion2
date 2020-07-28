@@ -2,21 +2,22 @@ package de.hamurasa.main.fragments.dictionary
 
 import android.content.Context
 import de.hamurasa.main.MainContext
-import de.hamurasa.model.lesson.LessonService
-import de.hamurasa.model.vocable.Vocable
-import de.hamurasa.model.vocable.VocableDTO
-import de.hamurasa.model.vocable.VocableService
+import de.hamurasa.data.lesson.LessonService
+import de.hamurasa.data.vocable.Vocable
+import de.hamurasa.data.vocableStats.VocableStats
+import de.hamurasa.data.vocableStats.VocableStatsService
+import de.hamurasa.data.vocable.VocableService
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import org.joda.time.DateTime
 
 class DictionaryViewModel(
     val context: Context,
     private val provider: SchedulerProvider,
     private val lessonService: LessonService,
-    private val vocableService: VocableService
+    private val vocableService: VocableService,
+    private val vocableStatsService: VocableStatsService
 ) : BaseViewModel(provider) {
 
 
@@ -26,8 +27,7 @@ class DictionaryViewModel(
         vocable: Vocable,
         lessonServerId: Long
     ) {
-        val vocableDTO = vocableService.convertToDTO(vocable)
-        addVocableToLesson(lessonServerId, vocableDTO)
+        addVocableToLesson(lessonServerId, vocable)
 
     }
 
@@ -35,24 +35,39 @@ class DictionaryViewModel(
     @ExperimentalCoroutinesApi
     private suspend fun addVocableToLesson(
         lessonId: Long,
-        vocableDTO: VocableDTO
+        vocable: Vocable
     ) {
-        val lesson = lessonService.findById(lessonId)?: return
+        val lesson = lessonService.findById(lessonId) ?: return
 
-        val newVocable = vocableService.save(vocableDTO)
-        if (newVocable != null) {
-            lesson.words.add(newVocable)
-            lesson.lastChanged = DateTime.now()
-            lessonService.save(lesson)
-            MainContext.EditContext.setLesson(lesson)
+        vocableService.save(vocable)
+        lesson.words.add(vocable)
+        lesson.lastChanged = DateTime.now()
+        lessonService.save(lesson)
+        MainContext.EditContext.setLesson(lesson)
 
-        }
     }
 
     @ExperimentalCoroutinesApi
-    fun getWord(name: String) {
+    suspend fun getWord(name: String) {
         val vocables = vocableService.findByName(name)
         MainContext.DictionaryContext.setWords(vocables)
+
+    }
+
+    suspend fun saveVocableStats(vocableStats: VocableStats) {
+        vocableStatsService.save(vocableStats)
+    }
+
+    @ExperimentalCoroutinesApi
+    suspend fun deleteVocable(vocable: Vocable) {
+        val lessons = lessonService.findByVocableId(vocableId = vocable.id)
+        for (lesson in lessons) {
+            lessonService.deleteVocableFromLesson(vocable, lesson)
+        }
+
+        vocableService.delete(vocable)
+        val words = MainContext.DictionaryContext.words.value
+        MainContext.DictionaryContext.setWords(words.filterNot { it.id == vocable.id })
 
     }
 

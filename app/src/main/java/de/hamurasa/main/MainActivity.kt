@@ -1,30 +1,39 @@
 package de.hamurasa.main
 
+import android.app.*
 import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
+import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.mitteloupe.solid.activity.handler.LifecycleHandler
 import de.hamurasa.R
+import de.hamurasa.main.fragments.adapters.OnLessonClickListener
 import de.hamurasa.main.fragments.dialogs.ImportExportDialog
+import de.hamurasa.main.fragments.dialogs.NewProfileDialog
 import de.hamurasa.main.fragments.dictionary.DictionaryFragment
 import de.hamurasa.main.fragments.edit.EditFragment
 import de.hamurasa.main.fragments.edit.NewVocableDialog
 import de.hamurasa.main.fragments.home.HomeFragment
 import de.hamurasa.main.fragments.home.NewLessonDialog
-import de.hamurasa.main.fragments.home.OnItemClickListener
-import de.hamurasa.model.lesson.Lesson
+
+import de.hamurasa.data.lesson.Lesson
 import de.hamurasa.settings.SettingsActivity
 import de.hamurasa.settings.model.Settings
-import de.hamurasa.util.AbstractSwipeActivity
-import de.util.hamurasa.utility.util.findFirst
+import de.hamurasa.util.BaseSwipeActivity
+import de.hamurasa.service.NotificationService
+import de.hamurasa.util.findFirst
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -32,13 +41,23 @@ import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 
-//Logger
+class MainInitHandler(private val mainActivity: MainActivity) : LifecycleHandler {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        with(mainActivity) {
+            bottom_navigator.setOnNavigationItemSelectedListener(this)
+        }
+    }
+}
 
-class MainActivity : AbstractSwipeActivity<MainViewModel>(),
+
+class MainActivity :
+    BaseSwipeActivity<MainViewModel>(),
     BottomNavigationView.OnNavigationItemSelectedListener,
-    OnItemClickListener {
+    OnLessonClickListener {
 
     override val myViewModel: MainViewModel by viewModel()
+
+    override val lifecycleHandlers: List<LifecycleHandler> = listOf(MainInitHandler(this))
 
     override val toolbarToUse: Toolbar get() = toolbar
 
@@ -48,15 +67,26 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
 
     override val swipe = Swipe(40, 300)
 
-    override fun init() {
-        super.init()
-        bottom_navigator.setOnNavigationItemSelectedListener(this)
+    lateinit var activeFragment: Fragment
+
+    @ExperimentalCoroutinesApi
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        runBlocking {
+            myViewModel.init()
+        }
 
         loadFragment(get<HomeFragment> { parametersOf(this) })
+
+        val service = NotificationService()
+        val mIntent = Intent(this, service::class.java)
+        if (!isMyServiceRunning(service::class.java)) {
+            startService(mIntent)
+        }
     }
 
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)
     }
@@ -65,13 +95,13 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
             R.id.nav_search -> {
-                if (MainContext.activeFragment !is DictionaryFragment) {
+                if (activeFragment !is DictionaryFragment) {
                     loadFragment(get<DictionaryFragment> { parametersOf() })
                     return true
                 }
             }
             R.id.nav_edit_lesson -> {
-                if (MainContext.activeFragment !is EditFragment) {
+                if (activeFragment !is EditFragment) {
                     loadFragment(get<EditFragment> { parametersOf() })
                     return true
                 }
@@ -79,7 +109,7 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
             }
 
             R.id.nav_home -> {
-                if (MainContext.activeFragment !is HomeFragment) {
+                if (activeFragment !is HomeFragment) {
                     loadFragment(get<HomeFragment> { parametersOf(this) })
                     return true
                 }
@@ -91,7 +121,7 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
 
     private fun swiped(right: Boolean) {
         with(
-            with(getIdFromFragment(MainContext.activeFragment)) {
+            with(getIdFromFragment(activeFragment)) {
                 if (right)
                     if (this == 2) 0 else this + 1
                 else
@@ -144,14 +174,8 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
         }
     }
 
-    //Select Menu Item OnClick
-    override fun onItemClick() {
-        bottom_navigator.selectedItemId = R.id.nav_edit_lesson
-        loadFragment(get<EditFragment>())
-    }
-
     private fun loadFragment(fragment: Fragment) {
-        MainContext.activeFragment = fragment
+        activeFragment = fragment
 
         if (fragment is DictionaryFragment || fragment is EditFragment) {
             val oldMenuItem = toolbarToUse.menu.findFirst { each -> each.itemId == 1 }
@@ -164,14 +188,10 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
                     true
                 }
             }
-            if (fragment is DictionaryFragment) {
-                modeSpinner.visibility = View.VISIBLE
-            } else {
-                modeSpinner.visibility = View.INVISIBLE
-            }
+            toolbarToUse.menu.removeItem(R.id.action_new_lesson)
         } else {
             toolbarToUse.menu.removeItem(1)
-            modeSpinner.visibility = View.INVISIBLE
+            toolbarToUse.menu.add(Menu.NONE, R.id.action_new_lesson, Menu.NONE, R.string.new_lesson)
         }
 
         val newSelectedItem = when (fragment) {
@@ -186,10 +206,7 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
         transaction.commit()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item == null)
-            return false
-
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
@@ -198,7 +215,8 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
             R.id.action_new_lesson -> {
                 val fragment =
                     NewLessonDialog(
-                        Lesson(lastChanged = DateTime.now())
+                        de.hamurasa.data.lesson.Lesson(lastChanged = DateTime.now()),
+                        activeFragment as HomeFragment
                     )
                 fragment.show(supportFragmentManager, "New Lesson")
             }
@@ -214,13 +232,32 @@ class MainActivity : AbstractSwipeActivity<MainViewModel>(),
                     }
                 }
             }
+            R.id.action_new_profile -> {
+                val newProfileDialog: NewProfileDialog by inject()
+                newProfileDialog.show(supportFragmentManager, "New Profile")
+            }
         }
         return super.onOptionsItemSelected(item)
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-        swipe.dispatchTouchEvent(event)
-        return super.dispatchTouchEvent(event)
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager =
+            getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.runningAppProcesses) {
+            if (serviceClass.name == service.processName) {
+                Log.i("Service status", "Running")
+                return true
+            }
+        }
+        Log.i("Service status", "Not running")
+        return false
+    }
+
+    override fun onLessonClick(lesson: de.hamurasa.data.lesson.Lesson) {
+        bottom_navigator.selectedItemId = R.id.nav_edit_lesson
+        loadFragment(get<EditFragment>())
+
     }
 
 }

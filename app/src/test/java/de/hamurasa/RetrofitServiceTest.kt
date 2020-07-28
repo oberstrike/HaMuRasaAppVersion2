@@ -1,15 +1,7 @@
 package de.hamurasa
 
-import de.hamurasa.network.*
-import de.hamurasa.util.GsonObject
-import okhttp3.mockwebserver.*
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import java.lang.AssertionError
-import java.net.HttpURLConnection
 
+/*
 
 internal class RetrofitServiceTest {
 
@@ -67,4 +59,5 @@ internal class RetrofitServiceTest {
             }
         }
     }
-}
+} */
+

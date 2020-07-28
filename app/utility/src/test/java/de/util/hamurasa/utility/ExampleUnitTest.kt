@@ -2,6 +2,7 @@ package de.util.hamurasa.utility
 
 import android.content.Context
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -26,7 +27,7 @@ class ExampleUnitTest {
 
     @Test
     fun test_observer_with_interface() {
-
+        assertNotNull(mockContext)
     }
 
 
