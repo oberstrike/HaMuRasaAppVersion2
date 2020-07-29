@@ -41,7 +41,7 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
     private lateinit var lessonRecyclerLessonViewAdapter: SolidAdapter<SolidLessonViewHolder, de.hamurasa.data.lesson.Lesson>
 
     @ExperimentalCoroutinesApi
-    private var activeProfile: Profile = MainContext.HomeContext.profile.value!!
+    private var activeProfile: Profile = MainContext.HomeContext.value()!!
 
     override fun getLayoutId(): Int = R.layout.home_fragment
 
@@ -61,7 +61,9 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
                         myViewModel.findProfileByName(it)!!
                     }
                 }, onValueChanged = {
-                    MainContext.HomeContext.setProfile(it)
+                    launchJob {
+                        MainContext.HomeContext.change(it)
+                    }
                 })
         }
 
@@ -90,7 +92,7 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
 
     @ExperimentalCoroutinesApi
     private suspend fun initObserver() {
-        MainContext.HomeContext.profile.collect {
+        MainContext.HomeContext.flow.collect {
             if (it == null)
                 return@collect
             withContext(Dispatchers.Main) {
@@ -112,7 +114,7 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
     override fun onLessonClick(lesson: de.hamurasa.data.lesson.Lesson) {
         myViewModel.launchJob {
             GlobalScope.launch(Dispatchers.IO) {
-                MainContext.EditContext.setLesson(lesson)
+                MainContext.EditContext.change(lesson)
 
                 withContext(Dispatchers.Main) {
                     onItemClickListener.onLessonClick(lesson)
@@ -153,7 +155,7 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
 
     @ExperimentalCoroutinesApi
     private fun onActionDeleteExercise() {
-        val lesson = MainContext.HomeContext.profile.value?.lessons?.get(position) ?: return
+        val lesson = MainContext.HomeContext.value()?.lessons?.get(position) ?: return
         val deleteLessonDialog = DeleteLessonDialog(lesson)
         deleteLessonDialog.show(parentFragmentManager, "Delete")
     }
@@ -168,7 +170,7 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
 
     @ExperimentalCoroutinesApi
     private fun onActionStart() {
-        val lesson = MainContext.HomeContext.profile.value?.lessons?.get(position) ?: return
+        val lesson = MainContext.HomeContext.value()?.lessons?.get(position) ?: return
 
         if (lesson.words.isEmpty())
             return

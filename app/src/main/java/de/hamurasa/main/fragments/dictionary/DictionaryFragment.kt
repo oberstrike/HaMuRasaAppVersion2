@@ -51,7 +51,7 @@ class DictionaryFragment : AbstractSelfCleanupFragment(),
 
     @ExperimentalCoroutinesApi
     private suspend fun initObserver() {
-        MainContext.DictionaryContext.words.collect {
+        MainContext.DictionaryContext.flow.collect {
             withContext(Dispatchers.Main) {
                 vocableRecyclerViewAdapter.setItems(it)
                 vocableRecyclerViewAdapter.notifyDataSetChanged()

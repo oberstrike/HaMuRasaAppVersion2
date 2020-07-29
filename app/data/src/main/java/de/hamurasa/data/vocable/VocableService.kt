@@ -4,7 +4,7 @@ package de.hamurasa.data.vocable
 interface VocableService {
     suspend fun findById(id: Long): Vocable?
 
-    suspend fun save(vocable: Vocable)
+    suspend fun save(vocable: Vocable): Vocable
 
     suspend fun deleteAll()
 
@@ -14,6 +14,8 @@ interface VocableService {
 
     suspend fun delete(vocable: Vocable)
 
+    suspend fun patch(vocable: Vocable)
+
 }
 
 class VocableServiceImpl(private val vocableRepository: VocableRepository) : VocableService {
@@ -22,7 +24,16 @@ class VocableServiceImpl(private val vocableRepository: VocableRepository) : Voc
         return vocableRepository.findById(id)
     }
 
-    override suspend fun save(vocable: Vocable) {
+    override suspend fun save(vocable: Vocable): Vocable {
+        val old = vocableRepository.findByValue(vocable.value)
+            .firstOrNull { it.translation == vocable.translation }
+        if (old != null)
+            return old
+        vocableRepository.save(vocable)
+        return vocable
+    }
+
+    override suspend fun patch(vocable: Vocable) {
         vocableRepository.save(vocable)
     }
 
@@ -35,7 +46,7 @@ class VocableServiceImpl(private val vocableRepository: VocableRepository) : Voc
     }
 
     override suspend fun findByName(name: String): List<Vocable> {
-        return vocableRepository.findByName(name)
+        return vocableRepository.findByValue(name)
     }
 
     override suspend fun delete(vocable: Vocable) {

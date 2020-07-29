@@ -168,7 +168,7 @@ class MainActivity :
     override fun onPause() {
         super.onPause()
         runBlocking {
-            val id = MainContext.EditContext.lesson.value?.id ?: return@runBlocking
+            val id = MainContext.EditContext.value()?.id ?: return@runBlocking
             settings.activeLessonId = id.toInt()
 
         }
@@ -183,7 +183,7 @@ class MainActivity :
                 toolbarToUse.menu.add(Menu.NONE, 1, Menu.NONE, "Add Vocable")
                 val menuItem = toolbarToUse.menu.findItem(1)
                 menuItem.setOnMenuItemClickListener {
-                    val dialog: NewVocableDialog by inject { parametersOf(this) }
+                    val dialog: NewVocableDialog by inject()
                     dialog.show(supportFragmentManager, "New Vocable")
                     true
                 }
@@ -215,7 +215,7 @@ class MainActivity :
             R.id.action_new_lesson -> {
                 val fragment =
                     NewLessonDialog(
-                        de.hamurasa.data.lesson.Lesson(lastChanged = DateTime.now()),
+                        Lesson(lastChanged = DateTime.now()),
                         activeFragment as HomeFragment
                     )
                 fragment.show(supportFragmentManager, "New Lesson")
@@ -254,7 +254,7 @@ class MainActivity :
         return false
     }
 
-    override fun onLessonClick(lesson: de.hamurasa.data.lesson.Lesson) {
+    override fun onLessonClick(lesson: Lesson) {
         bottom_navigator.selectedItemId = R.id.nav_edit_lesson
         loadFragment(get<EditFragment>())
 

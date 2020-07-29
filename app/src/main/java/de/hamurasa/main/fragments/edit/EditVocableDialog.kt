@@ -76,17 +76,18 @@ class EditVocableDialog(
 
     @ExperimentalCoroutinesApi
     private fun delete() {
-        val lesson = MainContext.EditContext.lesson.value ?: return
+        val lesson = MainContext.EditContext.value() ?: return
 
         myViewModel.launchJob {
             myViewModel.deleteVocableFromLesson(
                 vocable,
                 lesson
             )
-            withContext(Dispatchers.Main) {
-                editFragment.updateLesson(lesson)
-                dismiss()
-            }
+            dismiss()
+            //     withContext(Dispatchers.Main) {
+            //         editFragment.updateLesson(lesson)
+            //         dismiss()
+            //    }
         }
     }
 }

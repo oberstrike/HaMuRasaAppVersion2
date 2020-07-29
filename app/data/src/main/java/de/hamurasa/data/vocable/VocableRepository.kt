@@ -10,7 +10,7 @@ interface VocableRepository {
 
     suspend fun findById(id: Long): Vocable?
 
-    suspend fun findByName(value: String): List<Vocable>
+    suspend fun findByValue(value: String): List<Vocable>
 
     suspend fun findStatsByVocable(vocable: Vocable): VocableStats?
 
@@ -26,14 +26,11 @@ interface VocableRepository {
 
 }
 
-class VocableRepositoryImpl :
+class VocableRepositoryImpl(
+    private val vocableBox: Box<Vocable>,
+    private val vocableStatsBox: Box<VocableStats>
+) :
     VocableRepository {
-    private var vocableBox: Box<Vocable> = ObjectBox.boxStore.boxFor(
-        Vocable::class.java
-    )
-
-    private var vocableStatsBox: Box<VocableStats> =
-        ObjectBox.boxStore.boxFor(VocableStats::class.java)
 
     override suspend fun findStatsByVocable(vocable: Vocable): VocableStats? {
         return vocableStatsBox.query().equal(VocableStats_.vocableId, vocable.id).build()
@@ -69,6 +66,6 @@ class VocableRepositoryImpl :
         vocableBox.removeAll()
     }
 
-    override suspend fun findByName(value: String): List<Vocable> =
+    override suspend fun findByValue(value: String): List<Vocable> =
         vocableBox.query().equal(Vocable_.value, value).build().find()
 }

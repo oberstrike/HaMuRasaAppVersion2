@@ -6,15 +6,17 @@ import de.hamurasa.R
 import de.hamurasa.data.vocable.Language
 import de.hamurasa.data.vocable.Vocable
 import de.hamurasa.data.vocable.VocableType
+import de.hamurasa.util.BaseDialog
 import de.hamurasa.util.BaseViewModel
-import de.hamurasa.util.*
+import de.hamurasa.util.isValid
+import de.hamurasa.util.toast
 import de.hamurasa.util.widgets.afterSelectedChanged
 import de.hamurasa.util.widgets.bind
 import de.hamurasa.util.widgets.initAdapter
 import kotlinx.android.synthetic.main.dialog_new_vocable.*
 
 abstract class BaseNewVocableDialog(
-    private val vocable: de.hamurasa.data.vocable.Vocable
+    private val vocable: Vocable
 ) : BaseDialog(),
     View.OnClickListener {
 
@@ -39,19 +41,19 @@ abstract class BaseNewVocableDialog(
         new_vocable_add_button.setOnClickListener(this)
 
         new_vocable_type_spinner.afterSelectedChanged {
-            val type = de.hamurasa.data.vocable.VocableType.valueOf(it)
+            val type = VocableType.valueOf(it)
             vocable.type = type
         }
 
         new_vocable_language_spinner.afterSelectedChanged {
-            val language = de.hamurasa.data.vocable.Language.valueOf(it)
+            val language = Language.valueOf(it)
             vocable.language = language
         }
 
 
 
-        new_vocable_type_spinner.initAdapter<de.hamurasa.data.vocable.VocableType>()
-        new_vocable_language_spinner.initAdapter<de.hamurasa.data.vocable.Language>()
+        new_vocable_type_spinner.initAdapter<VocableType>()
+        new_vocable_language_spinner.initAdapter<Language>()
     }
 
     override fun onClick(v: View?) {

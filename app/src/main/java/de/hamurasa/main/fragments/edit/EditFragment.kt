@@ -20,7 +20,6 @@ import org.koin.core.parameter.parametersOf
 class EditFragment : AbstractSelfCleanupFragment(), VocableOnClickListener {
 
 
-
     override val myViewModel: EditViewModel by sharedViewModel()
 
     private lateinit var vocableEditRecyclerViewAdapter: SolidAdapter<SolidVocableViewHolder, de.hamurasa.data.vocable.Vocable>
@@ -49,7 +48,7 @@ class EditFragment : AbstractSelfCleanupFragment(), VocableOnClickListener {
 
     @ExperimentalCoroutinesApi
     private suspend fun initObserver() {
-        MainContext.EditContext.lesson.collect {
+        MainContext.EditContext.flow.collect {
             if (it == null) {
                 withContext(Dispatchers.Main) {
                     listIsEmpty.visibility = View.VISIBLE

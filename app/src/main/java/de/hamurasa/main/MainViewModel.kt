@@ -29,7 +29,7 @@ class MainViewModel(
             profileService.save(profile)
         }
 
-        MainContext.HomeContext.setProfile(profileService.findByName(MainContext.name)!!)
+        MainContext.HomeContext.change(profileService.findByName(MainContext.name)!!)
     }
 
 

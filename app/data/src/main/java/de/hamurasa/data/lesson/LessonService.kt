@@ -1,6 +1,7 @@
 package de.hamurasa.data.lesson
 
 import de.hamurasa.data.vocable.Vocable
+import io.objectbox.kotlin.applyChangesToDb
 import org.joda.time.DateTime
 
 interface LessonService {
@@ -71,10 +72,14 @@ class LessonServiceImpl(private val lessonRepository: LessonRepository) :
         return success
     }
 
-    override suspend fun deleteVocableFromLesson(vocable: Vocable, lesson: Lesson) {
-        lesson.words.removeIf { it.id == vocable.id }
+    override suspend fun deleteVocableFromLesson(vocableId: Vocable, lesson: Lesson) {
+        lesson.words.removeIf { it.id == vocableId.id }
         lesson.lastChanged = DateTime.now()
-        save(lesson)
+
+        lesson.words.applyChangesToDb(resetFirst = true) {
+            removeById(vocableId.id)
+        }
+
     }
 
 

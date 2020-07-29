@@ -9,6 +9,7 @@ import de.hamurasa.data.vocableStats.VocableStatsService
 import de.hamurasa.data.vocable.VocableService
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
+import io.objectbox.kotlin.applyChangesToDb
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.joda.time.DateTime
 
@@ -38,19 +39,23 @@ class DictionaryViewModel(
         vocable: Vocable
     ) {
         val lesson = lessonService.findById(lessonId) ?: return
+        if (lesson.words.any { it.value == vocable.value && it.translation == vocable.translation })
+            return
 
-        vocableService.save(vocable)
-        lesson.words.add(vocable)
+        lesson.words.applyChangesToDb {
+            add(vocable)
+        }
         lesson.lastChanged = DateTime.now()
         lessonService.save(lesson)
-        MainContext.EditContext.setLesson(lesson)
+
+        MainContext.EditContext.change(lesson)
 
     }
 
     @ExperimentalCoroutinesApi
     suspend fun getWord(name: String) {
         val vocables = vocableService.findByName(name)
-        MainContext.DictionaryContext.setWords(vocables)
+        MainContext.DictionaryContext.change(vocables)
 
     }
 
@@ -66,9 +71,13 @@ class DictionaryViewModel(
         }
 
         vocableService.delete(vocable)
-        val words = MainContext.DictionaryContext.words.value
-        MainContext.DictionaryContext.setWords(words.filterNot { it.id == vocable.id })
+        val words = MainContext.DictionaryContext.value()
+        MainContext.DictionaryContext.change(words.filterNot { it.id == vocable.id })
 
+    }
+
+    suspend fun saveVocable(vocable: Vocable): Vocable {
+        return vocableService.save(vocable)
     }
 
 }

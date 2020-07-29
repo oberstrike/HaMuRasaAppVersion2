@@ -1,6 +1,7 @@
 package de.hamurasa.main.fragments.home
 
 import android.content.Context
+import de.hamurasa.data.lesson.Lesson
 import de.hamurasa.main.MainContext
 import de.hamurasa.data.lesson.LessonService
 import de.hamurasa.data.profile.Profile
@@ -22,28 +23,29 @@ class HomeViewModel(
     @ExperimentalCoroutinesApi
     suspend fun updateHome() {
         val profile = profileService.findByName(MainContext.name)!!
-        MainContext.HomeContext.setProfile(profile)
+        MainContext.HomeContext.change(profile)
     }
 
 
     @ExperimentalCoroutinesApi
-    suspend fun deleteLesson(lesson: de.hamurasa.data.lesson.Lesson) {
+    suspend fun deleteLesson(lesson: Lesson) {
         lessonService.delete(lesson)
-        val profile = MainContext.HomeContext.profile.value!!
+        val profile = MainContext.HomeContext.value()!!
         profile.lessons.remove(lesson)
-        MainContext.HomeContext.setProfile(profile)
+        MainContext.HomeContext.change(profile)
     }
 
 
     @ExperimentalCoroutinesApi
-    suspend fun saveLesson(lesson: de.hamurasa.data.lesson.Lesson) {
+    suspend fun saveLesson(lesson: Lesson) {
         lessonService.save(lesson)
-        val profile = MainContext.HomeContext.profile.value ?: return
+        val profile = MainContext.HomeContext.value() ?: return
+
 
         profile.lessons.add(lesson)
         profile.lastTimeChanged = DateTime.now()
         profileService.save(profile)
-        MainContext.HomeContext.setProfile(profile)
+        MainContext.HomeContext.change(profile)
     }
 
     suspend fun findProfileByName(it: String): Profile? {

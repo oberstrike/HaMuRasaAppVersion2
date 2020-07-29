@@ -7,11 +7,7 @@ interface ProfileRepository : IBaseRepository<Profile> {
     suspend fun findByName(name: String): Profile?
 }
 
-class ProfileRepositoryImpl : ProfileRepository {
-
-    private var vocableBox: Box<Profile> = de.hamurasa.data.util.ObjectBox.boxStore.boxFor(
-        Profile::class.java
-    )
+class ProfileRepositoryImpl(private val vocableBox: Box<Profile>) : ProfileRepository {
 
     override suspend fun delete(t: Profile): Boolean {
         return vocableBox.remove(t)

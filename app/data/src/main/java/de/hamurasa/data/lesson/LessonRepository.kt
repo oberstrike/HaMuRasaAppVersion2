@@ -23,8 +23,7 @@ interface LessonRepository {
     fun findByVocableId(vocableId: Long): List<Lesson>
 }
 
-class LessonRepositoryImpl : LessonRepository {
-    private var lessonBox: Box<Lesson> = ObjectBox.boxStore.boxFor()
+class LessonRepositoryImpl(private val lessonBox: Box<Lesson>) : LessonRepository {
 
     override suspend fun getNumberOfLessons(): Int {
         return lessonBox.query { build() }.find().size

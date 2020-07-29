@@ -39,7 +39,6 @@ class NewLessonDialog(
                 val text = "The creation was successful!"
                 val toast = Toast.makeText(activity, text, Toast.LENGTH_LONG)
                 toast.show()
-                homeFragment.updateRecyclerView(MainContext.HomeContext.profile.value!!)
                 dismiss()
             }
         }

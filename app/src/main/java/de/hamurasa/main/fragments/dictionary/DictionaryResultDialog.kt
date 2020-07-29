@@ -38,7 +38,7 @@ class DictionaryResultDialog(val vocable: Vocable) : BaseDialog(), View.OnClickL
 
 
         myViewModel.launchJob {
-            MainContext.HomeContext.profile.collect {
+            MainContext.HomeContext.flow.collect {
                 if (it == null)
                     return@collect
                 val array = it.lessons.map { value -> value.id.toString() }.toTypedArray()

@@ -11,7 +11,7 @@ data class VocableWrapper(val vocable: de.hamurasa.data.vocable.Vocable) {
             field = if (value > 0) value else 1
         }
 
-    val value: String = vocable.value!!
+    val value: String = vocable.value
 
 
     val translation: String = vocable.translation.reduce { a, b -> "$a, $b" }

@@ -2,6 +2,7 @@ package de.hamurasa.data
 
 import de.hamurasa.data.lesson.*
 import de.hamurasa.data.profile.*
+import de.hamurasa.data.util.ObjectBox
 import de.hamurasa.data.vocable.*
 import de.hamurasa.data.vocableStats.*
 import de.hamurasa.main.MainViewModel
@@ -15,6 +16,7 @@ import de.hamurasa.main.mainModule
 import de.hamurasa.session.sessionModules
 import de.hamurasa.settings.SettingsViewModel
 import de.hamurasa.settings.model.Settings
+import io.objectbox.Box
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -22,22 +24,22 @@ import org.koin.dsl.module
 val appModules = module {
 
     //Overview
-
-    single { de.hamurasa.data.util.ObjectBox.init(get()) }
-
     single { Settings(get()) }
+
+    single { ObjectBox(get()) }
+
 
     //Repositories
 
     single { SchedulerProviderImpl() } bind SchedulerProvider::class
 
-    single { VocableRepositoryImpl() } bind VocableRepository::class
+    single { VocableRepositoryImpl(get<ObjectBox>().getBox(Vocable::class.java), get<ObjectBox>().getBox(VocableStats::class.java)) } bind VocableRepository::class
 
-    single { LessonRepositoryImpl() } bind LessonRepository::class
+    single { LessonRepositoryImpl(get<ObjectBox>().getBox(Lesson::class.java) ) } bind LessonRepository::class
 
-    single { ProfileRepositoryImpl() } bind ProfileRepository::class
+    single { ProfileRepositoryImpl(get<ObjectBox>().getBox(Profile::class.java) ) } bind ProfileRepository::class
 
-    single { VocableStatsRepositoryImpl() } bind VocableStatsRepository::class
+    single { VocableStatsRepositoryImpl(get<ObjectBox>().getBox(VocableStats::class.java)) } bind VocableStatsRepository::class
 
     //Services
 

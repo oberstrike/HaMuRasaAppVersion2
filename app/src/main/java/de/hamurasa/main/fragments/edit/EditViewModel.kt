@@ -11,7 +11,6 @@ import de.hamurasa.data.vocable.VocableService
 import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.joda.time.DateTime
 
 class EditViewModel(
     val context: Context,
@@ -24,11 +23,11 @@ class EditViewModel(
 
     @ExperimentalCoroutinesApi
     suspend fun patchVocable(vocable: Vocable) {
-        vocableService.save(vocable)
+        vocableService.patch(vocable)
 
-        val activeLesson = MainContext.EditContext.lesson.value ?: return
+        val activeLesson = MainContext.EditContext.value() ?: return
         val newLesson = lessonService.findById(activeLesson.id) ?: return
-        MainContext.EditContext.setLesson(newLesson)
+        MainContext.EditContext.change(newLesson)
 
     }
 
@@ -37,7 +36,7 @@ class EditViewModel(
         //val vocable = vocableService.findById(vocable.id)!!
         lessonService.deleteVocableFromLesson(vocable, lesson)
 
-        MainContext.EditContext.setLesson(lesson)
+        MainContext.EditContext.change(lesson)
     }
 
     suspend fun stats(vocable: Vocable): VocableStats? {

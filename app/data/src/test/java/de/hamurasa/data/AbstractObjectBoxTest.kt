@@ -7,6 +7,7 @@ import de.hamurasa.data.vocable.getRandomVocable
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.DebugFlags
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import java.io.File
@@ -14,7 +15,7 @@ import java.io.File
 
 abstract class AbstractObjectBoxTest<T> {
 
-    protected lateinit var store: BoxStore
+    lateinit var store: BoxStore
 
     protected lateinit var box: Box<T>
 
@@ -44,7 +45,7 @@ abstract class AbstractObjectBoxTest<T> {
     }
 
 
-    fun withRandomVocables(count: Int = 5, blocK: (List<Vocable>) -> Unit) {
+    fun withRandomVocables(count: Int = 5, blocK: suspend (List<Vocable>) -> Unit) = runBlocking {
         val box = store.boxFor(Vocable::class.java)
         val list = (0 until count).map { getRandomVocable() }
 
@@ -67,6 +68,11 @@ abstract class AbstractObjectBoxTest<T> {
         blocK.invoke(lesson)
 
         box.remove(lesson)
+    }
+
+    inline fun <reified T> withBox(blocK: (Box<T>) -> Unit) {
+        val box = store.boxFor(T::class.java)
+        blocK.invoke(box)
     }
 
 

@@ -38,7 +38,7 @@ class SolidVocableViewBinder(
         }
 
         viewHolder.wordValueTextView.text = data.value
-        if (data.value!!.length < 6) {
+        if (data.value.length < 6) {
             viewHolder.wordValueTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24f)
         } else {
             viewHolder.wordValueTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20f)
