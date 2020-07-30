@@ -89,6 +89,7 @@ dependencies {
     //Epoxy
     implementation 'com.airbnb.android:epoxy:3.11.0'
     kapt  'com.airbnb.android:epoxy-processor:3.11.0'
+    implementation 'com.airbnb.android:epoxy-paging:3.11.0'
 
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.annotation:annotation:1.1.0'
