@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mitteloupe.solid.recyclerview.InflatedViewProvider
 import com.mitteloupe.solid.recyclerview.SimpleViewBinder
 import de.hamurasa.R
+import de.hamurasa.data.lesson.Lesson
 import kotlinx.android.extensions.LayoutContainer
 
 class SolidViewProvider(
@@ -20,26 +21,18 @@ class SolidLessonViewHolder(
 ) : RecyclerView.ViewHolder(containerView), LayoutContainer {
     val lessonId: TextView = itemView.findViewById(R.id.lesson_id)
     val lessonView: ConstraintLayout = itemView.findViewById(R.id.lesson_view)
-
-
 }
 
 class SolidLessonViewBinder(
     private val lessonRecyclerViewListener: ILessonRecyclerViewListener
-) : SimpleViewBinder<SolidLessonViewHolder, de.hamurasa.data.lesson.Lesson>() {
+) : SimpleViewBinder<SolidLessonViewHolder, Lesson>() {
 
-    private var position: Int = 0
-
-    override fun bindView(viewHolder: SolidLessonViewHolder, data: de.hamurasa.data.lesson.Lesson) {
-
+    override fun bindView(viewHolder: SolidLessonViewHolder, data: Lesson) {
         viewHolder.lessonId.text = "Lesson: ${data.id}"
         viewHolder.lessonView.setBackgroundColor(Color.parseColor("#D4D4D4"))
-
-
         viewHolder.itemView.setOnClickListener {
             lessonRecyclerViewListener.onLessonClick(data)
         }
-
 
         viewHolder.itemView.setOnLongClickListener {
             lessonRecyclerViewListener.onLessonLongClick(viewHolder.adapterPosition)
@@ -51,7 +44,7 @@ class SolidLessonViewBinder(
 }
 
 interface OnLessonClickListener {
-    fun onLessonClick(lesson: de.hamurasa.data.lesson.Lesson)
+    fun onLessonClick(lesson: Lesson)
 }
 
 interface OnLessonLongClickListener {

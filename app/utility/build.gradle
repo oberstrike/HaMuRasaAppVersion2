@@ -2,6 +2,13 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
+apply plugin: 'com.jakewharton.butterknife'
+
+kapt {
+    correctErrorTypes = true
+}
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -74,5 +81,7 @@ dependencies {
     implementation "com.mitteloupe.solid:solidrecyclerview:1.0.2"
 
 
-
+    //Epoxy
+    implementation 'com.airbnb.android:epoxy:3.11.0'
+    kapt  'com.airbnb.android:epoxy-processor:3.11.0'
 }

@@ -22,6 +22,7 @@ class VocableDeserializer : JsonDeserializer<Vocable> {
         val vocable = Vocable()
         val jsonObject = json.asJsonObject
 
+
         //Id
         val id = jsonObject.getAsJsonPrimitive("id").asLong
         vocable.id = id

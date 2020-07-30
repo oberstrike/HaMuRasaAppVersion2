@@ -16,6 +16,10 @@ fun EditText.bind(property: KMutableProperty0<String>) {
     bind(25, property) { value -> value }
 }
 
+fun EditText.bindInt(property: KMutableProperty0<Int>) {
+    bind(maxLength = 25, property = property, converter = String::toInt, toString = Int::toString)
+}
+
 inline fun <T> EditText.bind(
     maxLength: Int = 25,
     property: KMutableProperty0<T>,
@@ -26,7 +30,7 @@ inline fun <T> EditText.bind(
     filters = arrayOf(InputFilter.LengthFilter(maxLength))
 
     afterTextChanged {
-        if (it.isNotEmpty()) {
+        if (it.isNotEmpty() && it.isNotBlank()) {
             val value = converter.invoke(it)
             property.set(value)
         }

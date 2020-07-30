@@ -40,17 +40,16 @@ abstract class BaseNewVocableDialog(
 
         new_vocable_add_button.setOnClickListener(this)
 
-        new_vocable_type_spinner.afterSelectedChanged {
-            val type = VocableType.valueOf(it)
-            vocable.type = type
-        }
 
-        new_vocable_language_spinner.afterSelectedChanged {
-            val language = Language.valueOf(it)
-            vocable.language = language
-        }
+        new_vocable_type_spinner.bind(
+            vocable::type,
+            toString = VocableType::toString,
+            converter = { VocableType.valueOf(it) })
 
-
+        new_vocable_language_spinner.bind(
+            vocable::language,
+            toString = Language::toString,
+            converter = { Language.valueOf(it) })
 
         new_vocable_type_spinner.initAdapter<VocableType>()
         new_vocable_language_spinner.initAdapter<Language>()

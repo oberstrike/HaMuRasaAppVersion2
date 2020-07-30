@@ -3,6 +3,7 @@ package de.hamurasa.data.lesson
 import de.hamurasa.data.util.DateTimeStringConverter
 import de.hamurasa.data.util.LanguageStringConverter
 import de.hamurasa.data.vocable.Language
+import de.hamurasa.data.vocable.Vocable
 import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
@@ -28,7 +29,7 @@ data class Lesson(
     )
     var lastChanged: DateTime = DateTime.now()
 ) {
-    lateinit var words: ToMany<de.hamurasa.data.vocable.Vocable>
+    lateinit var words: ToMany<Vocable>
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

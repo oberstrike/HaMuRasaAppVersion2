@@ -17,6 +17,11 @@ class Settings(context: Context) : KotprefModel(context) {
 
     var maxVocableCount by intPref(20, MAX_VOCABLE_COUNT)
 
+    var maxVocablesPerPage by intPref(10, MAX_VOCABLES_PER_PAGE)
+
+    var maxLessonsPerPage by intPref(10, MAX_LESSONS_PER_PAGE)
+
+
     private companion object Key {
         const val ACTIVE_LESSON_ID = "ACTIVE_LESSON"
         const val MAX_REPETITIONS = "MAX_REPETITIONS"
@@ -24,6 +29,8 @@ class Settings(context: Context) : KotprefModel(context) {
         const val WRITING_TYPE = "WRITING_TYPE"
         const val STANDARD_TYPE = "STANDARD_TYPE"
         const val ALTERNATIVE_TYPE = "ALTERNATIVE_TYPE"
+        const val MAX_VOCABLES_PER_PAGE = "MAX_VOCABLES_PER_PAGE"
+        const val MAX_LESSONS_PER_PAGE = "MAX_LESSONS_PER_PAGE"
     }
 
 

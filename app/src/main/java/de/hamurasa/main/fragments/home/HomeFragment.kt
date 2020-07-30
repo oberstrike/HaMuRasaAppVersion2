@@ -6,9 +6,10 @@ import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.mitteloupe.solid.recyclerview.SolidAdapter
+import android.widget.TextView
+import com.airbnb.epoxy.*
 import de.hamurasa.R
+import de.hamurasa.data.lesson.Lesson
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.fragments.adapters.*
 import de.hamurasa.data.profile.Profile
@@ -16,6 +17,7 @@ import de.hamurasa.session.SessionActivity
 import de.hamurasa.session.models.SessionEvent
 import de.hamurasa.session.models.VocableWrapper
 import de.hamurasa.util.AbstractSelfCleanupFragment
+import de.hamurasa.util.epoxy.KotlinModel
 import de.hamurasa.util.widgets.bind
 import de.hamurasa.util.widgets.initAdapter
 import kotlinx.android.synthetic.main.home_fragment.*
@@ -38,7 +40,11 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
 
     private val sessionEvent: SessionEvent by inject()
 
-    private lateinit var lessonRecyclerLessonViewAdapter: SolidAdapter<SolidLessonViewHolder, de.hamurasa.data.lesson.Lesson>
+    //  private lateinit var lessonRecyclerLessonViewAdapter: SolidAdapter<SolidLessonViewHolder, Lesson>
+
+    // private lateinit var lessonRecyclerLessonViewAdapter: Typed2EpoxyController<List<Lesson>, Boolean>
+
+    private val controller = SampleKotlinController()
 
     @ExperimentalCoroutinesApi
     private var activeProfile: Profile = MainContext.HomeContext.value()!!
@@ -78,16 +84,16 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
 
     }
 
+
     private fun initElements() {
+        /*
         lessonRecyclerLessonViewAdapter = SolidAdapter(
             viewBinder = SolidLessonViewBinder(this),
             viewProvider = SolidViewProvider(layoutInflater),
             viewHoldersProvider = { view, _ -> SolidLessonViewHolder(view) }
-        )
+        )*/
 
-
-        lessonsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        lessonsRecyclerView.adapter = lessonRecyclerLessonViewAdapter
+        lessonsRecyclerView.adapter = controller.adapter
     }
 
     @ExperimentalCoroutinesApi
@@ -103,15 +109,15 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
 
     fun updateRecyclerView(it: Profile) {
         try {
-            lessonRecyclerLessonViewAdapter.setItems(it.lessons)
-            lessonRecyclerLessonViewAdapter.notifyDataSetChanged()
+            controller.setData(it.lessons, true)
+            lessonsRecyclerView.requestModelBuild()
         } catch (exception: Exception) {
             exception.printStackTrace()
         }
     }
 
     @ExperimentalCoroutinesApi
-    override fun onLessonClick(lesson: de.hamurasa.data.lesson.Lesson) {
+    override fun onLessonClick(lesson: Lesson) {
         myViewModel.launchJob {
             GlobalScope.launch(Dispatchers.IO) {
                 MainContext.EditContext.change(lesson)
@@ -183,5 +189,19 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
         startActivity(intent)
 
     }
+
+}
+
+
+class SampleKotlinController : Typed2EpoxyController<List<Lesson>, Boolean>() {
+
+    override fun buildModels(data1: List<Lesson>, data2: Boolean?) {
+        data1.forEachIndexed { index, lesson ->
+            LessonKotlinModel("lesson ${lesson.id}")
+                .id("data class $index")
+                .addTo(this)
+        }
+    }
+
 
 }
