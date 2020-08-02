@@ -7,6 +7,7 @@ import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.*
+import java.lang.Exception
 
 interface RxViewModel {
     val disposables: CompositeDisposable
@@ -19,17 +20,18 @@ interface RxViewModel {
 
 abstract class AbstractViewModel : ViewModel(), RxViewModel {
     override val disposables = CompositeDisposable()
-    private val jobs: MutableSet<Deferred<*>> = mutableSetOf()
+
+    private val jobs: MutableSet<Job> = mutableSetOf()
 
     fun <T> launchJob(
         coroutineScope: CoroutineScope = viewModelScope,
         job: suspend () -> T
     ) {
+
         jobs.add(
-            coroutineScope.async {
-                job()
-            }
+            coroutineScope.async { job.invoke() }
         )
+
     }
 
     public override fun onCleared() {

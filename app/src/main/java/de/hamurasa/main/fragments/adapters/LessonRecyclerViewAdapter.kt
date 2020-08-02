@@ -30,6 +30,7 @@ class SolidLessonViewBinder(
     override fun bindView(viewHolder: SolidLessonViewHolder, data: Lesson) {
         viewHolder.lessonId.text = "Lesson: ${data.id}"
         viewHolder.lessonView.setBackgroundColor(Color.parseColor("#D4D4D4"))
+
         viewHolder.itemView.setOnClickListener {
             lessonRecyclerViewListener.onLessonClick(data)
         }

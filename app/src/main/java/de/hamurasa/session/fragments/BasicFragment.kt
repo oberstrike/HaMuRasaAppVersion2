@@ -14,12 +14,13 @@ abstract class BasicFragment(
 
     val settings: Settings by inject()
 
-    override fun getLayoutId(): Int = R.layout.vocable_session_fragment
+    override val layoutId: Int
+        get() = R.layout.vocable_session_fragment
+
 
     abstract fun reset()
 
     abstract fun init()
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()

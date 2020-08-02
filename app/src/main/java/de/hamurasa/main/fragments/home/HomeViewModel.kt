@@ -18,8 +18,6 @@ class HomeViewModel(
     private val profileService: ProfileService
 ) : BaseViewModel(provider) {
 
-    lateinit var profile: Profile
-
     @ExperimentalCoroutinesApi
     suspend fun updateHome() {
         val profile = profileService.findByName(MainContext.name)!!

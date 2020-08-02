@@ -28,6 +28,9 @@ abstract class BaseNewVocableDialog(
         super.onViewCreated(view, savedInstanceState)
         vocable.id = 0
 
+        new_vocable_type_spinner.initAdapter<VocableType>()
+        new_vocable_language_spinner.initAdapter<Language>()
+
         new_vocable_value_editText.bind(vocable::value)
         new_vocable_translations_editText.bind(
             maxLength = 25,
@@ -51,9 +54,9 @@ abstract class BaseNewVocableDialog(
             toString = Language::toString,
             converter = { Language.valueOf(it) })
 
-        new_vocable_type_spinner.initAdapter<VocableType>()
-        new_vocable_language_spinner.initAdapter<Language>()
+
     }
+
 
     override fun onClick(v: View?) {
         if (!vocable.isValid()) {

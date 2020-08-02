@@ -6,29 +6,67 @@ import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.TextView
-import com.airbnb.epoxy.*
+import com.airbnb.epoxy.TypedEpoxyController
+import com.mitteloupe.solid.fragment.handler.LifecycleHandler
 import de.hamurasa.R
 import de.hamurasa.data.lesson.Lesson
-import de.hamurasa.main.MainContext
-import de.hamurasa.main.fragments.adapters.*
 import de.hamurasa.data.profile.Profile
+import de.hamurasa.main.MainContext
+import de.hamurasa.main.fragments.adapters.ILessonRecyclerViewListener
+import de.hamurasa.main.fragments.adapters.LessonKotlinModel
+import de.hamurasa.main.fragments.adapters.OnLessonClickListener
 import de.hamurasa.session.SessionActivity
 import de.hamurasa.session.models.SessionEvent
 import de.hamurasa.session.models.VocableWrapper
-import de.hamurasa.util.AbstractSelfCleanupFragment
-import de.hamurasa.util.epoxy.KotlinModel
-import de.hamurasa.util.widgets.bind
-import de.hamurasa.util.widgets.initAdapter
+import de.hamurasa.util.AbstractSelfCleaningFragment
 import kotlinx.android.synthetic.main.home_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import org.angmarch.views.NiceSpinner
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 
+class ProfileHandler(
+    private val homeViewModel: HomeViewModel
+) : LifecycleHandler {
+
+    private lateinit var profileSpinner: NiceSpinner
+
+    @ExperimentalCoroutinesApi
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val profiles = homeViewModel.getAllProfiles().map { it.name }
+
+        profileSpinner = view.findViewById(R.id.profileSpinner)
+        profileSpinner.attachDataSource(profiles)
+
+        profileSpinner.setOnSpinnerItemSelectedListener { parent, _, position, _ ->
+            val item = parent.getItemAtPosition(position) as String
+            homeViewModel.launchJob {
+                val profile = homeViewModel.findProfileByName(item) ?: return@launchJob
+                MainContext.HomeContext.change(profile)
+            }
+        }
+    }
+
+
+}
+
+
 class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
-    AbstractSelfCleanupFragment(), ILessonRecyclerViewListener {
+    AbstractSelfCleaningFragment(), ILessonRecyclerViewListener {
+
+    override val layoutId: Int = R.layout.home_fragment
+
+    override val myViewModel: HomeViewModel by sharedViewModel()
+
+    override val lifecycleHandlers: List<LifecycleHandler> = listOf(
+        ProfileHandler(
+            get()
+        )
+    )
 
     private var position: Int = 0
 
@@ -36,85 +74,42 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
         this.position = position
     }
 
-    override val myViewModel: HomeViewModel by sharedViewModel()
-
     private val sessionEvent: SessionEvent by inject()
 
-    //  private lateinit var lessonRecyclerLessonViewAdapter: SolidAdapter<SolidLessonViewHolder, Lesson>
+    private val controller = SampleKotlinController(this)
 
-    // private lateinit var lessonRecyclerLessonViewAdapter: Typed2EpoxyController<List<Lesson>, Boolean>
-
-    private val controller = SampleKotlinController()
-
-    @ExperimentalCoroutinesApi
-    private var activeProfile: Profile = MainContext.HomeContext.value()!!
-
-    override fun getLayoutId(): Int = R.layout.home_fragment
 
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val profiles = myViewModel.getAllProfiles().map { it.name }.toTypedArray()
-        profileSpinner.initAdapter(profiles)
-
-        myViewModel.launchJob {
-            profileSpinner.bind(this::activeProfile,
-                toString = {
-                    it.name
-                }, converter = {
-                    runBlocking {
-                        myViewModel.findProfileByName(it)!!
-                    }
-                }, onValueChanged = {
-                    launchJob {
-                        MainContext.HomeContext.change(it)
-                    }
-                })
-        }
-
-        //Init Views
-        initElements()
+        lessonsRecyclerView
 
         launchJob {
-            myViewModel.updateHome()
             initObserver()
         }
 
-
     }
 
-
-    private fun initElements() {
-        /*
-        lessonRecyclerLessonViewAdapter = SolidAdapter(
-            viewBinder = SolidLessonViewBinder(this),
-            viewProvider = SolidViewProvider(layoutInflater),
-            viewHoldersProvider = { view, _ -> SolidLessonViewHolder(view) }
-        )*/
-
-        lessonsRecyclerView.adapter = controller.adapter
-    }
 
     @ExperimentalCoroutinesApi
     private suspend fun initObserver() {
         MainContext.HomeContext.flow.collect {
-            if (it == null)
-                return@collect
+            val profile = it.value ?: return@collect
             withContext(Dispatchers.Main) {
-                updateRecyclerView(it)
+                updateRecyclerView(profile)
             }
         }
     }
 
-    fun updateRecyclerView(it: Profile) {
+    private fun updateRecyclerView(it: Profile) {
         try {
-            controller.setData(it.lessons, true)
-            lessonsRecyclerView.requestModelBuild()
+            lessonsRecyclerView.adapter = controller.adapter
+            controller.setData(it.lessons)
         } catch (exception: Exception) {
             exception.printStackTrace()
         }
     }
+
 
     @ExperimentalCoroutinesApi
     override fun onLessonClick(lesson: Lesson) {
@@ -128,7 +123,6 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
 
             }
         }
-
     }
 
     override fun onCreateContextMenu(
@@ -136,6 +130,7 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
         v: View,
         menuInfo: ContextMenu.ContextMenuInfo?
     ) {
+
         menu.add(Menu.NONE, R.id.action_delete, Menu.NONE, R.string.action_delete)
         menu.add(Menu.NONE, R.id.action_rename, Menu.NONE, R.string.action_rename)
         menu.add(Menu.NONE, R.id.action_start, Menu.NONE, R.string.start)
@@ -171,7 +166,7 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
     }
         val position = lessonRecyclerViewAdapter.position
         val lesson = lessonRecyclerViewAdapter.getLesson(position)
-*/
+    */
     }
 
     @ExperimentalCoroutinesApi
@@ -193,13 +188,16 @@ class HomeFragment(private val onItemClickListener: OnLessonClickListener) :
 }
 
 
-class SampleKotlinController : Typed2EpoxyController<List<Lesson>, Boolean>() {
+class SampleKotlinController(
+    private val lessonRecyclerViewListener: ILessonRecyclerViewListener
+) : TypedEpoxyController<List<Lesson>>() {
 
-    override fun buildModels(data1: List<Lesson>, data2: Boolean?) {
+    override fun buildModels(data1: List<Lesson>) {
         data1.forEachIndexed { index, lesson ->
-            LessonKotlinModel("lesson ${lesson.id}")
+            LessonKotlinModel(lesson, lessonRecyclerViewListener)
                 .id("data class $index")
                 .addTo(this)
+
         }
     }
 

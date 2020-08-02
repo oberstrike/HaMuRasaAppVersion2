@@ -24,6 +24,7 @@ fun Spinner.initAdapter(
 
 //Spinner
 fun Spinner.afterSelectedChanged(afterSelected: (String) -> Unit) {
+
     this.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
             val value = parent?.selectedItem?.toString()

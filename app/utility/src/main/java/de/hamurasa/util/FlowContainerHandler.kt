@@ -4,7 +4,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import java.lang.Exception
 
 interface IFlowHandler<T> {
     val flow: Flow<T>
@@ -16,21 +18,25 @@ interface IFlowHandler<T> {
 @ExperimentalCoroutinesApi
 abstract class FlowContainerHandler<T>(
     startValue: T
-) : IFlowHandler<T> {
+) {
 
     class Container<T>(val value: T)
 
     private val mutableStateFlow: MutableStateFlow<Container<T>> =
         MutableStateFlow(Container(startValue))
 
-    override val flow: Flow<T> = mutableStateFlow.map { it.value }
+    val flow: StateFlow<Container<T>> = mutableStateFlow
 
-    override suspend fun change(value: T) {
+    suspend fun change(value: T) {
         delay(100)
-        mutableStateFlow.value = Container(value)
+        try {
+            mutableStateFlow.value = Container(value)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
     }
 
-    override fun value(): T = mutableStateFlow.value.value
+    fun value(): T = mutableStateFlow.value.value
 }
 
 @ExperimentalCoroutinesApi

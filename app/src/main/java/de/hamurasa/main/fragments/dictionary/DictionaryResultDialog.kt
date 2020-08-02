@@ -39,9 +39,8 @@ class DictionaryResultDialog(val vocable: Vocable) : BaseDialog(), View.OnClickL
 
         myViewModel.launchJob {
             MainContext.HomeContext.flow.collect {
-                if (it == null)
-                    return@collect
-                val array = it.lessons.map { value -> value.id.toString() }.toTypedArray()
+                val lessons = it.value?.lessons ?: return@collect
+                val array = lessons.map { value -> value.id.toString() }.toTypedArray()
                 result_lesson_Spinner.initAdapter(array = array)
             }
         }

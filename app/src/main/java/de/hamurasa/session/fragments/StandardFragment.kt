@@ -18,8 +18,6 @@ open class ClickingFragment(
     override val myViewModel: SessionViewModel by sharedViewModel()
 
 
-
-
     override fun init() {
         session_vocable_second_value.setOnClickListener(this)
 

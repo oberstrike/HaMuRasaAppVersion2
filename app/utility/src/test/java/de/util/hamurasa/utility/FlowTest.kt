@@ -2,12 +2,10 @@ package de.util.hamurasa.utility
 
 import de.hamurasa.util.FlowContainerHandler
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.runners.MockitoJUnitRunner
-import java.util.*
-import kotlin.coroutines.CoroutineContext
+import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
 class FlowTest {
@@ -24,7 +22,7 @@ class FlowTest {
 
         GlobalScope.launch {
             EventHandler.flow.collect {
-                println("Hallo ${it.name}")
+                println("Hallo 2 ${it.value.name}")
             }
         }
 

@@ -7,9 +7,7 @@ import com.mitteloupe.solid.recyclerview.SolidAdapter
 import de.hamurasa.R
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.fragments.adapters.*
-import de.hamurasa.data.lesson.Lesson
-import de.hamurasa.data.vocable.Vocable
-import de.hamurasa.util.AbstractSelfCleanupFragment
+import de.hamurasa.util.AbstractSelfCleaningFragment
 import kotlinx.android.synthetic.main.edit_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -17,14 +15,13 @@ import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.core.parameter.parametersOf
 
-class EditFragment : AbstractSelfCleanupFragment(), VocableOnClickListener {
-
+class EditFragment : AbstractSelfCleaningFragment(), VocableOnClickListener {
 
     override val myViewModel: EditViewModel by sharedViewModel()
 
     private lateinit var vocableEditRecyclerViewAdapter: SolidAdapter<SolidVocableViewHolder, de.hamurasa.data.vocable.Vocable>
 
-    override fun getLayoutId(): Int = R.layout.edit_fragment
+    override val layoutId: Int = R.layout.edit_fragment
 
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -49,13 +46,14 @@ class EditFragment : AbstractSelfCleanupFragment(), VocableOnClickListener {
     @ExperimentalCoroutinesApi
     private suspend fun initObserver() {
         MainContext.EditContext.flow.collect {
-            if (it == null) {
+            val lesson = it.value
+            if (lesson == null) {
                 withContext(Dispatchers.Main) {
                     listIsEmpty.visibility = View.VISIBLE
                 }
                 return@collect
             }
-            updateLesson(it)
+            updateLesson(lesson)
         }
     }
 

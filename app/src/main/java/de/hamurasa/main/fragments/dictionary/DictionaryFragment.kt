@@ -7,18 +7,18 @@ import com.mitteloupe.solid.recyclerview.SolidAdapter
 import de.hamurasa.R
 import de.hamurasa.main.MainContext
 import de.hamurasa.main.fragments.adapters.*
-import de.hamurasa.util.AbstractSelfCleanupFragment
+import de.hamurasa.util.AbstractSelfCleaningFragment
 import kotlinx.android.synthetic.main.dictionary_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class DictionaryFragment : AbstractSelfCleanupFragment(),
+class DictionaryFragment : AbstractSelfCleaningFragment(),
     VocableOnClickListener {
     override val myViewModel: DictionaryViewModel by sharedViewModel()
     private lateinit var vocableRecyclerViewAdapter: SolidAdapter<SolidVocableViewHolder, de.hamurasa.data.vocable.Vocable>
 
-    override fun getLayoutId() = R.layout.dictionary_fragment
+    override val layoutId: Int = R.layout.dictionary_fragment
 
     override fun onItemClick(vocable: de.hamurasa.data.vocable.Vocable) {
         val fragment = DictionaryResultDialog(vocable)

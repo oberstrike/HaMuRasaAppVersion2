@@ -2,10 +2,8 @@ package de.hamurasa.data.vocable
 
 import org.jeasy.random.EasyRandom
 
-val easyRandom = EasyRandom()
-
 fun getRandomVocable(): Vocable {
-    val randomVocable = easyRandom.nextObject(RandomVocable::class.java)
+    val randomVocable = EasyRandom().nextObject(RandomVocable::class.java)
     return Vocable(
         value = randomVocable.value!!,
         type = randomVocable.type!!,
