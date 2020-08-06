@@ -22,6 +22,7 @@ import de.hamurasa.util.AbstractSelfCleaningFragment
 import kotlinx.android.synthetic.main.home_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import okhttp3.internal.notify
 import org.angmarch.views.NiceSpinner
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -38,17 +39,21 @@ class ProfileHandler(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val profiles = homeViewModel.getAllProfiles().map { it.name }
-
         profileSpinner = view.findViewById(R.id.profileSpinner)
-        profileSpinner.attachDataSource(profiles)
 
-        profileSpinner.setOnSpinnerItemSelectedListener { parent, _, position, _ ->
-            val item = parent.getItemAtPosition(position) as String
-            homeViewModel.launchJob {
-                val profile = homeViewModel.findProfileByName(item) ?: return@launchJob
-                MainContext.HomeContext.change(profile)
+        profileSpinner.apply {
+            attachDataSource(profiles)
+
+            setOnSpinnerItemSelectedListener { parent, _, position, _ ->
+                val item = parent.getItemAtPosition(position) as String
+                homeViewModel.launchJob {
+                    val profile = homeViewModel.findProfileByName(item) ?: return@launchJob
+                    MainContext.HomeContext.change(profile)
+                }
             }
         }
+
+
     }
 
 
