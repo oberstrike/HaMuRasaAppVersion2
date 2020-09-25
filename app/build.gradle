@@ -89,7 +89,7 @@ dependencies {
 
     //Epoxy
     implementation 'com.airbnb.android:epoxy:3.11.0'
-    kapt  'com.airbnb.android:epoxy-processor:3.11.0'
+    kapt 'com.airbnb.android:epoxy-processor:3.11.0'
     implementation 'com.airbnb.android:epoxy-paging:3.11.0'
 
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
@@ -109,7 +109,7 @@ dependencies {
     implementation "org.koin:koin-android-viewmodel:$koin_version"
     // Koin Android Experimental features
     implementation "org.koin:koin-android-ext:$koin_version"
-    
+
 
     //Gson for json serialization und deserialization
     implementation "com.google.code.gson:gson:2.8.5"
@@ -159,6 +159,7 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
 
+    /*
     androidTestImplementation 'androidx.test:core:' + coreVersion
     androidTestImplementation 'androidx.test:core-ktx:' + coreVersion
     androidTestImplementation 'androidx.test.ext:junit:' + extJUnitVersion
@@ -167,7 +168,7 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:' + espressoVersion
     debugImplementation 'androidx.fragment:fragment-testing:1.2.5'
-
+*/
     testImplementation 'androidx.test:core:' + coreVersion;
     testImplementation 'androidx.test.ext:junit:' + extJUnitVersion
     testImplementation 'junit:junit:4.13'
@@ -175,7 +176,6 @@ dependencies {
     testImplementation 'androidx.test.espresso:espresso-core:' + espressoVersion
     testImplementation 'androidx.test.espresso:espresso-intents:' + espressoVersion
     testImplementation 'androidx.test.ext:truth:' + extTruthVersion
-
 
 
 }

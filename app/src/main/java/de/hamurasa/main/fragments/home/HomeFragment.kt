@@ -199,8 +199,8 @@ class SampleKotlinController(
 
     override fun buildModels(data1: List<Lesson>) {
         data1.forEachIndexed { index, lesson ->
-            LessonKotlinModel(lesson, lessonRecyclerViewListener)
-                .id("data class $index")
+            LessonKotlinModel(lesson, lessonRecyclerViewListener, index)
+                .id("$index")
                 .addTo(this)
 
         }

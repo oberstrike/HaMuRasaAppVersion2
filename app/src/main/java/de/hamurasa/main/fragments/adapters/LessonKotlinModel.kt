@@ -8,7 +8,8 @@ import de.hamurasa.util.epoxy.KotlinModel
 
 data class LessonKotlinModel(
     val lesson: Lesson,
-    val lessonRecyclerViewListener: ILessonRecyclerViewListener
+    val lessonRecyclerViewListener: ILessonRecyclerViewListener,
+    val lessonId: Int
 ) : KotlinModel(R.layout.holder_lesson_fragment) {
 
     private val lessonIdTextView by bind<TextView>(R.id.lesson_id)
@@ -22,7 +23,7 @@ data class LessonKotlinModel(
                 lessonRecyclerViewListener.onLessonClick(lesson)
             }
             setOnLongClickListener {
-                lessonRecyclerViewListener.onLessonLongClick(id)
+                lessonRecyclerViewListener.onLessonLongClick(lessonId)
                 false
             }
             setOnCreateContextMenuListener(lessonRecyclerViewListener)

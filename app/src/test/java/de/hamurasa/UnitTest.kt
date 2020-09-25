@@ -22,7 +22,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.inject
-import org.koin.test.KoinTest
 
 /**
  * Basic tests showcasing simple view matchers and actions like [ViewMatchers.withId],
@@ -31,6 +30,7 @@ import org.koin.test.KoinTest
  *
  * Note that there is no need to tell Espresso that a view is in a different [Activity].
  */
+/*
 @RunWith(AndroidJUnit4::class)
 class ChangeTextBehaviorTest : KoinTest {
 
@@ -57,4 +57,4 @@ class ChangeTextBehaviorTest : KoinTest {
     companion object {
         const val STRING_TO_BE_TYPED = "Espresso"
     }
-}
+}*/
