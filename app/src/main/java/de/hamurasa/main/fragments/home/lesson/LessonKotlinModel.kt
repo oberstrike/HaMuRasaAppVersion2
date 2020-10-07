@@ -1,6 +1,7 @@
-package de.hamurasa.main.fragments.adapters
+package de.hamurasa.main.fragments.home.lesson
 
 import android.graphics.Color
+import android.view.View
 import android.widget.TextView
 import de.hamurasa.R
 import de.hamurasa.data.lesson.Lesson
@@ -8,7 +9,9 @@ import de.hamurasa.util.epoxy.KotlinModel
 
 data class LessonKotlinModel(
     val lesson: Lesson,
-    val lessonRecyclerViewListener: ILessonRecyclerViewListener,
+    val lessonClickListener: IOnLessonClickListener,
+    val lessonLongClickListener: IOnLessonLongClickListener,
+    val lessonOnCreateContextMenuListener: View.OnCreateContextMenuListener,
     val lessonId: Int
 ) : KotlinModel(R.layout.holder_lesson_fragment) {
 
@@ -20,13 +23,13 @@ data class LessonKotlinModel(
         view?.apply {
             setBackgroundColor(Color.parseColor("#D4D4D4"))
             setOnClickListener {
-                lessonRecyclerViewListener.onLessonClick(lesson)
+                lessonClickListener.onLessonClick(lesson)
             }
             setOnLongClickListener {
-                lessonRecyclerViewListener.onLessonLongClick(lessonId)
+                lessonLongClickListener.onLessonLongClick(lessonId)
                 false
             }
-            setOnCreateContextMenuListener(lessonRecyclerViewListener)
+            setOnCreateContextMenuListener(lessonOnCreateContextMenuListener)
         }
 
     }

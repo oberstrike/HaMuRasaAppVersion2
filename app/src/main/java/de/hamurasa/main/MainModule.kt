@@ -15,9 +15,9 @@ val mainModule = module {
 
     factory { NewProfileDialog(get()) }
 
-    factory { params -> EditVocableDialog(params[0], params[1]) }
+    factory { params -> EditVocableDialog(params[0]) }
 
-    factory { params -> HomeFragment(params[0]) }
+    factory { _ -> HomeFragment() }
 
     factory { DictionaryFragment() }
 

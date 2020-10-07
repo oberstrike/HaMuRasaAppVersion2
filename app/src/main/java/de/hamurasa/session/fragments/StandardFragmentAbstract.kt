@@ -4,12 +4,10 @@ import android.view.View
 import de.hamurasa.R
 import de.hamurasa.session.SessionViewModel
 import de.hamurasa.session.models.VocableWrapper
-import de.hamurasa.settings.model.Settings
 import kotlinx.android.synthetic.main.vocable_session_fragment.*
-import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-open class ClickingFragment(
+abstract class AbstractClickingFragment(
     override val activeVocable: VocableWrapper,
     private val firstValueConverter: (VocableWrapper) -> String,
     private val secondValueConverter: (VocableWrapper) -> String
@@ -41,17 +39,17 @@ open class ClickingFragment(
     }
 }
 
-class StandardFragment(
+class StandardFragmentAbstract(
     activeVocable: VocableWrapper
-) : ClickingFragment(
+) : AbstractClickingFragment(
     activeVocable,
     { it.value },
     { it.translation }
 )
 
-class AlternativeFragment(
+class AlternativeFragmentAbstract(
     activeVocable: VocableWrapper
-) : ClickingFragment(
+) : AbstractClickingFragment(
     activeVocable,
     { it.translation },
     { it.value }

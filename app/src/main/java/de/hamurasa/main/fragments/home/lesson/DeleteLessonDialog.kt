@@ -1,9 +1,10 @@
-package de.hamurasa.main.fragments.home
+package de.hamurasa.main.fragments.home.lesson
 
 import android.os.Bundle
 import android.view.View
 import de.hamurasa.R
 import de.hamurasa.data.lesson.Lesson
+import de.hamurasa.main.fragments.home.HomeViewModel
 import de.hamurasa.util.BaseDialog
 import kotlinx.android.synthetic.main.dialog_delete_lesson.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi

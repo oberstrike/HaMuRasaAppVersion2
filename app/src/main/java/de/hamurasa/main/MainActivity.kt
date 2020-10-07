@@ -14,16 +14,16 @@ import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mitteloupe.solid.activity.handler.LifecycleHandler
 import de.hamurasa.R
-import de.hamurasa.main.fragments.adapters.OnLessonClickListener
 import de.hamurasa.main.fragments.dialogs.ImportExportDialog
 import de.hamurasa.main.fragments.dialogs.NewProfileDialog
 import de.hamurasa.main.fragments.dictionary.DictionaryFragment
 import de.hamurasa.main.fragments.edit.EditFragment
 import de.hamurasa.main.fragments.edit.NewVocableDialog
 import de.hamurasa.main.fragments.home.HomeFragment
-import de.hamurasa.main.fragments.home.NewLessonDialog
+import de.hamurasa.main.fragments.home.lesson.NewLessonDialog
 
 import de.hamurasa.data.lesson.Lesson
+import de.hamurasa.main.fragments.home.lesson.IOnLessonClickListener
 import de.hamurasa.settings.SettingsActivity
 import de.hamurasa.settings.model.Settings
 import de.hamurasa.util.BaseSwipeActivity
@@ -32,6 +32,7 @@ import de.hamurasa.util.findFirst
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
@@ -41,10 +42,25 @@ import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 
-class MainInitHandler(private val mainActivity: MainActivity) : LifecycleHandler {
+class MainInitHandler(
+    private val mainActivity: MainActivity,
+    private val settings: Settings
+
+) : LifecycleHandler {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         with(mainActivity) {
             bottom_navigator.setOnNavigationItemSelectedListener(this)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun onPause() {
+        super.onPause()
+        runBlocking {
+            val id = MainContext.EditContext.value()?.id ?: return@runBlocking
+            settings.activeLessonId = id.toInt()
+
         }
     }
 }
@@ -52,22 +68,19 @@ class MainInitHandler(private val mainActivity: MainActivity) : LifecycleHandler
 
 class MainActivity :
     BaseSwipeActivity<MainViewModel>(),
-    BottomNavigationView.OnNavigationItemSelectedListener,
-    OnLessonClickListener {
+    BottomNavigationView.OnNavigationItemSelectedListener {
 
     override val myViewModel: MainViewModel by viewModel()
 
-    override val lifecycleHandlers: List<LifecycleHandler> = listOf(MainInitHandler(this))
+    override val lifecycleHandlers: List<LifecycleHandler> = listOf(MainInitHandler(this, get()))
 
     override val toolbarToUse: Toolbar get() = toolbar
 
     override val layoutRes: Int = R.layout.activity_main
 
-    private val settings: Settings by inject()
-
     override val swipe = Swipe(40, 300)
 
-    lateinit var activeFragment: Fragment
+    private lateinit var activeFragment: Fragment
 
     @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,13 +89,19 @@ class MainActivity :
             myViewModel.init()
         }
 
-        loadFragment(get<HomeFragment> { parametersOf(this) })
-
-        val service = NotificationService()
-        val mIntent = Intent(this, service::class.java)
-        if (!isMyServiceRunning(service::class.java)) {
-            startService(mIntent)
+        myViewModel.launchJob {
+            MainContext.EditContext.flow.collect {
+                it.value ?: return@collect
+                withContext(Dispatchers.Main) {
+                    bottom_navigator.menu.findItem(R.id.nav_edit_lesson).isEnabled = true
+                    bottom_navigator.selectedItemId = R.id.nav_edit_lesson
+                    loadFragment(get<EditFragment>())
+                }
+            }
         }
+
+
+        loadFragment(get<HomeFragment>())
     }
 
 
@@ -96,13 +115,13 @@ class MainActivity :
         when (menuItem.itemId) {
             R.id.nav_search -> {
                 if (activeFragment !is DictionaryFragment) {
-                    loadFragment(get<DictionaryFragment> { parametersOf() })
+                    loadFragment(get<DictionaryFragment>())
                     return true
                 }
             }
             R.id.nav_edit_lesson -> {
                 if (activeFragment !is EditFragment) {
-                    loadFragment(get<EditFragment> { parametersOf() })
+                    loadFragment(get<EditFragment>())
                     return true
                 }
 
@@ -167,11 +186,7 @@ class MainActivity :
     @ExperimentalCoroutinesApi
     override fun onPause() {
         super.onPause()
-        runBlocking {
-            val id = MainContext.EditContext.value()?.id ?: return@runBlocking
-            settings.activeLessonId = id.toInt()
 
-        }
     }
 
     private fun loadFragment(fragment: Fragment) {
@@ -240,24 +255,5 @@ class MainActivity :
         return super.onOptionsItemSelected(item)
     }
 
-
-    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager =
-            getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.runningAppProcesses) {
-            if (serviceClass.name == service.processName) {
-                Log.i("Service status", "Running")
-                return true
-            }
-        }
-        Log.i("Service status", "Not running")
-        return false
-    }
-
-    override fun onLessonClick(lesson: Lesson) {
-        bottom_navigator.selectedItemId = R.id.nav_edit_lesson
-        loadFragment(get<EditFragment>())
-
-    }
 
 }

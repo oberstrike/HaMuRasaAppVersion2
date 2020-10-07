@@ -53,7 +53,7 @@ class DictionaryViewModel(
     }
 
     @ExperimentalCoroutinesApi
-    suspend fun getWord(name: String) {
+    suspend fun search(name: String) {
         val vocables = vocableService.findByName(name)
         MainContext.DictionaryContext.change(vocables)
 

@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import de.hamurasa.R
+import de.hamurasa.data.vocable.Vocable
 import de.hamurasa.main.MainContext
 import de.hamurasa.util.*
 import de.hamurasa.util.widgets.afterTextChanged
@@ -16,8 +17,7 @@ import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 //Reworked
 class EditVocableDialog(
-    val vocable: de.hamurasa.data.vocable.Vocable,
-    private val editFragment: EditFragment
+    val vocable: Vocable
 ) :
     BaseDialog(), View.OnClickListener {
 
@@ -36,7 +36,7 @@ class EditVocableDialog(
             if (it.isNotBlank()) vocable.translation = it.split(",")
         }
 
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.IO) {
             val stats = myViewModel.stats(vocable) ?: return@launch
             withContext(Dispatchers.Main) {
                 val color =
@@ -52,6 +52,9 @@ class EditVocableDialog(
             de.hamurasa.data.vocable.VocableType.valueOf(it)
         }
 
+
+        editVocableLastTimeLearnedEditText.setText( vocable.lastChanged.toString( "dd.MM.yyyy hh:mm.ss" ) )
+        editVocableLastTimeLearnedEditText.isEnabled = false
 
         deleteButton.setOnClickListener {
             delete()

@@ -8,10 +8,7 @@ import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.mitteloupe.solid.activity.handler.LifecycleHandler
 import de.hamurasa.R
 import de.hamurasa.main.MainActivity
-import de.hamurasa.session.fragments.AlternativeFragment
-import de.hamurasa.session.fragments.BasicFragment
-import de.hamurasa.session.fragments.StandardFragment
-import de.hamurasa.session.fragments.WritingFragment
+import de.hamurasa.session.fragments.*
 import de.hamurasa.session.models.SessionEvent
 import de.hamurasa.session.models.SessionType
 import de.hamurasa.util.BaseSwipeActivity
@@ -57,7 +54,7 @@ class SessionActivity : BaseSwipeActivity<SessionViewModel>() {
 
     override val swipe = Swipe(40, 300)
 
-    private var oldFragment: BasicFragment? = null
+    private var oldFragment: IBasicFragment? = null
 
     val session: SessionEvent by inject()
 
@@ -106,8 +103,8 @@ class SessionActivity : BaseSwipeActivity<SessionViewModel>() {
     @ExperimentalCoroutinesApi
     fun getNewFragment(): BasicFragment {
         return when (session.sessionType) {
-            SessionType.STANDARD -> get<StandardFragment> { parametersOf(session.activeVocable) }
-            SessionType.ALTERNATIVE -> get<AlternativeFragment> { parametersOf(session.activeVocable) }
+            SessionType.STANDARD -> get<StandardFragmentAbstract> { parametersOf(session.activeVocable) }
+            SessionType.ALTERNATIVE -> get<AlternativeFragmentAbstract> { parametersOf(session.activeVocable) }
             else -> get<WritingFragment> {
                 parametersOf(
                     session.activeVocable,
@@ -140,8 +137,10 @@ class SessionActivity : BaseSwipeActivity<SessionViewModel>() {
 
 
     private fun close() {
-        val intent2 = Intent(this, MainActivity::class.java)
-        startActivity(intent2)
+        val newIntent = Intent(this, MainActivity::class.java)
+        startActivity(newIntent)
+
+
         toast("You have successfully completed the training!")
         finish()
     }

@@ -7,6 +7,9 @@ import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.converter.PropertyConverter
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
+import org.joda.time.format.DateTimeFormatterBuilder
 import java.util.*
 
 @Entity
@@ -20,7 +23,7 @@ class Vocable(
     @Convert(converter = LanguageStringConverter::class, dbType = Long::class)
     var language: Language = Language.ES,
     @Convert(converter = DateTimeStringConverter::class, dbType = String::class)
-    var lastChanged: DateTime = DateTime.now()
+    var lastChanged: DateTime = DateTime.parse("19600101", DateTimeFormat.forPattern("yyyyMMdd"))
 ) {
 
     override fun equals(other: Any?): Boolean {

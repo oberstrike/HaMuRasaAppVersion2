@@ -1,12 +1,12 @@
-package de.hamurasa.main.fragments.home
+package de.hamurasa.main.fragments.home.lesson
 
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import de.hamurasa.R
-import de.hamurasa.main.MainContext
 import de.hamurasa.data.vocable.Language
-import de.hamurasa.data.lesson.Lesson
+import de.hamurasa.main.fragments.home.HomeFragment
+import de.hamurasa.main.fragments.home.HomeViewModel
 import de.hamurasa.util.BaseDialog
 import de.hamurasa.util.isValid
 import de.hamurasa.util.toast
@@ -57,7 +57,7 @@ class NewLessonDialog(
         //Language Binding
         new_lesson_language_spinner.initAdapter<de.hamurasa.data.vocable.Language>()
         new_lesson_language_spinner.bind(lesson::language) {
-            de.hamurasa.data.vocable.Language.valueOf(it)
+            Language.valueOf(it)
         }
 
         //Validation Language Binding

@@ -75,11 +75,10 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.3.1'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.core:core-ktx:1.3.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     //implementation 'com.minimize.android:rxrecycler-adapter:1.3.1'
@@ -112,7 +111,7 @@ dependencies {
 
 
     //Gson for json serialization und deserialization
-    implementation "com.google.code.gson:gson:2.8.5"
+    implementation "com.google.code.gson:gson:2.8.6"
 
     //Gson converter for retrofit2
     implementation "com.squareup.retrofit2:retrofit:2.6.2"
@@ -143,7 +142,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-rx2:1.3.8'
 
     //Login
-    implementation 'io.github.microutils:kotlin-logging:1.7.10'
+    implementation 'io.github.microutils:kotlin-logging:1.12.0'
 
     // core
     implementation 'com.chibatching.kotpref:kotpref:2.11.0'
@@ -158,18 +157,7 @@ dependencies {
     // Testing-only dependencies
     androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-
-    /*
-    androidTestImplementation 'androidx.test:core:' + coreVersion
-    androidTestImplementation 'androidx.test:core-ktx:' + coreVersion
-    androidTestImplementation 'androidx.test.ext:junit:' + extJUnitVersion
-    androidTestImplementation 'androidx.test.ext:junit-ktx:' + extJUnitVersion
-    androidTestImplementation 'androidx.test:runner:' + runnerVersion
-    androidTestImplementation 'androidx.test:rules:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:' + espressoVersion
-    debugImplementation 'androidx.fragment:fragment-testing:1.2.5'
-*/
-    testImplementation 'androidx.test:core:' + coreVersion;
+    testImplementation 'androidx.test:core:' + coreVersion
     testImplementation 'androidx.test.ext:junit:' + extJUnitVersion
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.robolectric:robolectric:' + robolectricVersion

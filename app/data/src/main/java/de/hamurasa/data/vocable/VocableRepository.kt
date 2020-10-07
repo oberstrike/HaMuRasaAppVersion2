@@ -67,5 +67,5 @@ class VocableRepositoryImpl(
     }
 
     override suspend fun findByValue(value: String): List<Vocable> =
-        vocableBox.query().equal(Vocable_.value, value).build().find()
+        vocableBox.query().contains(Vocable_.value, value).build().find()
 }

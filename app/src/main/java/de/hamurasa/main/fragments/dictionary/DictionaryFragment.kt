@@ -44,7 +44,7 @@ class DictionaryFragment : AbstractSelfCleaningFragment(),
 
         dictionary_search_button.setOnClickListener {
             myViewModel.launchJob {
-                myViewModel.getWord(dictionary_search_editText.text.toString())
+                myViewModel.search(dictionary_search_editText.text.toString())
             }
         }
     }

@@ -9,6 +9,7 @@ import de.hamurasa.util.BaseViewModel
 import de.hamurasa.util.SchedulerProvider
 import de.hamurasa.util.weight
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.joda.time.DateTime
 
 class SessionViewModel(
     provider: SchedulerProvider,
@@ -23,36 +24,37 @@ class SessionViewModel(
     @ExperimentalCoroutinesApi
     fun init() {
         with(session) {
-            vocables = vocables.take(settings.maxVocableCount)
-            val next = vocables.random()
-            activeVocable = next
 
-            val tmp: MutableList<SessionType> = mutableListOf()
+            listOfVocableWrapper = vocables.sortedBy { it.lastChanged }
+                .take(settings.maxVocableCount)
+                .onEach { it.lastChanged = DateTime.now() }
+                .map { VocableWrapper(it) }
+
+            activeVocable = listOfVocableWrapper.random()
+
+            val types: MutableList<SessionType> = mutableListOf()
             if (settings.standardType) {
-                tmp.add(SessionType.STANDARD)
+                types.add(SessionType.STANDARD)
             }
             if (settings.alternativeType) {
-                tmp.add(SessionType.ALTERNATIVE)
+                types.add(SessionType.ALTERNATIVE)
             }
             if (settings.writingType) {
-                tmp.add(SessionType.WRITING)
+                types.add(SessionType.WRITING)
             }
-            sessionTypes = tmp
+            sessionTypes = types
             session.sessionType = sessionTypes.random()
-
-
         }
     }
 
     @ExperimentalCoroutinesApi
     fun next(correct: Boolean): Boolean {
-        val vocable = session.activeVocable
-        vocable.level += if (correct) 1 else -1
-        vocable.attempts += 1
+        val activeVocableWrapper = session.activeVocable
+        activeVocableWrapper.level += if (correct) 1 else -1
+        activeVocableWrapper.attempts += 1
 
-
-        val nextVocableWrapper: VocableWrapper = getNextVocableWrapper(vocable) ?: return false
-
+        val nextVocableWrapper: VocableWrapper =
+            getNextVocableWrapper(activeVocableWrapper) ?: return false
         val nextSessionType: SessionType = sessionTypes.random()
         session.activeVocable = nextVocableWrapper
         session.sessionType = nextSessionType
@@ -63,9 +65,9 @@ class SessionViewModel(
     private fun getNextVocableWrapper(vocable: VocableWrapper): VocableWrapper? {
         return with(session) {
             if (vocable.level >= (settings.maxRepetitions + 1))
-                vocables = vocables.filterNot { it.value == vocable.value }
-            if (vocables.isNotEmpty()) {
-                vocables.weight(
+                listOfVocableWrapper = listOfVocableWrapper.filterNot { it.value == vocable.value }
+            if (listOfVocableWrapper.isNotEmpty()) {
+                listOfVocableWrapper.weight(
                     keySelector = {
                         it.level
                     }, weightFunction = {

@@ -31,6 +31,16 @@ class ImportExportDialog(
                 export()
             }
             R.id.importButton -> {
+                if (clipboardManager.hasPrimaryClip()) {
+                    val clip = clipboardManager.primaryClip ?: return
+                    if (clip.itemCount > 0) {
+                        val data = clip.getItemAt(0)
+                        val newJson = data.text
+                        if (newJson.isNotEmpty()) {
+                            jsonMultiLineText.setText(newJson)
+                        }
+                    }
+                }
 
             }
             R.id.import_export_close_button -> {

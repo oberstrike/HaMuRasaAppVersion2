@@ -12,44 +12,44 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
-        android:layout_marginTop="25dp"
         android:text="@string/word"
+        app:layout_constraintBottom_toBottomOf="@+id/valueEditText"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/valueEditText" />
 
     <EditText
         android:id="@+id/valueEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
+        android:layout_marginTop="25dp"
         android:autofillHints=""
         android:ems="10"
         android:inputType="textNoSuggestions|text|textAutoComplete"
         android:labelFor="@id/wordTextView"
-        app:layout_constraintStart_toEndOf="@+id/translationTextView"
-        app:layout_constraintTop_toTopOf="@+id/wordTextView"
+        app:layout_constraintStart_toStartOf="@+id/translationEditText"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="LabelFor" />
 
     <TextView
         android:id="@+id/translationTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
         android:text="@string/translation"
+        app:layout_constraintBottom_toBottomOf="@+id/translationEditText"
         app:layout_constraintStart_toStartOf="@+id/wordTextView"
-        app:layout_constraintTop_toBottomOf="@+id/valueEditText" />
+        app:layout_constraintTop_toTopOf="@+id/translationEditText" />
 
     <EditText
         android:id="@+id/translationEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
+        android:layout_marginTop="25dp"
         android:autofillHints=""
         android:ems="10"
         android:inputType="textNoSuggestions|text|textAutoComplete"
         android:labelFor="@id/translationTextView"
-        app:layout_constraintStart_toEndOf="@+id/translationTextView"
-        app:layout_constraintTop_toTopOf="@+id/translationTextView"
+        app:layout_constraintStart_toStartOf="@+id/editVocableLastTimeLearnedEditText"
+        app:layout_constraintTop_toBottomOf="@+id/valueEditText"
         tools:ignore="LabelFor" />
 
     <Button
@@ -59,37 +59,45 @@
         android:layout_marginTop="25dp"
         android:text="@string/apply"
         app:layout_constraintEnd_toEndOf="@+id/translationEditText"
-        app:layout_constraintTop_toBottomOf="@+id/editVocableTypeSpinner" />
+        app:layout_constraintTop_toBottomOf="@+id/editVocableLastTimeLearnedEditText" />
 
     <Button
         android:id="@+id/deleteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
         android:layout_marginEnd="8dp"
         android:text="@string/action_delete"
         app:layout_constraintEnd_toStartOf="@+id/applyButton"
         app:layout_constraintStart_toStartOf="@+id/translationEditText"
-        app:layout_constraintTop_toTopOf="@+id/applyButton" />
+        app:layout_constraintTop_toBottomOf="@+id/editVocableLastTimeLearnedEditText" />
 
     <Spinner
         android:id="@+id/editVocableTypeSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/infoButton"
-        app:layout_constraintStart_toStartOf="@+id/translationTextView"
-        app:layout_constraintTop_toBottomOf="@+id/translationEditText" />
+        app:layout_constraintStart_toStartOf="@+id/lastTimeLearnedTextView"
+        app:layout_constraintTop_toTopOf="@+id/deleteButton" />
 
-    <ImageButton
-        android:id="@+id/infoButton"
-        android:layout_width="66dp"
-        android:layout_height="47dp"
-        android:layout_marginEnd="24dp"
-        android:contentDescription="Hallo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/deleteButton"
-        app:srcCompat="@android:drawable/ic_dialog_info" />
+    <TextView
+        android:id="@+id/lastTimeLearnedTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Last time learned"
+        app:layout_constraintBottom_toBottomOf="@+id/editVocableLastTimeLearnedEditText"
+        app:layout_constraintStart_toStartOf="@+id/translationTextView"
+        app:layout_constraintTop_toTopOf="@+id/editVocableLastTimeLearnedEditText" />
+
+    <EditText
+        android:id="@+id/editVocableLastTimeLearnedEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="25dp"
+        android:ems="10"
+        android:inputType="date"
+        app:layout_constraintStart_toEndOf="@+id/lastTimeLearnedTextView"
+        app:layout_constraintTop_toBottomOf="@+id/translationEditText" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
